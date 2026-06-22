@@ -1,45 +1,50 @@
 import { useState } from "react";
 
 // ─────────────────────────────────────────────────────────────
-// FESTIVAL BOSS — bold, high-contrast, festival-poster energy
-// Palette: deep midnight blue canvas, electric yellow,
-// hot coral/orange, bright white. Like a Rick Griffin poster
-// or a modern Primavera lineup bill. Loud. Confident. Festive.
+// FESTIVAL BOSS — maximalist festival poster
+// WHITE canvas. Bold overlapping type. Multiple loud colours.
+// Looks like a real Glastonbury / Reading bill stuck on a wall.
+// Absolutely NO dark mode. This is ink on paper, not a screen.
 // ─────────────────────────────────────────────────────────────
 
 const C = {
-  bg:       "#0a0e1a",   // deep midnight blue
-  surface:  "#111827",   // dark navy
-  card:     "#151d2e",   // card navy
-  cardHi:   "#1a2338",   // hover state
+  // Canvas — paper white
+  bg:        "#ffffff",
+  surface:   "#f5f0e8",   // aged cream
+  card:      "#faf6ee",   // card cream
+  ink:       "#0a0a0a",   // near-black ink
 
-  text:     "#f8f4e8",   // warm white
-  textMid:  "#8892a4",   // muted blue-grey
-  textDim:  "#3d4d63",   // very faded
+  // Type hierarchy
+  text:      "#0a0a0a",
+  textMid:   "#4a4a4a",
+  textDim:   "#999999",
+  textFaint: "#cccccc",
 
-  yellow:   "#f5e642",   // electric festival yellow
-  yellowDim:"rgba(245,230,66,0.12)",
-  coral:    "#ff5c3a",   // hot coral/orange
-  coralDim: "rgba(255,92,58,0.12)",
-  teal:     "#00c9a7",   // bright teal
-  tealDim:  "rgba(0,201,167,0.11)",
-  lilac:    "#c084fc",   // warm lilac
+  // Bold poster colours — all work on white
+  red:       "#e8191f",   // classic festival red
+  redDim:    "rgba(232,25,31,0.1)",
+  blue:      "#0038a8",   // deep poster blue
+  blueDim:   "rgba(0,56,168,0.1)",
+  orange:    "#f47920",   // warm festival orange
+  orangeDim: "rgba(244,121,32,0.1)",
+  purple:    "#7b2d8b",   // psychedelic purple
+  purpleDim: "rgba(123,45,139,0.1)",
+  green:     "#1a7a3c",   // forest green
+  greenDim:  "rgba(26,122,60,0.1)",
+  yellow:    "#ffd400",   // bright poster yellow
+  yellowDim: "rgba(255,212,0,0.15)",
 
-  green:    "#22c55e",   // profit green
-  greenDim: "rgba(34,197,94,0.12)",
-  red:      "#ff5c3a",   // same coral for loss
-  redDim:   "rgba(255,92,58,0.12)",
+  // Semantic
+  win:       "#1a7a3c",
+  winDim:    "rgba(26,122,60,0.1)",
+  loss:      "#e8191f",
+  lossDim:   "rgba(232,25,31,0.1)",
 
-  border:   "rgba(248,244,232,0.08)",
-  borderHi: "rgba(248,244,232,0.18)",
-
-  // Poster specific
-  posterBg:    "#0a0e1a",
-  posterYellow:"#f5e642",
-  posterCoral: "#ff5c3a",
-  posterTeal:  "#00c9a7",
-  posterWhite: "#f8f4e8",
+  border:    "rgba(10,10,10,0.12)",
+  borderHi:  "rgba(10,10,10,0.25)",
+  borderBold:"rgba(10,10,10,0.8)",
 };
+
 
 // ─── ARTIST DB ───────────────────────────────────────────────
 const ALL_ARTISTS = [
@@ -170,7 +175,6 @@ const ALL_ARTISTS = [
   {id:102,name:"Grimes",               fee:0.7,  draw:7.3, genre:"Electronic"},
   {id:103,name:"Caroline Polachek",    fee:0.5,  draw:7.1, genre:"Art Pop"},
   {id:104,name:"Arca",                 fee:0.45, draw:6.8, genre:"Electronic"},
-  {id:105,name:"slowthai",             fee:0.4,  draw:7.0, genre:"Hip-Hop"},
   {id:106,name:"Loyle Carner",         fee:0.45, draw:7.1, genre:"Hip-Hop"},
   {id:107,name:"Jorja Smith",          fee:0.7,  draw:7.5, genre:"R&B / Soul"},
   {id:108,name:"Mahalia",              fee:0.35, draw:6.9, genre:"R&B / Soul"},
@@ -180,7 +184,6 @@ const ALL_ARTISTS = [
   {id:112,name:"Pa Salieu",            fee:0.3,  draw:6.6, genre:"Afro-Swing"},
   {id:113,name:"Ghetts",               fee:0.35, draw:6.7, genre:"Grime"},
   {id:114,name:"Kano",                 fee:0.4,  draw:7.0, genre:"Grime"},
-  {id:115,name:"Wiley",                fee:0.45, draw:7.1, genre:"Grime"},
   {id:116,name:"M.I.A.",               fee:0.7,  draw:7.6, genre:"Electronic / Rap"},
   {id:117,name:"Diplo",                fee:0.6,  draw:7.4, genre:"Electronic"},
   {id:118,name:"Hot Chip",             fee:0.6,  draw:7.4, genre:"Electronic"},
@@ -253,26 +256,29 @@ const ALL_ARTISTS = [
 const ARTISTS = [...new Map(ALL_ARTISTS.map(a=>[a.id,a])).values()];
 
 // ─── GAME CONFIG ─────────────────────────────────────────────
-// 10 slots, £12m budget, £3.5m profit target.
-// 8 spins to fill 10 slots — every choice matters.
-// Stage assignment multipliers add strategic depth.
-const BUDGET        = 12;
-const TICKET_REV    = 20;
-const TARGET_PROFIT = 3.5;
+// Budget: £14m. Target: £4m profit after £2m overheads.
+// Effective target revenue: £20m+
+// 5 spins to fill 10 slots — genuinely difficult.
+// Silent genre penalty + tier balance + stage mismatch all bite.
+const BUDGET        = 14;    // £14m booking budget
+const OVERHEADS     = 2;     // £2m fixed costs (staging/security/infra)
+const TICKET_REV    = 22;    // max possible revenue at perfection
+const TARGET_PROFIT = 4;     // £4m profit after overheads
 const TOTAL_SLOTS   = 10;
-const MAX_SPINS     = 8;
+const MAX_SPINS     = 5;
 const HL_MIN        = 2;
-const GENRE_MIN     = 5;
-const HAND_SIZE     = 10; // acts dealt per spin
+const HAND_SIZE     = 10;
 
-// Stage assignment multipliers — putting wrong acts on wrong stages costs you
+const GENRE_MIN     = 5;     // for About page reference only — genre variety is silent in scoring
+
+// Stage multipliers — harsher than before
 const STAGE_MULS = {
   "Main Stage":    1.0,
-  "Second Stage":  0.82,
-  "Smaller Stage": 0.65,
+  "Second Stage":  0.75,
+  "Smaller Stage": 0.50,
 };
 
-// Ideal stage by tier — mismatching penalises revenue
+// Ideal stage by tier
 const IDEAL_STAGE = {
   "Headliner":     "Main Stage",
   "Main Stage":    "Main Stage",
@@ -280,79 +286,96 @@ const IDEAL_STAGE = {
   "Smaller Stage": "Smaller Stage",
 };
 
+// Tier balance requirements (Option D)
+const TIER_REQUIRED = {
+  "Main Stage":    1,   // at least 1
+  "Second Stage":  2,   // at least 2
+  "Smaller Stage": 2,   // at least 2
+};
+
 function calcCost(lu){ return +lu.reduce((s,a)=>s+a.fee,0).toFixed(2); }
 
 function calcRevenue(lu){
   if(!lu.length) return 0;
   const avg = lu.reduce((s,a)=>s+a.draw,0)/lu.length;
-  const hl  = lu.filter(a=>(a.tier==="Headliner")||(a.assignedStage==="Main Stage"&&a.draw>=9.0)).length;
-  const gs  = new Set(lu.map(a=>a.genre)).size;
 
-  // Stage assignment score — reward correct placement
+  // ── Tier balance check (Option D) ──────────────────────────
+  const mainCount    = lu.filter(a=>a.assignedStage==="Main Stage").length;
+  const secondCount  = lu.filter(a=>a.assignedStage==="Second Stage").length;
+  const smallerCount = lu.filter(a=>a.assignedStage==="Smaller Stage").length;
+  const balancedMain    = mainCount    >= TIER_REQUIRED["Main Stage"];
+  const balancedSecond  = secondCount  >= TIER_REQUIRED["Second Stage"];
+  const balancedSmaller = smallerCount >= TIER_REQUIRED["Smaller Stage"];
+  const fullyBalanced   = balancedMain && balancedSecond && balancedSmaller;
+  const balanceMul = fullyBalanced ? 1.10 : (balancedMain ? 0.82 : 0.60);
+
+  // ── Headliner cliff ─────────────────────────────────────────
+  const hl    = lu.filter(a=>a.tier==="Headliner").length;
+  const hMul  = hl>=HL_MIN ? 1.08 : hl===1 ? 0.65 : 0.40;
+
+  // ── Stage assignment score ───────────────────────────────────
   const stageMul = lu.reduce((s,a)=>{
-    const ideal = IDEAL_STAGE[a.tier]||"Second Stage";
-    const assigned = a.assignedStage||ideal;
-    const match = assigned===ideal?1.0:assigned==="Main Stage"&&ideal!=="Main Stage"?0.88:0.78;
+    const ideal    = IDEAL_STAGE[a.tier] || "Second Stage";
+    const assigned = a.assignedStage || ideal;
+    // Harsh penalties for misplacement
+    let match = 1.0;
+    if(assigned !== ideal){
+      if(assigned==="Smaller Stage") match = 0.50;
+      else if(assigned==="Main Stage" && ideal!=="Main Stage") match = 0.72;
+      else match = 0.78;
+    }
     return s + match;
-  },0) / lu.length;
+  }, 0) / lu.length;
 
-  // Headliner cliff
-  const hMul = hl>=HL_MIN?1.1:hl===1?0.72:0.45;
+  // ── Silent genre penalty (variety bonus) ────────────────────
+  const genreCounts = {};
+  lu.forEach(a=>{
+    genreCounts[a.genre] = (genreCounts[a.genre]||0)+1;
+  });
+  const maxSameGenre = Math.max(...Object.values(genreCounts));
+  const genreMul = maxSameGenre>=4 ? 0.78
+                 : maxSameGenre===3 ? 0.91
+                 : maxSameGenre===2 ? 1.05
+                 : maxSameGenre===1 ? 1.05
+                 : 1.0;
 
-  // Genre diversity
-  const dMul = gs>=GENRE_MIN?1.06:gs>=4?0.95:gs>=3?0.86:0.75;
+  // ── Draw quality ─────────────────────────────────────────────
+  const drawMul = avg>=9.0 ? 1.10
+                : avg>=8.5 ? 1.03
+                : avg>=8.0 ? 0.94
+                : avg>=7.5 ? 0.83
+                : 0.68;
 
-  // Draw quality
-  const drawMul = avg>=9.0?1.1:avg>=8.5?1.03:avg>=8.0?0.95:avg>=7.5?0.85:0.72;
+  // ── Slot fill ────────────────────────────────────────────────
+  const slotMul = 0.1 + 0.9*(lu.length/TOTAL_SLOTS);
 
-  // Slot fill
-  const slotMul = 0.15 + 0.85*(lu.length/TOTAL_SLOTS);
-
-  // Headliner quality
+  // ── Headliner quality ────────────────────────────────────────
   const hlActs = lu.filter(a=>a.tier==="Headliner");
   const hlQual = hlActs.length>0 ? hlActs.reduce((s,a)=>s+a.draw,0)/hlActs.length : 7;
-  const qualMul = hlQual>=9.8?1.07:hlQual>=9.5?1.03:hlQual>=9.0?1.0:0.92;
+  const qualMul = hlQual>=9.8?1.08 : hlQual>=9.5?1.04 : hlQual>=9.0?1.0 : 0.90;
 
-  return +(TICKET_REV * hMul * dMul * drawMul * slotMul * stageMul * qualMul).toFixed(2);
+  const gross = TICKET_REV * hMul * balanceMul * stageMul * genreMul * drawMul * slotMul * qualMul;
+  // Overheads always deducted from revenue for display purposes
+  return +(gross).toFixed(2);
 }
 
-// ─── SPIN MECHANIC ───────────────────────────────────────────
-// Deals a balanced hand of HAND_SIZE acts, guaranteed spread:
-// at least 1 headliner, 2 main stage, 3 second stage, rest smaller
-// and at least 4 different genres per hand
-function dealHand(usedIds){
-  const available = ARTISTS.filter(a=>!usedIds.includes(a.id));
-  if(available.length < HAND_SIZE) return available;
+// Total cost includes artist fees + fixed overheads
+function calcTotalCost(lu){ return +(calcCost(lu) + OVERHEADS).toFixed(2); }
 
-  const shuffle = arr => [...arr].sort(()=>Math.random()-0.5);
-
-  const headliners  = shuffle(available.filter(a=>a.tier==="Headliner"));
-  const mainStage   = shuffle(available.filter(a=>a.tier==="Main Stage"));
-  const secondStage = shuffle(available.filter(a=>a.tier==="Second Stage"));
-  const smaller     = shuffle(available.filter(a=>a.tier==="Smaller Stage"));
-
-  // Guaranteed minimum spread
-  const hand = [
-    ...headliners.slice(0,2),
-    ...mainStage.slice(0,2),
-    ...secondStage.slice(0,3),
-    ...smaller.slice(0,2),
-  ];
-
-  // Top up to HAND_SIZE with random remaining
-  const handIds = new Set(hand.map(a=>a.id));
-  const rest = shuffle(available.filter(a=>!handIds.has(a.id)));
-  while(hand.length < HAND_SIZE && rest.length > 0) hand.push(rest.pop());
-
-  return shuffle(hand);
-}
-
-// ─── TIER COLOUR ─────────────────────────────────────────────
+// ── Tier colour (by ASSIGNED stage) ──────────────────────────
 function tCol(t){
-  return {Headliner:C.yellow,"Main Stage":C.teal,"Second Stage":C.coral,"Smaller Stage":C.lilac}[t]||C.textMid;
+  return {Headliner:C.red,"Main Stage":C.blue,"Second Stage":C.purple,"Smaller Stage":C.orange}[t]||C.textMid;
 }
 
-// ─── FORMATTERS ──────────────────────────────────────────────
+// Stage colours
+function stageColor(stage){
+  return {"Main Stage":C.blue,"Second Stage":C.purple,"Smaller Stage":C.orange}[stage]||C.textMid;
+}
+function stageBg(stage){
+  return {"Main Stage":C.blueDim,"Second Stage":C.purpleDim,"Smaller Stage":C.orangeDim}[stage]||"rgba(0,0,0,0.04)";
+}
+
+// ── Formatters ───────────────────────────────────────────────
 function fmt(v){
   const a=Math.abs(v);
   if(a===0) return "£0m";
@@ -360,21 +383,37 @@ function fmt(v){
 }
 function fmtS(v){return `${v>=0?"+":"−"}${fmt(v)}`;}
 
-// ─── SHARE ───────────────────────────────────────────────────
+// ── Share ────────────────────────────────────────────────────
 function shareText(n,res,lu){
   const hls=lu.filter(a=>a.tier==="Headliner").map(a=>a.name).join(", ")||"none";
-  return `🎪 ${n} — Festival Boss\nHeadliners: ${hls}\nRevenue: ${fmt(res.revenue)}  Costs: ${fmt(res.cost)}\n${res.win?"✅":"❌"} ${fmtS(res.profit)}\nThink you can do better? → festivalbossgame.com`;
+  return `🎪 ${n} — Festival Boss\nHeadliners: ${hls}\nRevenue: ${fmt(res.revenue)}  Costs: ${fmt(res.totalCost)}\n${res.win?"✅":"❌"} ${fmtS(res.profit)}\nCan you beat it? → festivalbossgame.com`;
 }
 async function doCopy(t){try{await navigator.clipboard.writeText(t);return true;}catch{return false;}}
 function doTweet(t){window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(t)}`,"_blank");}
 function doFb(){window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent("https://festivalbossgame.com")}`,"_blank");}
 
-// ─────────────────────────────────────────────────────────────
-// ROOT
-// ─────────────────────────────────────────────────────────────
-// ─────────────────────────────────────────────────────────────
-// ROOT
-// ─────────────────────────────────────────────────────────────
+// ── Spin / deal hand ─────────────────────────────────────────
+function dealHand(usedIds){
+  const available = ARTISTS.filter(a=>!usedIds.includes(a.id));
+  if(available.length < HAND_SIZE) return available;
+  const shuffle = arr=>[...arr].sort(()=>Math.random()-0.5);
+  const headliners  = shuffle(available.filter(a=>a.tier==="Headliner"));
+  const mainStage   = shuffle(available.filter(a=>a.tier==="Main Stage"));
+  const secondStage = shuffle(available.filter(a=>a.tier==="Second Stage"));
+  const smaller     = shuffle(available.filter(a=>a.tier==="Smaller Stage"));
+  const hand = [
+    ...headliners.slice(0,2),
+    ...mainStage.slice(0,2),
+    ...secondStage.slice(0,3),
+    ...smaller.slice(0,2),
+  ];
+  const handIds = new Set(hand.map(a=>a.id));
+  const rest = shuffle(available.filter(a=>!handIds.has(a.id)));
+  while(hand.length < HAND_SIZE && rest.length > 0) hand.push(rest.pop());
+  return shuffle(hand).slice(0, HAND_SIZE);
+}
+
+
 export default function FestivalBoss(){
   const [screen,    setScreen]    = useState("home");
   const [name,      setName]      = useState("");
@@ -385,25 +424,36 @@ export default function FestivalBoss(){
   const [result,    setResult]    = useState(null);
   const [copied,    setCopied]    = useState(false);
   const [legal,     setLegal]     = useState(null);
-  const [picking,   setPicking]   = useState(null);
+  const [picking,   setPicking]   = useState(null);  // stage picker modal
+  const [drawerOpen,setDrawerOpen]= useState(false); // mobile lineup drawer
 
-  const spent   = calcCost(lineup);
-  const rem     = +(BUDGET-spent).toFixed(2);
-  const revenue = calcRevenue(lineup);
-  const profit  = +(revenue-spent).toFixed(2);
-  const hlCount = lineup.filter(a=>a.tier==="Headliner").length;
-  const gCount  = new Set(lineup.map(a=>a.genre)).size;
-  const full    = lineup.length>=TOTAL_SLOTS;
+  const spent      = calcCost(lineup);
+  const rem        = +(BUDGET - spent).toFixed(2);
+  const revenue    = calcRevenue(lineup);
+  const totalCost  = calcTotalCost(lineup);
+  const profit     = +(revenue - totalCost).toFixed(2);
+  const hlCount    = lineup.filter(a=>a.tier==="Headliner").length;
+  const full       = lineup.length >= TOTAL_SLOTS;
+
+  // Tier balance status
+  const mainCount    = lineup.filter(a=>a.assignedStage==="Main Stage").length;
+  const secondCount  = lineup.filter(a=>a.assignedStage==="Second Stage").length;
+  const smallerCount = lineup.filter(a=>a.assignedStage==="Smaller Stage").length;
+
+  // Genre variety status (for hint display)
+  const genreCounts  = {};
+  lineup.forEach(a=>{ genreCounts[a.genre]=(genreCounts[a.genre]||0)+1; });
+  const maxSameGenre = lineup.length > 0 ? Math.max(...Object.values(genreCounts)) : 0;
+  const varietyGood  = maxSameGenre <= 2;
 
   function spin(){
     if(spinsLeft<=0||full||spinning) return;
     setSpinning(true);
     setTimeout(()=>{
-      const usedIds = lineup.map(a=>a.id);
-      setHand(dealHand(usedIds));
+      setHand(dealHand(lineup.map(a=>a.id)));
       setSpinsLeft(p=>p-1);
       setSpinning(false);
-    }, 600);
+    }, 500);
   }
 
   function pickAct(artist){
@@ -413,7 +463,7 @@ export default function FestivalBoss(){
 
   function assignStage(stage){
     if(!picking) return;
-    setLineup(p=>[...p,{...picking,assignedStage:stage}]);
+    setLineup(p=>[...p,{...picking, assignedStage:stage}]);
     setHand(p=>p.filter(a=>a.id!==picking.id));
     setPicking(null);
   }
@@ -421,19 +471,25 @@ export default function FestivalBoss(){
   function removeAct(id){ setLineup(p=>p.filter(a=>a.id!==id)); }
 
   function submit(){
-    const cost=calcCost(lineup),rev=calcRevenue(lineup),pnl=+(rev-cost).toFixed(2);
-    setResult({revenue:rev,cost,profit:pnl,win:pnl>=TARGET_PROFIT&&hlCount>=HL_MIN});
+    // Name festival after booking — go to naming screen
+    setScreen("name");
+  }
+
+  function finalise(){
+    const cost=calcCost(lineup), rev=calcRevenue(lineup), tc=calcTotalCost(lineup), pnl=+(rev-tc).toFixed(2);
+    setResult({revenue:rev, cost:tc, profit:pnl, artistCost:cost, win:pnl>=TARGET_PROFIT&&hlCount>=HL_MIN});
     setScreen("result");
   }
 
   function reset(){
     setLineup([]);setHand([]);setSpinsLeft(MAX_SPINS);
-    setResult(null);setCopied(false);setPicking(null);setScreen("game");
+    setResult(null);setCopied(false);setPicking(null);setName("");setScreen("game");
   }
 
-  if(legal)            return <Legal  type={legal} onBack={()=>setLegal(null)}/>;
-  if(screen==="about") return <About  onBack={()=>setScreen("home")} onLegal={setLegal}/>;
-  if(screen==="home")  return <Home   name={name} setName={setName} onStart={()=>{setScreen("game");}} onLegal={setLegal} onAbout={()=>setScreen("about")}/>;
+  if(legal)             return <Legal    type={legal} onBack={()=>setLegal(null)}/>;
+  if(screen==="about")  return <About    onBack={()=>setScreen("home")} onLegal={setLegal}/>;
+  if(screen==="home")   return <HomeScreen onStart={()=>setScreen("game")} onLegal={setLegal} onAbout={()=>setScreen("about")}/>;
+  if(screen==="name")   return <NameScreen name={name} setName={setName} lineup={lineup} onConfirm={finalise} onBack={()=>setScreen("game")}/>;
   if(screen==="result") return(
     <Result
       result={result} lineup={lineup} name={name||"My Festival"}
@@ -458,6 +514,7 @@ export default function FestivalBoss(){
         ::-webkit-scrollbar-thumb{background:${C.textDim};border-radius:2px}
         @keyframes spinAnim{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
         @keyframes deal{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(200,241,53,0.4)}50%{box-shadow:0 0 0 12px rgba(200,241,53,0)}}
       `}</style>
 
       {/* STAGE PICKER MODAL */}
@@ -465,16 +522,17 @@ export default function FestivalBoss(){
         <div style={gm.overlay}>
           <div style={gm.modal}>
             <div style={gm.modalName}>{picking.name}</div>
-            <div style={gm.modalSub}>Which stage do you want them on?</div>
-            <div style={gm.modalFee}>{fmt(picking.fee)} · Draw {picking.draw}</div>
-            {Object.keys(STAGE_MULS).map(stage=>(
-              <button key={stage} style={{...gm.stageBtn,borderColor:stageColor(stage)+"55"}} onClick={()=>assignStage(stage)}>
-                <span style={{color:stageColor(stage),fontWeight:700,fontSize:14}}>{stage}</span>
-                <span style={gm.stageMulTxt}>
-                  {stage===IDEAL_STAGE[picking.tier]?"✓ Perfect fit":"Risk: revenue penalty"}
-                </span>
-              </button>
-            ))}
+            <div style={gm.modalSub}>Which stage are they playing?</div>
+            <div style={gm.modalFee}>{fmt(picking.fee)} · Draw {picking.draw} · {picking.genre}</div>
+            {Object.keys(STAGE_MULS).map(stage=>{
+              const isIdeal = stage===IDEAL_STAGE[picking.tier];
+              return(
+                <button key={stage} style={{...gm.stageBtn, borderColor:stageColor(stage)+(isIdeal?"cc":"44"), background:isIdeal?stageBg(stage):"transparent"}} onClick={()=>assignStage(stage)}>
+                  <span style={{color:stageColor(stage),fontWeight:700,fontSize:14}}>{stage}</span>
+                  <span style={gm.stageMulTxt}>{isIdeal?"✓ Perfect fit":"⚠ Revenue penalty"}</span>
+                </button>
+              );
+            })}
             <button style={gm.cancelBtn} onClick={()=>setPicking(null)}>Cancel</button>
           </div>
         </div>
@@ -483,102 +541,135 @@ export default function FestivalBoss(){
       {/* HEADER */}
       <header style={s.hdr}>
         <div style={s.brand}>
-          <div style={s.logoBox}>
-            <span style={s.logoTop}>FESTIVAL</span>
-            <span style={s.logoBoss}>BOSS</span>
+          <span style={s.brandF}>F</span>
+          <div style={s.brandText}>
+            <span style={s.brandTitle}>Festival Boss</span>
           </div>
         </div>
         <div style={s.kpis}>
-          <Kpi l="Budget"   v={fmt(rem)}                           c={rem<1?C.coral:C.yellow}/>
+          <Kpi l="Budget" v={fmt(rem)}                          c={rem<2?C.red:'#fff'}/>
           <div style={s.kdiv}/>
-          <Kpi l="Acts"     v={`${lineup.length}/${TOTAL_SLOTS}`}  c={full?C.yellow:C.text}/>
+          <Kpi l="Acts"   v={`${lineup.length}/${TOTAL_SLOTS}`} c={full?C.yellow:'#fff'}/>
           <div style={s.kdiv}/>
-          <Kpi l="Spins"    v={spinsLeft}                          c={spinsLeft<=2?C.coral:C.teal}/>
+          <Kpi l="Spins"  v={spinsLeft}                         c={spinsLeft<=1?C.yellow:'#fff'}/>
           <div style={s.kdiv}/>
-          <Kpi l="P&L"      v={fmtS(profit)}                      c={profit>=TARGET_PROFIT?C.teal:C.coral}/>
+          <Kpi l="P&L"    v={fmtS(profit)}                     c={profit>=TARGET_PROFIT?C.yellow:C.red}/>
         </div>
       </header>
 
       {/* RAILS */}
       <div style={s.railWrap}>
-        <div style={s.rail}><div style={{...s.railFill,width:`${budPct}%`,background:rem<1?C.coral:C.yellow}}/></div>
-        <div style={s.rail}><div style={{...s.railFill,width:`${slotPct}%`,background:C.teal}}/></div>
+        <div style={s.rail}><div style={{...s.railFill,width:`${budPct}%`,background:rem<2?C.red:C.green}}/></div>
+        <div style={s.rail}><div style={{...s.railFill,width:`${slotPct}%`,background:C.blue}}/></div>
       </div>
 
-      {/* BODY */}
-      <div style={gm.body}>
+      {/* ── MOBILE-FIRST LAYOUT ──
+          On mobile: single column — spin top, cards below, drawer floats at bottom.
+          On desktop (≥680px): side-by-side via CSS class override.
+      */}
+      <style>{`
+        @media(min-width:680px){
+          .fb-body{ flex-direction:row!important; height:calc(100vh - 74px)!important; overflow:hidden!important; }
+          .fb-sidebar{ display:flex!important; position:static!important; transform:none!important; height:auto!important; max-height:none!important; border-top:none!important; box-shadow:none!important; z-index:auto!important; width:300px!important; min-width:260px!important; border-right:3px solid #0a0a0a!important; overflow:hidden!important; flex-shrink:0!important; }
+          .fb-drawer-btn{ display:none!important; }
+          .fb-main{ overflow-y:auto!important; flex:1!important; }
+        }
+      `}</style>
 
-        {/* LINEUP SIDEBAR */}
-        <aside style={gm.sidebar}>
-          <div style={s.panelLabel}>My Lineup</div>
+      <div className="fb-body" style={gm.body}>
+
+        {/* DESKTOP SIDEBAR / MOBILE DRAWER */}
+        <aside
+          className="fb-sidebar"
+          style={{
+            ...gm.sidebar,
+            display:"none", // hidden on mobile by default; shown via drawer state
+            ...(drawerOpen ? {display:"flex"} : {}),
+          }}
+        >
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"0 14px 10px",borderBottom:`2px solid ${C.ink}`,marginBottom:8}}>
+            <div style={s.panelLabel2}>My Lineup</div>
+            <button style={gm.drawerClose} onClick={()=>setDrawerOpen(false)}>✕ Close</button>
+          </div>
           <div style={gm.lineupScroll}>
             {lineup.length===0&&<p style={s.sideEmpty}>Spin to get your first acts</p>}
             {lineup.map(a=>(
-              <div key={a.id} style={{...gm.lineupRow,borderLeftColor:stageColor(a.assignedStage)}}>
+              <div key={a.id} style={{...gm.lineupRow, borderLeftColor:stageColor(a.assignedStage)}}>
                 <div style={{flex:1,minWidth:0}}>
                   <div style={s.aName}>{a.name}</div>
                   <div style={s.aMeta}>
-                    <span style={{...s.pill,background:stageBg(a.assignedStage),color:stageColor(a.assignedStage)}}>{a.assignedStage}</span>
+                    <span style={{...s.pill, background:stageBg(a.assignedStage), color:stageColor(a.assignedStage)}}>{a.assignedStage}</span>
                     <span style={s.aGenre}>{a.genre}</span>
                   </div>
                 </div>
                 <div style={s.aRight}>
-                  <span style={{...s.aFee,color:stageColor(a.assignedStage)}}>{fmt(a.fee)}</span>
+                  <span style={{color:stageColor(a.assignedStage),fontWeight:800,fontSize:12}}>{fmt(a.fee)}</span>
                   <button style={s.xBtn} onClick={()=>removeAct(a.id)}>✕</button>
                 </div>
               </div>
             ))}
           </div>
 
+          {/* CHECKLIST */}
           <div style={gm.checkBox}>
-            <Chk ok={hlCount>=HL_MIN}           t={`${hlCount}/${HL_MIN} headliners`}/>
-            <Chk ok={gCount>=GENRE_MIN}          t={`${gCount}/${GENRE_MIN} genres`}/>
-            <Chk ok={full}                       t={`${lineup.length}/${TOTAL_SLOTS} slots`}/>
-            <Chk ok={profit>=TARGET_PROFIT}      t={`${fmt(TARGET_PROFIT)}+ profit needed`}/>
+            <Chk ok={hlCount>=HL_MIN}                              t={`${hlCount}/${HL_MIN} headliners`}/>
+            <Chk ok={mainCount>=TIER_REQUIRED["Main Stage"]}       t={`${mainCount}/${TIER_REQUIRED["Main Stage"]} Main Stage`}/>
+            <Chk ok={secondCount>=TIER_REQUIRED["Second Stage"]}   t={`${secondCount}/${TIER_REQUIRED["Second Stage"]} Second Stage`}/>
+            <Chk ok={smallerCount>=TIER_REQUIRED["Smaller Stage"]} t={`${smallerCount}/${TIER_REQUIRED["Smaller Stage"]} Smaller Stage`}/>
+            <Chk ok={varietyGood}                                  t={varietyGood?"Good genre variety":"Too many same genre"}/>
+            <Chk ok={full}                                         t={`${lineup.length}/${TOTAL_SLOTS} slots filled`}/>
             <div style={gm.pnlLine}/>
+            <div style={{fontSize:11,color:C.textDim,marginBottom:6}}>Incl. £{OVERHEADS}m overheads</div>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
               <span style={{color:C.textMid,fontSize:12}}>Projected P&L</span>
-              <span style={{color:profit>=TARGET_PROFIT?C.teal:C.coral,fontWeight:900,fontSize:18}}>{fmtS(profit)}</span>
+              <span style={{color:profit>=TARGET_PROFIT?C.green:C.red,fontWeight:900,fontSize:18}}>{fmtS(profit)}</span>
             </div>
           </div>
 
-          {full&&<button style={s.releaseBtn} onClick={submit}>Release Lineup →</button>}
+          {full&&(
+            <button style={gm.releaseBtn} onClick={()=>{setDrawerOpen(false);submit();}}>
+              Name &amp; Release Lineup →
+            </button>
+          )}
           <Ad text="🎟 Ticketmaster — sell out in seconds"/>
         </aside>
 
-        {/* SPIN AREA */}
-        <main style={gm.main}>
+        {/* MAIN SPIN AREA */}
+        <main className="fb-main" style={gm.main}>
+
+          {/* SPIN BUTTON — always visible at top */}
           <div style={gm.spinWrap}>
             <button
               style={{
                 ...gm.spinBtn,
-                opacity:(spinsLeft<=0||full)?0.3:1,
+                opacity:(spinsLeft<=0||full)?0.25:1,
                 cursor:(spinsLeft<=0||full)?"not-allowed":"pointer",
-                animation:spinning?"spinAnim 0.6s linear infinite":"none",
+                animation:spinning?"spinAnim 0.5s linear infinite":"none",
               }}
               onClick={spin}
               disabled={spinsLeft<=0||full||spinning}
             >⟳</button>
             <div style={gm.spinLabel}>
-              {full?"Lineup full — release it!"
+              {full?"Lineup full!"
                 :spinsLeft<=0?"No spins left"
                 :hand.length===0?"Tap to spin your first acts"
-                :`${spinsLeft} spin${spinsLeft!==1?"s":""} left`}
+                :`${spinsLeft} spin${spinsLeft!==1?"s":""} remaining`}
             </div>
-            {hand.length>0&&!full&&spinsLeft>0&&(
-              <div style={gm.spinHint}>Pick one or spin again for a new hand</div>
+            {hand.length>0&&!full&&(
+              <div style={gm.spinHint}>Pick one · or spin again for a new hand</div>
             )}
           </div>
 
+          {/* DEALT CARDS — 2-col on mobile, auto-fill on desktop */}
           {hand.length>0&&!full&&(
             <div style={gm.hand}>
               {hand.map((a,i)=>{
-                const canAfford=rem>=a.fee-0.001;
+                const canAfford = rem>=a.fee-0.001;
                 return(
                   <div key={a.id}
                     style={{
                       ...gm.actCard,
-                      opacity:canAfford?1:0.28,
+                      opacity:canAfford?1:0.25,
                       cursor:canAfford?"pointer":"not-allowed",
                       borderTop:`3px solid ${tCol(a.tier)}`,
                       animationDelay:`${i*0.04}s`,
@@ -592,7 +683,7 @@ export default function FestivalBoss(){
                       <span style={{color:tCol(a.tier),fontWeight:900,fontSize:13}}>{fmt(a.fee)}</span>
                       <span style={{color:C.textDim,fontSize:10}}>Draw {a.draw}</span>
                     </div>
-                    {!canAfford&&<div style={gm.overBudget}>Over budget</div>}
+                    {!canAfford&&<div style={{fontSize:9,color:C.red,fontWeight:700,marginTop:4,textTransform:"uppercase",letterSpacing:"0.06em"}}>Over budget</div>}
                   </div>
                 );
               })}
@@ -601,41 +692,53 @@ export default function FestivalBoss(){
 
           {hand.length===0&&!full&&(
             <div style={gm.emptyState}>
-              <div style={{fontSize:52,marginBottom:10,opacity:0.4}}>⟳</div>
-              <div style={{color:C.textMid,fontSize:15}}>Hit spin to get your first hand of acts</div>
-              <div style={{color:C.textDim,fontSize:12,marginTop:6}}>{MAX_SPINS} spins to fill {TOTAL_SLOTS} slots — choose wisely</div>
+              <div style={{fontSize:64,marginBottom:12,opacity:0.25,fontFamily:"serif"}}>⟳</div>
+              <div style={{color:C.textMid,fontSize:16,fontWeight:700,fontFamily:"'Georgia',serif"}}>Hit spin to get your acts</div>
+              <div style={{color:C.textDim,fontSize:12,marginTop:8}}>{MAX_SPINS} spins · {TOTAL_SLOTS} slots · £{BUDGET}m budget</div>
+              <div style={{color:C.textDim,fontSize:11,marginTop:4}}>Need {fmt(TARGET_PROFIT)}+ profit to win</div>
             </div>
           )}
+
+          {/* Spacer so content clears the floating drawer button */}
+          <div style={{height:80}}/>
         </main>
       </div>
+
+      {/* FLOATING DRAWER BUTTON — mobile only, always visible */}
+      <button
+        className="fb-drawer-btn"
+        style={{
+          ...gm.drawerBtn,
+          background: full ? C.green : C.ink,
+        }}
+        onClick={()=>{ if(full){ setDrawerOpen(false); submit(); } else setDrawerOpen(p=>!p); }}
+      >
+        {full
+          ? "🚀 Name & Release Lineup →"
+          : `🎤 My Lineup (${lineup.length}/${TOTAL_SLOTS})  ${drawerOpen?"▼":"▲"}`
+        }
+      </button>
     </div>
   );
 }
 
-// Stage colours
-function stageColor(stage){
-  return {"Main Stage":C.yellow,"Second Stage":C.teal,"Smaller Stage":C.coral}[stage]||C.textMid;
-}
-function stageBg(stage){
-  return {"Main Stage":C.yellowDim,"Second Stage":C.tealDim,"Smaller Stage":C.coralDim}[stage]||"rgba(255,255,255,0.05)";
-}
 
 // ─── MINI COMPONENTS ─────────────────────────────────────────
 function Kpi({l,v,c}){
   return(
     <div style={{textAlign:"center"}}>
-      <div style={{color:c,fontWeight:900,fontSize:16,letterSpacing:"-0.3px"}}>{v}</div>
-      <div style={{color:C.textDim,fontSize:9,textTransform:"uppercase",letterSpacing:"0.1em",marginTop:1}}>{l}</div>
+      <div style={{color:c,fontWeight:900,fontSize:16,letterSpacing:"-0.3px",fontFamily:"'Georgia',serif"}}>{v}</div>
+      <div style={{color:"rgba(255,255,255,0.6)",fontSize:9,textTransform:"uppercase",letterSpacing:"0.1em",marginTop:1}}>{l}</div>
     </div>
   );
 }
 function Chk({ok,t}){
   return(
-    <div style={{display:"flex",alignItems:"center",gap:7,fontSize:11,color:ok?C.teal:C.textDim,marginTop:4}}>
+    <div style={{display:"flex",alignItems:"center",gap:7,fontSize:11,color:ok?C.green:C.textDim,marginTop:4}}>
       <span style={{
-        width:13,height:13,borderRadius:"50%",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",
-        background:ok?C.tealDim:"transparent",
-        border:`1.5px solid ${ok?C.teal:C.textDim}`,fontSize:8,
+        width:14,height:14,flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",
+        background:ok?C.green:"transparent",border:`2px solid ${ok?C.green:C.textFaint}`,
+        fontSize:9,color:"#fff",fontWeight:900,
       }}>{ok?"✓":""}</span>
       {t}
     </div>
@@ -643,103 +746,133 @@ function Chk({ok,t}){
 }
 function Ad({text}){
   return(
-    <div style={{margin:"10px 12px 0",padding:"7px 10px",border:`1px dashed ${C.border}`,borderRadius:6,display:"flex",gap:7,alignItems:"center"}}>
-      <span style={{fontSize:8,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.1em",color:C.textDim,background:C.surface,padding:"2px 5px",borderRadius:3,flexShrink:0}}>Ad</span>
+    <div style={{margin:"10px 12px 0",padding:"6px 10px",border:`1px dashed ${C.border}`,display:"flex",gap:7,alignItems:"center"}}>
+      <span style={{fontSize:8,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.1em",color:C.textDim,background:C.surface,padding:"1px 4px",flexShrink:0}}>Ad</span>
       <span style={{fontSize:11,color:C.textMid}}>{text}</span>
     </div>
   );
 }
 
-// ─────────────────────────────────────────────────────────────
-// HOME SCREEN
-// ─────────────────────────────────────────────────────────────
-function Home({name,setName,onStart,onLegal,onAbout}){
-  const ok=name.trim().length>=2;
+// ─── HOME SCREEN ─────────────────────────────────────────────
+function HomeScreen({onStart,onLegal,onAbout}){
   return(
     <div style={h.page}>
       <style>{`
-        @keyframes drift{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}
+        @keyframes deal{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes spinAnim{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
       `}</style>
 
-      {/* BIG POSTER TITLE BLOCK */}
-      <div style={h.posterBlock}>
-        <div style={h.preTitle}>— THE GAME —</div>
-        <div style={h.mainTitle}>
-          <span style={{color:C.yellow}}>FESTIVAL</span>
-          <br/>
-          <span style={{color:C.text,WebkitTextStroke:`2px ${C.yellow}`}}>BOSS</span>
+      {/* BIG POSTER TITLE */}
+      <div style={h.heroWrap}>
+        {/* Coloured stripe */}
+        <div style={h.stripe}/>
+        <div style={h.poster}>
+          <span style={h.line1}>Festival</span>
+          <span style={h.line2}>Boss</span>
         </div>
-        <div style={h.tagline}>Book your lineup. Fill the field. Turn a profit.</div>
+        <div style={h.tagline}>Spin the acts · Book the lineup · Turn a profit</div>
       </div>
 
-      {/* CARD */}
+      {/* RULES CARD */}
       <div style={h.card}>
+        <div style={{fontWeight:900,fontSize:11,letterSpacing:"0.2em",textTransform:"uppercase",color:C.textMid,marginBottom:14,borderBottom:`2px solid ${C.ink}`,paddingBottom:8}}>How to play</div>
         <div style={h.rulesGrid}>
-          <Rule icon="💷" text={`${fmt(BUDGET)} booking budget`}/>
-          <Rule icon="🎰" text={`${MAX_SPINS} spins to build your lineup`}/>
-          <Rule icon="🎤" text={`Pick ${TOTAL_SLOTS} acts per festival`}/>
-          <Rule icon="⭐" text={`${HL_MIN} headliners required`}/>
-          <Rule icon="🎪" text="Assign each act to the right stage"/>
-          <Rule icon="📈" text={`${fmt(TARGET_PROFIT)}+ profit to win`}/>
+          <RuleItem icon="⟳"  label={`${MAX_SPINS} spins`}       desc="to fill your lineup" col={C.red}/>
+          <RuleItem icon="💷" label={`£${BUDGET}m budget`}       desc="inc. £2m overheads"  col={C.blue}/>
+          <RuleItem icon="🎤" label={`${TOTAL_SLOTS} acts`}      desc="to book"             col={C.orange}/>
+          <RuleItem icon="🎪" label="Stage placement"            desc="matters — get it right" col={C.purple}/>
+          <RuleItem icon="🎸" label="Genre variety"              desc="stacking same genre hurts" col={C.green}/>
+          <RuleItem icon="📈" label={`£${TARGET_PROFIT}m+ profit`} desc="to win"            col={C.red}/>
         </div>
 
-        <label style={h.label}>Name your festival</label>
-        <input
-          style={h.input}
-          placeholder="e.g. Dave's Fantastic Fest"
-          value={name}
-          maxLength={32}
-          onChange={e=>setName(e.target.value)}
-        />
-
-        <button
-          style={{...h.btn,opacity:ok?1:0.35,cursor:ok?"pointer":"not-allowed"}}
-          onClick={()=>ok&&onStart()}
-        >
-          Start Booking →
+        <button style={h.startBtn} onClick={onStart}>
+          Build Your Festival
         </button>
 
-        {/* CARBON ADS — small, below the button */}
         <CarbonAd/>
+        <SponsorSlot/>
 
+        <div style={h.legalRow}>
+          <button style={h.lBtn} onClick={onAbout}>About</button>
+          <span style={{color:C.textDim}}>·</span>
+          <button style={h.lBtn} onClick={()=>onLegal("terms")}>Terms</button>
+          <span style={{color:C.textDim}}>·</span>
+          <button style={h.lBtn} onClick={()=>onLegal("privacy")}>Privacy</button>
+        </div>
       </div>
 
       <SiteFooter onLegal={onLegal} onAbout={onAbout}/>
     </div>
   );
 }
-function Rule({icon,text}){
+function RuleItem({icon,label,desc,col}){
   return(
-    <div style={{display:"flex",alignItems:"center",gap:9,padding:"5px 0",borderBottom:`1px solid ${C.border}`}}>
-      <span style={{fontSize:15,flexShrink:0}}>{icon}</span>
-      <span style={{color:C.textMid,fontSize:13,flex:1}}>{text}</span>
+    <div style={{display:"flex",alignItems:"flex-start",gap:10,padding:"6px 0",borderBottom:`1px solid ${C.border}`}}>
+      <span style={{fontSize:15,flexShrink:0,marginTop:1}}>{icon}</span>
+      <div>
+        <span style={{color:col,fontWeight:900,fontSize:13,fontFamily:"'Georgia',serif"}}>{label}</span>
+        <span style={{color:C.textMid,fontSize:13}}> — {desc}</span>
+      </div>
     </div>
   );
 }
 
-// ─────────────────────────────────────────────────────────────
-// RESULT SCREEN — FESTIVAL POSTER
-// ─────────────────────────────────────────────────────────────
+// ─── NAME SCREEN ─────────────────────────────────────────────
+function NameScreen({name,setName,lineup,onConfirm,onBack}){
+  const ok  = name.trim().length >= 2;
+  const hls = lineup.filter(a=>a.tier==="Headliner");
+  return(
+    <div style={h.page}>
+      <div style={{...h.card, marginTop:32}}>
+        <button style={{background:"none",border:"none",color:C.textMid,cursor:"pointer",fontFamily:"inherit",fontSize:13,padding:0,marginBottom:20,display:"block"}} onClick={onBack}>← Back to lineup</button>
+
+        {/* Mini poster preview */}
+        <div style={{background:C.ink,padding:"12px 14px",marginBottom:20,textAlign:"center"}}>
+          <div style={{fontSize:9,letterSpacing:"0.3em",color:"rgba(255,255,255,0.5)",textTransform:"uppercase",marginBottom:6}}>Your headliners</div>
+          {hls.length>0
+            ? hls.map(a=><div key={a.id} style={{fontWeight:900,fontSize:16,color:C.yellow,letterSpacing:"0.06em",textTransform:"uppercase",fontFamily:"'Georgia',serif",lineHeight:1.3}}>{a.name}</div>)
+            : <div style={{color:C.red,fontSize:13}}>No headliners booked</div>
+          }
+        </div>
+
+        <div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.14em",color:C.textMid,marginBottom:10}}>Name your festival</div>
+        <input
+          style={h.nameInput}
+          placeholder="e.g. Dave's Fantastic Fest"
+          value={name}
+          maxLength={32}
+          onChange={e=>setName(e.target.value)}
+          autoFocus
+        />
+        <div style={{fontSize:11,color:C.textDim,marginBottom:16}}>{name.length}/32 characters</div>
+        <button
+          style={{...h.startBtn,background:ok?C.green:C.textFaint,opacity:ok?1:0.5,cursor:ok?"pointer":"not-allowed",boxShadow:ok?`4px 4px 0 ${C.ink}`:"none"}}
+          onClick={()=>ok&&onConfirm()}
+        >
+          Release Lineup →
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── RESULT SCREEN ────────────────────────────────────────────
 function Result({result,lineup,name,onReset,onHome,copied,onCopy,onTweet,onFb,onLegal,onAbout}){
-  const {revenue,cost,profit,win}=result;
-  const hls=lineup.filter(a=>a.tier==="Headliner");
-  const ms =lineup.filter(a=>a.tier==="Main Stage");
-  const ss =lineup.filter(a=>a.tier==="Second Stage");
-  const sm =lineup.filter(a=>a.tier==="Smaller Stage");
+  const {revenue,cost,profit,win,artistCost}=result;
+  const hls = lineup.filter(a=>a.tier==="Headliner");
+  const ms  = lineup.filter(a=>a.assignedStage==="Main Stage"&&a.tier!=="Headliner");
+  const ss  = lineup.filter(a=>a.assignedStage==="Second Stage");
+  const sm  = lineup.filter(a=>a.assignedStage==="Smaller Stage");
 
   return(
     <div style={r.page}>
       <Ad text="🎪 Eventbrite — sell your tickets in minutes"/>
 
-      {/* VERDICT BANNER */}
-      <div style={{...r.verdict,
-        background:win?`linear-gradient(135deg,${C.tealDim},transparent)`:
-                       `linear-gradient(135deg,${C.coralDim},transparent)`,
-        borderLeft:`4px solid ${win?C.teal:C.coral}`,
-      }}>
-        <span style={{fontSize:28}}>{win?"⬟":"⬡"}</span>
+      {/* VERDICT */}
+      <div style={{...r.verdict, background:win?C.greenDim:C.lossDim, borderLeft:`4px solid ${win?C.green:C.red}`}}>
+        <span style={{fontSize:28}}>{win?"✦":"✕"}</span>
         <div>
-          <div style={{fontWeight:900,fontSize:22,color:win?C.teal:C.coral,letterSpacing:"-0.5px",lineHeight:1}}>
+          <div style={{fontWeight:900,fontSize:22,color:win?C.green:C.red,fontFamily:"'Georgia',serif",lineHeight:1}}>
             {win?"In the Black.":"Bankrupt."}
           </div>
           <div style={{color:C.textMid,fontSize:13,marginTop:3}}>{name}</div>
@@ -748,89 +881,49 @@ function Result({result,lineup,name,onReset,onHome,copied,onCopy,onTweet,onFb,on
 
       {/* FIGURES */}
       <div style={r.figs}>
-        <Fig l="Revenue" v={fmt(revenue)}    c={C.teal}/>
-        <Fig l="Costs"   v={`−${fmt(cost)}`} c={C.coral}/>
-        <Fig l={profit>=0?"Profit":"Loss"} v={fmtS(profit)} c={profit>=TARGET_PROFIT?C.yellow:C.coral} big/>
+        <Fig l="Revenue"   v={fmt(revenue)}    c={C.green}/>
+        <Fig l="All Costs" v={`−${fmt(cost)}`} c={C.red}/>
+        <Fig l={profit>=0?"Profit":"Loss"} v={fmtS(profit)} c={profit>=TARGET_PROFIT?C.green:C.red} big/>
+      </div>
+      <div style={{color:C.textDim,fontSize:11,textAlign:"center",marginBottom:12}}>
+        Includes £{OVERHEADS}m overheads · Artist fees: {fmt(artistCost||cost-OVERHEADS)}
       </div>
 
       <p style={r.msg}>
         {win
-          ?`${name} turned ${fmt(profit)} profit. ${hls[0]?.name||"Your headliner"} packed the field and the tills. Not bad.`
+          ?`${name} turned ${fmt(profit)} profit. ${hls[0]?.name||"Your headliner"} packed the field. The crowd won't forget it.`
           :profit>0
-            ?`${fmt(profit)} profit — but you needed ${fmt(TARGET_PROFIT)}. One bigger headliner might've cracked it.`
-            :`${name} lost ${fmt(Math.abs(profit))}. The portaloos were the only things that made money.`
+            ?`So close — ${fmt(profit)} profit but you needed ${fmt(TARGET_PROFIT)}. Check your stage placements and genre mix.`
+            :`${name} lost ${fmt(Math.abs(profit))}. Even the portaloos turned a profit.`
         }
       </p>
 
-      {/* ════ FESTIVAL POSTER ════ */}
+      {/* POSTER */}
       <div style={po.wrap}>
-        {/* Decorative angled stripe top */}
-        <div style={po.stripeTop}/>
         <div style={po.poster}>
-
-          {/* Header bar */}
-          <div style={po.hBar}>
-            <span style={po.hBarText}>FESTIVAL BOSS PRESENTS</span>
-          </div>
-
-          {/* Festival name */}
+          <div style={po.topBand}/>
+          <div style={po.hBar}><span style={po.hBarText}>Festival Boss Presents</span></div>
           <div style={po.festName}>{name.toUpperCase()}</div>
-          <div style={po.festSub}>ONE DAY · ONE STAGE · ONE CHANCE</div>
-
+          <div style={po.festSub}>ONE WEEKEND · ONE CHANCE</div>
           <div style={po.divider}/>
-
-          {/* HEADLINERS */}
           {hls.length>0
             ? hls.map(a=><div key={a.id} style={po.hlAct}>{a.name.toUpperCase()}</div>)
-            : <div style={{...po.hlAct,opacity:0.2,fontSize:18}}>NO HEADLINER</div>
-          }
-
+            : <div style={{...po.hlAct,opacity:0.2,fontSize:16}}>NO HEADLINER BOOKED</div>}
+          {ms.length>0&&<><div style={po.divider}/>
+            <div style={po.tier}>{ms.map((a,i)=><span key={a.id} style={po.msAct}>{a.name}{i<ms.length-1?" · ":""}</span>)}</div></>}
+          {ss.length>0&&<><div style={po.thinRule}/>
+            <div style={po.tier}>{ss.map((a,i)=><span key={a.id} style={po.ssAct}>{a.name}{i<ss.length-1?"  ":""}</span>)}</div></>}
+          {sm.length>0&&<><div style={po.thinRule}/>
+            <div style={po.tier}>{sm.map((a,i)=><span key={a.id} style={po.smAct}>{a.name}{i<sm.length-1?"  ":""}</span>)}</div></>}
           <div style={po.divider}/>
-
-          {/* MAIN STAGE */}
-          {ms.length>0&&(
-            <div style={po.tier}>
-              {ms.map((a,i)=>(
-                <span key={a.id} style={po.msAct}>{a.name}{i<ms.length-1?" · ":""}</span>
-              ))}
-            </div>
-          )}
-
-          {/* SECOND STAGE */}
-          {ss.length>0&&(
-            <>
-              <div style={po.thinRule}/>
-              <div style={po.tier}>
-                {ss.map((a,i)=>(
-                  <span key={a.id} style={po.ssAct}>{a.name}{i<ss.length-1?"  ":""}</span>
-                ))}
-              </div>
-            </>
-          )}
-
-          {/* SMALLER */}
-          {sm.length>0&&(
-            <>
-              <div style={po.thinRule}/>
-              <div style={po.tier}>
-                {sm.map((a,i)=>(
-                  <span key={a.id} style={po.smAct}>{a.name}{i<sm.length-1?"  ":""}</span>
-                ))}
-              </div>
-            </>
-          )}
-
-          <div style={po.divider}/>
-          <div style={po.footer}>
-            {win?"★★ SOLD OUT — ALL WEEKEND ★★":"✕ EVENT CANCELLED ✕"}
-          </div>
+          <div style={po.footer}>{win?"★★ SOLD OUT — ALL WEEKEND ★★":"✕ EVENT CANCELLED ✕"}</div>
+          <div style={po.bottomBand}/>
         </div>
-        <div style={po.stripeBot}/>
       </div>
 
       {/* SHARE */}
       <div style={r.shareWrap}>
-        <div style={r.shareLabel}>Share your lineup</div>
+        <div style={r.shareLabel}>Share your festival</div>
         <div style={r.shareBtns}>
           <SBtn onClick={onTweet}>𝕏 Post</SBtn>
           <SBtn onClick={onFb}>f Share</SBtn>
@@ -843,20 +936,16 @@ function Result({result,lineup,name,onReset,onHome,copied,onCopy,onTweet,onFb,on
         <button style={r.btnGhost}   onClick={onHome}>Home</button>
       </div>
 
-      {/* SPONSOR SLOT — activate this when you have a sponsor (see SponsorSlot component) */}
       <SponsorSlot/>
-
-      {/* CARBON ADS */}
       <CarbonAd/>
-
       <SiteFooter onLegal={onLegal} onAbout={onAbout}/>
     </div>
   );
 }
 function Fig({l,v,c,big}){
   return(
-    <div style={{flex:1,textAlign:"center",background:C.card,borderRadius:8,padding:"10px 6px",border:`1px solid ${C.border}`}}>
-      <div style={{color:c,fontWeight:900,fontSize:big?22:17}}>{v}</div>
+    <div style={{flex:1,textAlign:"center",background:C.surface,padding:"10px 6px",border:`2px solid ${C.ink}`,boxShadow:`2px 2px 0 ${C.ink}`}}>
+      <div style={{color:c,fontWeight:900,fontSize:big?22:17,fontFamily:"'Georgia',serif"}}>{v}</div>
       <div style={{color:C.textDim,fontSize:10,marginTop:3}}>{l}</div>
     </div>
   );
@@ -864,16 +953,16 @@ function Fig({l,v,c,big}){
 function SBtn({onClick,hi,children}){
   return(
     <button onClick={onClick} style={{
-      background:hi?C.tealDim:"transparent",border:`1px solid ${hi?C.teal:C.border}`,
-      color:hi?C.teal:C.textMid,padding:"8px 14px",borderRadius:6,cursor:"pointer",
-      fontSize:12,fontFamily:"inherit",fontWeight:600,
+      background:hi?C.greenDim:"transparent",
+      border:`2px solid ${hi?C.green:C.ink}`,
+      color:hi?C.green:C.ink,
+      padding:"8px 14px",cursor:"pointer",fontSize:12,
+      fontFamily:"inherit",fontWeight:700,
+      boxShadow:hi?"none":`2px 2px 0 ${C.ink}`,
     }}>{children}</button>
   );
 }
 
-// ─────────────────────────────────────────────────────────────
-// LEGAL — comprehensive, watertight
-// ─────────────────────────────────────────────────────────────
 function Legal({type,onBack}){
   const isT=type==="terms";
   // helper so legal screen can link to the other doc
@@ -1093,212 +1182,251 @@ function Legal({type,onBack}){
 function Cl({h,children}){
   return(
     <div style={{marginBottom:18}}>
-      <div style={{color:C.coral,fontWeight:700,fontSize:13,marginBottom:5}}>{h}</div>
+      <div style={{color:C.red,fontWeight:700,fontSize:13,marginBottom:5}}>{h}</div>
       <p style={{color:C.textMid,fontSize:13,lineHeight:1.75,margin:0}}>{children}</p>
     </div>
   );
 }
 
 // ─────────────────────────────────────────────────────────────
-// GAME STYLES
+// GAME STYLES — mobile-first, drawer pattern
 // ─────────────────────────────────────────────────────────────
 const gm={
-  body:         {display:"flex",flex:1,overflow:"hidden",height:"calc(100vh - 62px)"},
-  sidebar:      {width:280,minWidth:240,background:C.surface,borderRight:`1px solid ${C.border}`,
-                 display:"flex",flexDirection:"column",padding:"12px 0",overflow:"hidden"},
-  lineupScroll: {flex:1,overflowY:"auto",padding:"0 10px"},
-  lineupRow:    {display:"flex",alignItems:"center",gap:8,borderLeft:"3px solid",
-                 padding:"7px 8px 7px 10px",marginBottom:5,background:C.card,borderRadius:"0 6px 6px 0"},
-  checkBox:     {margin:"8px 12px 0",padding:"11px 12px",background:C.card,borderRadius:8,border:`1px solid ${C.border}`},
-  pnlLine:      {height:1,background:C.border,margin:"8px 0"},
-  main:         {flex:1,display:"flex",flexDirection:"column",overflow:"hidden",padding:"0"},
-  spinWrap:     {textAlign:"center",padding:"20px 16px 14px",borderBottom:`1px solid ${C.border}`},
-  spinBtn:      {
-    width:72,height:72,borderRadius:"50%",
-    background:`linear-gradient(135deg,${C.yellow},${C.coral})`,
-    border:"none",color:C.bg,fontSize:36,cursor:"pointer",
+  body:        {display:"flex",flexDirection:"column",flex:1,overflow:"hidden",position:"relative"},
+  // Sidebar — on mobile this becomes a slide-up drawer
+  sidebar:     {
+    position:"fixed",bottom:0,left:0,right:0,zIndex:100,
+    background:C.surface,
+    borderTop:`3px solid ${C.ink}`,
+    maxHeight:"75vh",
+    display:"flex",flexDirection:"column",overflow:"hidden",
+    boxShadow:`0 -4px 24px rgba(0,0,0,0.15)`,
+  },
+  lineupScroll:{flex:1,overflowY:"auto",padding:"0 10px"},
+  lineupRow:   {
+    display:"flex",alignItems:"center",gap:8,
+    borderLeft:"4px solid",padding:"7px 8px 7px 10px",
+    marginBottom:5,background:C.card,
+    borderBottom:`1px solid ${C.border}`,
+  },
+  checkBox:    {margin:"8px 12px",padding:"11px 12px",background:C.card,border:`2px solid ${C.ink}`,flexShrink:0},
+  pnlLine:     {height:2,background:C.ink,margin:"8px 0"},
+  releaseBtn:  {
+    margin:"10px 12px",flexShrink:0,
+    background:C.red,border:"none",color:"#fff",
+    fontWeight:900,fontSize:14,padding:"13px 0",
+    cursor:"pointer",fontFamily:"inherit",
+    letterSpacing:"0.05em",textTransform:"uppercase",
+    boxShadow:`3px 3px 0 ${C.ink}`,
+  },
+  // Floating drawer toggle button — mobile only
+  drawerBtn:   {
+    position:"fixed",bottom:0,left:0,right:0,zIndex:101,
+    color:"#fff",fontWeight:900,fontSize:14,
+    padding:"16px 20px",border:"none",
+    cursor:"pointer",fontFamily:"'Georgia',serif",
+    letterSpacing:"0.03em",textAlign:"center",
+    boxShadow:`0 -2px 0 ${C.ink}`,
+  },
+  drawerClose: {
+    background:"none",border:"none",color:C.textMid,
+    cursor:"pointer",fontFamily:"inherit",fontSize:12,
+    fontWeight:600,padding:0,flexShrink:0,
+  },
+  // Main spin area — full width on mobile
+  main:        {flex:1,display:"flex",flexDirection:"column",overflowY:"auto",background:C.bg},
+  spinWrap:    {
+    textAlign:"center",padding:"20px 16px 14px",
+    borderBottom:`2px solid ${C.ink}`,background:C.surface,
+    flexShrink:0,
+  },
+  spinBtn:     {
+    width:88,height:88,borderRadius:"50%",
+    background:C.red,
+    border:`4px solid ${C.ink}`,
+    color:"#fff",fontSize:40,fontWeight:900,
     display:"inline-flex",alignItems:"center",justifyContent:"center",
-    fontWeight:900,boxShadow:`0 0 24px ${C.yellow}33`,marginBottom:10,
-    transformOrigin:"center",
+    cursor:"pointer",marginBottom:10,transformOrigin:"center",
+    boxShadow:`5px 5px 0 ${C.ink}`,fontFamily:"serif",
   },
-  spinLabel:    {color:C.text,fontWeight:700,fontSize:14},
-  spinHint:     {color:C.textDim,fontSize:11,marginTop:4},
-  hand:         {
-    flex:1,overflowY:"auto",padding:"12px 14px",
-    display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(140px,1fr))",
-    gap:8,alignContent:"start",
+  spinLabel:   {color:C.ink,fontWeight:900,fontSize:15,textTransform:"uppercase",letterSpacing:"0.05em"},
+  spinHint:    {color:C.textMid,fontSize:11,marginTop:5},
+  // 2 columns on mobile, auto-fill on desktop
+  hand:        {
+    padding:"12px 12px",
+    display:"grid",
+    gridTemplateColumns:"repeat(2,1fr)",
+    gap:10,alignContent:"start",
   },
-  actCard:      {
-    background:C.card,border:`1px solid ${C.border}`,borderRadius:7,
+  actCard:     {
+    background:C.card,border:`2px solid ${C.ink}`,
     padding:"10px 11px",cursor:"pointer",userSelect:"none",
-    animation:"deal 0.25s ease both",
+    animation:"deal 0.18s ease both",
+    boxShadow:`3px 3px 0 ${C.ink}`,
   },
-  actName:      {fontWeight:700,fontSize:13,color:C.text,lineHeight:1.25,marginBottom:2},
-  actGenre:     {fontSize:11,color:C.textMid},
-  overBudget:   {fontSize:9,color:C.coral,fontWeight:700,marginTop:4,textTransform:"uppercase",letterSpacing:"0.06em"},
-  emptyState:   {flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:32,textAlign:"center"},
-  // Modal
-  overlay:      {position:"fixed",inset:0,background:"rgba(0,0,0,0.75)",zIndex:999,display:"flex",alignItems:"center",justifyContent:"center",padding:16},
-  modal:        {background:C.surface,borderRadius:14,padding:"24px 20px",width:"100%",maxWidth:340,border:`1px solid ${C.borderHi}`},
-  modalName:    {fontWeight:900,fontSize:20,color:C.text,marginBottom:4},
-  modalSub:     {color:C.textMid,fontSize:13,marginBottom:4},
-  modalFee:     {color:C.textDim,fontSize:12,marginBottom:16},
-  stageBtn:     {
+  actName:     {fontWeight:900,fontSize:13,color:C.ink,lineHeight:1.2,marginBottom:3,fontFamily:"'Georgia',serif"},
+  actGenre:    {fontSize:10,color:C.textMid,textTransform:"uppercase",letterSpacing:"0.06em"},
+  emptyState:  {flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:32,textAlign:"center"},
+  overlay:     {position:"fixed",inset:0,background:"rgba(0,0,0,0.6)",zIndex:999,display:"flex",alignItems:"center",justifyContent:"center",padding:16},
+  modal:       {background:C.bg,border:`3px solid ${C.ink}`,padding:"24px 20px",width:"100%",maxWidth:340,boxShadow:`6px 6px 0 ${C.ink}`},
+  modalName:   {fontWeight:900,fontSize:22,color:C.ink,marginBottom:4,fontFamily:"'Georgia',serif"},
+  modalSub:    {color:C.textMid,fontSize:13,marginBottom:4},
+  modalFee:    {color:C.textDim,fontSize:12,marginBottom:16},
+  stageBtn:    {
     display:"flex",justifyContent:"space-between",alignItems:"center",
-    width:"100%",background:C.card,border:"1px solid",borderRadius:8,
-    padding:"12px 14px",marginBottom:8,cursor:"pointer",fontFamily:"inherit",
+    width:"100%",border:`2px solid ${C.ink}`,background:"transparent",
+    padding:"11px 13px",marginBottom:8,cursor:"pointer",fontFamily:"inherit",
+    boxShadow:`2px 2px 0 ${C.ink}`,
   },
-  stageMulTxt:  {color:C.textDim,fontSize:11},
-  cancelBtn:    {width:"100%",background:"transparent",border:`1px solid ${C.border}`,color:C.textMid,
-                 padding:"10px 0",borderRadius:8,cursor:"pointer",fontFamily:"inherit",fontSize:13,marginTop:4},
+  stageMulTxt: {color:C.textMid,fontSize:11},
+  cancelBtn:   {
+    width:"100%",background:"transparent",border:`1px solid ${C.border}`,
+    color:C.textMid,padding:"10px 0",cursor:"pointer",fontFamily:"inherit",fontSize:13,marginTop:4,
+  },
 };
 
-// ─────────────────────────────────────────────────────────────
-// STYLES
-// ─────────────────────────────────────────────────────────────
+// ─── MAIN APP STYLES ─────────────────────────────────────────
 const s={
-  app:  {minHeight:"100vh",background:C.bg,color:C.text,fontFamily:"system-ui,-apple-system,sans-serif",display:"flex",flexDirection:"column"},
-  hdr:  {display:"flex",justifyContent:"space-between",alignItems:"center",padding:"0 16px",height:56,
-         background:C.surface,borderBottom:`1px solid ${C.border}`,flexWrap:"wrap",gap:10},
-  brand:{display:"flex",alignItems:"center"},
-  logoBox:{display:"flex",flexDirection:"column",lineHeight:1,gap:0},
-  logoTop:{fontSize:9,fontWeight:900,letterSpacing:"0.28em",color:C.yellow,textTransform:"uppercase"},
-  logoBoss:{fontSize:22,fontWeight:900,letterSpacing:"-0.5px",color:C.text,lineHeight:0.9,
-    textShadow:`0 0 20px ${C.yellow}44`},
-  kpis:{display:"flex",alignItems:"center",gap:18,flexWrap:"wrap"},
-  kdiv:{width:1,height:24,background:C.border},
-  railWrap:{display:"flex",flexDirection:"column"},
-  rail:{height:3,background:C.card},
-  railFill:{height:"100%",transition:"width 0.3s"},
-  mobTabs:{display:"flex",borderBottom:`1px solid ${C.border}`,background:C.surface},
-  body:{display:"flex",flex:1,overflow:"hidden",height:"calc(100vh - 98px)"},
-  side:{width:290,minWidth:260,background:C.surface,borderRight:`1px solid ${C.border}`,
-        flexDirection:"column",padding:"14px 0",overflow:"hidden"},
-  panelLabel:{fontSize:9,fontWeight:800,textTransform:"uppercase",letterSpacing:"0.14em",
-              color:C.textDim,padding:"0 14px 10px",borderBottom:`1px solid ${C.border}`,marginBottom:8},
-  sideScroll:{flex:1,overflowY:"auto",padding:"0 10px"},
-  sideEmpty:{color:C.textDim,fontSize:13,padding:"28px 0",textAlign:"center",margin:0},
-  aRow:{display:"flex",alignItems:"center",gap:8,borderLeft:"3px solid",
-        padding:"7px 8px 7px 10px",marginBottom:5,background:C.card,borderRadius:"0 6px 6px 0"},
-  aName:{fontWeight:700,fontSize:13,color:C.text,marginBottom:2,lineHeight:1.2},
-  aMeta:{display:"flex",gap:5,alignItems:"center",flexWrap:"wrap"},
-  aGenre:{fontSize:10,color:C.textMid},
-  aRight:{display:"flex",alignItems:"center",gap:7,flexShrink:0},
-  aFee:{fontWeight:800,fontSize:12},
-  xBtn:{background:"none",border:"none",color:C.textDim,cursor:"pointer",fontSize:11,padding:0,fontFamily:"inherit"},
-  pill:{fontSize:8,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.06em",padding:"2px 7px",borderRadius:20},
-  pnlBox:{margin:"8px 12px 0",padding:"11px 12px",background:C.card,borderRadius:8,border:`1px solid ${C.border}`},
-  pnlLine:{height:1,background:C.border,margin:"8px 0"},
-  checks:{marginTop:9,paddingTop:8,borderTop:`1px solid ${C.border}`},
-  releaseBtn:{margin:"10px 12px 0",background:`linear-gradient(90deg,${C.yellow},${C.coral})`,
-              border:"none",color:C.bg,fontWeight:900,fontSize:14,padding:"12px 0",
-              borderRadius:8,cursor:"pointer",fontFamily:"inherit",letterSpacing:"0.03em"},
-  browse:{flex:1,display:"flex",flexDirection:"column",overflow:"hidden"},
-  filterBar:{padding:"12px 14px 8px",borderBottom:`1px solid ${C.border}`,background:C.surface},
-  searchBox:{width:"100%",background:C.card,border:`1px solid ${C.border}`,borderRadius:7,
-             padding:"8px 12px",color:C.text,fontSize:13,outline:"none",fontFamily:"inherit",marginBottom:8},
-  filterRow:{display:"flex",gap:6,flexWrap:"wrap"},
-  sel:{flex:1,minWidth:88,background:C.card,border:`1px solid ${C.border}`,borderRadius:7,
-       padding:"7px 8px",color:C.textMid,fontSize:12,outline:"none",cursor:"pointer",fontFamily:"inherit"},
-  grid:{flex:1,overflowY:"auto",padding:"12px 14px",display:"grid",
-        gridTemplateColumns:"repeat(auto-fill,minmax(145px,1fr))",gap:8,alignContent:"start"},
-  card:{background:C.card,border:`1px solid ${C.border}`,borderRadius:7,
-        padding:"10px 11px",transition:"opacity 0.15s",userSelect:"none"},
-  cName:{fontWeight:700,fontSize:13,color:C.text,lineHeight:1.25,marginBottom:2},
-  cGenre:{fontSize:11,color:C.textMid},
+  app:       {minHeight:"100vh",background:C.bg,color:C.ink,fontFamily:"'Georgia',serif",display:"flex",flexDirection:"column"},
+  hdr:       {
+    display:"flex",justifyContent:"space-between",alignItems:"center",
+    padding:"0 20px",height:64,background:C.red,
+    borderBottom:`3px solid ${C.ink}`,flexWrap:"wrap",gap:10,
+  },
+  brand:     {display:"flex",alignItems:"center",gap:0},
+  brandF:    {color:"#fff",fontWeight:900,fontSize:13,letterSpacing:"0.2em",textTransform:"uppercase",fontFamily:"'Georgia',serif"},
+  brandText: {display:"flex",flexDirection:"column",lineHeight:1},
+  brandTitle:{fontWeight:900,fontSize:20,color:"#fff",letterSpacing:"-0.5px",fontFamily:"'Georgia',serif"},
+  kpis:      {display:"flex",alignItems:"center",gap:16,flexWrap:"wrap"},
+  kdiv:      {width:1,height:24,background:"rgba(255,255,255,0.3)"},
+  railWrap:  {display:"flex",flexDirection:"column"},
+  rail:      {height:5,background:C.surface},
+  railFill:  {height:"100%",transition:"width 0.3s"},
+  panelLabel:{
+    fontSize:9,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.16em",
+    color:C.textDim,padding:"0 14px 10px",
+    borderBottom:`2px solid ${C.ink}`,marginBottom:8,
+  },
+  panelLabel2:{
+    fontSize:11,fontWeight:900,textTransform:"uppercase",letterSpacing:"0.12em",color:C.ink,
+  },
+  sideEmpty: {color:C.textDim,fontSize:13,padding:"28px 0",textAlign:"center",margin:0},
+  aName:     {fontWeight:700,fontSize:13,color:C.ink,marginBottom:2,lineHeight:1.2,fontFamily:"'Georgia',serif"},
+  aMeta:     {display:"flex",gap:5,alignItems:"center",flexWrap:"wrap"},
+  aGenre:    {fontSize:10,color:C.textMid,textTransform:"uppercase",letterSpacing:"0.04em"},
+  aRight:    {display:"flex",alignItems:"center",gap:7,flexShrink:0},
+  xBtn:      {background:"none",border:"none",color:C.textDim,cursor:"pointer",fontSize:11,padding:0,fontFamily:"inherit"},
+  pill:      {fontSize:8,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.06em",padding:"2px 7px",border:`1px solid`},
 };
 
+// ─── HOME STYLES ─────────────────────────────────────────────
 const h={
-  page:{minHeight:"100vh",background:C.bg,display:"flex",flexDirection:"column",
-        alignItems:"center",padding:"36px 16px 60px"},
-  posterBlock:{textAlign:"center",marginBottom:32},
-  preTitle:{fontSize:10,letterSpacing:"0.3em",color:C.textDim,textTransform:"uppercase",marginBottom:10},
-  mainTitle:{
-    fontSize:"clamp(52px,16vw,96px)",fontWeight:900,lineHeight:0.9,letterSpacing:"-2px",
-    textTransform:"uppercase",
-    textShadow:`0 0 60px ${C.yellow}33`,
+  page:    {minHeight:"100vh",background:C.bg,display:"flex",flexDirection:"column",alignItems:"center",padding:"0 16px 60px",position:"relative",overflow:"hidden"},
+  heroWrap:{width:"100%",maxWidth:640,padding:"32px 0 20px",textAlign:"center",position:"relative"},
+  // Big overlapping poster typography
+  poster:  {position:"relative",userSelect:"none",lineHeight:0.85,marginBottom:8},
+  line1:   {
+    display:"block",fontSize:"clamp(56px,16vw,110px)",fontWeight:900,
+    fontFamily:"'Georgia','Times New Roman',serif",
+    color:C.red,letterSpacing:"-2px",textTransform:"uppercase",
+    WebkitTextStroke:`2px ${C.ink}`,
   },
-  tagline:{fontSize:14,color:C.textMid,marginTop:14,letterSpacing:"0.05em"},
-  card:{background:C.surface,border:`1px solid ${C.border}`,borderRadius:12,
-        padding:"24px 22px",width:"100%",maxWidth:420},
+  line2:   {
+    display:"block",fontSize:"clamp(72px,20vw,140px)",fontWeight:900,
+    fontFamily:"'Georgia','Times New Roman',serif",
+    color:C.blue,letterSpacing:"-4px",textTransform:"uppercase",
+    WebkitTextStroke:`2px ${C.ink}`,
+    marginTop:-8,
+  },
+  tagline: {fontSize:13,color:C.textMid,letterSpacing:"0.15em",textTransform:"uppercase",marginBottom:24,marginTop:16},
+  // Poster decorative elements
+  stripe:  {height:8,background:`repeating-linear-gradient(90deg,${C.red} 0,${C.red} 20px,${C.yellow} 20px,${C.yellow} 40px,${C.blue} 40px,${C.blue} 60px,${C.orange} 60px,${C.orange} 80px,${C.purple} 80px,${C.purple} 100px)`,marginBottom:20,border:`2px solid ${C.ink}`},
+  card:    {background:C.surface,border:`3px solid ${C.ink}`,padding:"24px 22px",width:"100%",maxWidth:460,boxShadow:`6px 6px 0 ${C.ink}`},
   rulesGrid:{marginBottom:20},
-  label:{display:"block",fontSize:10,fontWeight:700,textTransform:"uppercase",
-         letterSpacing:"0.1em",color:C.textMid,marginBottom:8},
-  input:{width:"100%",background:C.card,border:`1px solid ${C.borderHi}`,borderRadius:8,
-         padding:"12px 14px",color:C.text,fontSize:16,outline:"none",fontFamily:"inherit"},
-  btn:{width:"100%",marginTop:14,
-       background:`linear-gradient(90deg,${C.yellow},${C.coral})`,
-       border:"none",color:C.bg,fontWeight:900,fontSize:15,padding:"14px 0",
-       borderRadius:9,cursor:"pointer",fontFamily:"inherit",letterSpacing:"0.04em"},
-  legalRow:{display:"flex",gap:10,justifyContent:"center",marginTop:12,alignItems:"center"},
-  lBtn:{background:"none",border:"none",color:C.textDim,fontSize:11,cursor:"pointer",
-        fontFamily:"inherit",textDecoration:"underline",padding:0},
+  startBtn:{
+    width:"100%",marginTop:4,
+    background:C.blue,border:`3px solid ${C.ink}`,
+    color:"#fff",fontWeight:900,fontSize:16,padding:"15px 0",
+    borderRadius:0,cursor:"pointer",fontFamily:"'Georgia',serif",
+    letterSpacing:"0.08em",textTransform:"uppercase",
+    boxShadow:`5px 5px 0 ${C.ink}`,
+  },
+  nameInput:{
+    width:"100%",background:C.bg,border:`3px solid ${C.ink}`,
+    padding:"13px 14px",color:C.ink,fontSize:17,
+    outline:"none",fontFamily:"'Georgia',serif",marginBottom:6,
+    boxSizing:"border-box",fontWeight:700,
+  },
+  legalRow:{display:"flex",gap:10,justifyContent:"center",marginTop:14,alignItems:"center"},
+  lBtn:   {background:"none",border:"none",color:C.textDim,fontSize:11,cursor:"pointer",fontFamily:"inherit",textDecoration:"underline",padding:0},
 };
 
-// POSTER
+// ─── POSTER STYLES ────────────────────────────────────────────
 const po={
-  wrap:{margin:"14px 0",position:"relative"},
-  stripeTop:{height:8,background:`linear-gradient(90deg,${C.yellow},${C.coral},${C.teal})`,borderRadius:"4px 4px 0 0"},
-  stripeBot:{height:8,background:`linear-gradient(90deg,${C.teal},${C.coral},${C.yellow})`,borderRadius:"0 0 4px 4px"},
-  poster:{
-    background:`radial-gradient(ellipse at 50% 0%,#1a1040 0%,${C.bg} 70%)`,
-    padding:"20px 18px 18px",textAlign:"center",
-    border:`1px solid ${C.border}`,borderTop:"none",borderBottom:"none",
+  wrap:      {margin:"14px 0"},
+  poster:    {
+    background:"#fffff8",
+    border:`3px solid ${C.ink}`,
+    padding:"0 0 20px",textAlign:"center",
+    fontFamily:"'Georgia','Times New Roman',serif",
+    boxShadow:`6px 6px 0 ${C.ink}`,
+    overflow:"hidden",
   },
-  hBar:{background:C.yellow,padding:"3px 0",marginBottom:14,marginLeft:-18,marginRight:-18,marginTop:-20},
-  hBarText:{fontSize:9,fontWeight:900,letterSpacing:"0.3em",color:C.bg,textTransform:"uppercase"},
-  festName:{
-    fontSize:"clamp(22px,6vw,36px)",fontWeight:900,color:C.yellow,
-    letterSpacing:"0.1em",textTransform:"uppercase",lineHeight:1.1,marginBottom:4,
-    textShadow:`0 0 30px ${C.yellow}66`,wordBreak:"break-word",
+  topBand:   {
+    background:`repeating-linear-gradient(90deg,${C.red} 0,${C.red} 14%,${C.yellow} 14%,${C.yellow} 28%,${C.orange} 28%,${C.orange} 42%,${C.green} 42%,${C.green} 57%,${C.blue} 57%,${C.blue} 71%,${C.purple} 71%,${C.purple} 85%,${C.red} 85%,${C.red} 100%)`,
+    height:22,marginBottom:0,
   },
-  festSub:{fontSize:9,color:C.textDim,letterSpacing:"0.25em",textTransform:"uppercase",marginBottom:8},
-  divider:{height:1,background:`linear-gradient(90deg,transparent,${C.yellow}44,transparent)`,margin:"12px 0"},
-  thinRule:{height:1,background:C.border,margin:"8px 0"},
-  hlAct:{fontSize:22,fontWeight:900,color:C.coral,letterSpacing:"0.08em",
-         textTransform:"uppercase",lineHeight:1.3,
-         textShadow:`0 0 20px ${C.coral}55`,marginBottom:2},
-  tier:{display:"flex",flexWrap:"wrap",justifyContent:"center",gap:"2px 0",padding:"3px 0"},
-  msAct:{fontSize:13,fontWeight:700,color:C.teal,letterSpacing:"0.04em"},
-  ssAct:{fontSize:11,fontWeight:600,color:C.text,letterSpacing:"0.02em"},
-  smAct:{fontSize:9,fontWeight:500,color:C.textMid,letterSpacing:"0.01em"},
-  footer:{fontSize:11,fontWeight:800,color:C.yellow,letterSpacing:"0.2em",
-          textTransform:"uppercase",marginTop:4},
+  hBar:      {background:C.ink,padding:"6px 0",marginBottom:14},
+  hBarText:  {fontSize:10,fontWeight:900,letterSpacing:"0.35em",color:"#fff",textTransform:"uppercase"},
+  festName:  {
+    fontSize:"clamp(28px,7vw,48px)",fontWeight:900,color:C.ink,
+    letterSpacing:"0.06em",textTransform:"uppercase",lineHeight:1,
+    marginBottom:4,padding:"0 16px",wordBreak:"break-word",
+  },
+  festSub:   {fontSize:9,color:C.textMid,letterSpacing:"0.3em",textTransform:"uppercase",marginBottom:10},
+  divider:   {height:2,background:C.ink,margin:"12px 16px"},
+  thinRule:  {height:1,background:C.border,margin:"8px 16px"},
+  hlAct:     {
+    fontSize:"clamp(18px,4.5vw,28px)",fontWeight:900,color:C.red,
+    letterSpacing:"0.06em",textTransform:"uppercase",lineHeight:1.25,marginBottom:4,
+    fontFamily:"'Georgia','Times New Roman',serif",
+  },
+  tier:      {display:"flex",flexWrap:"wrap",justifyContent:"center",gap:"2px 8px",padding:"4px 16px"},
+  msAct:     {fontSize:14,fontWeight:700,color:C.blue,letterSpacing:"0.03em",fontFamily:"'Georgia',serif"},
+  ssAct:     {fontSize:11,fontWeight:600,color:C.ink,letterSpacing:"0.02em"},
+  smAct:     {fontSize:9,fontWeight:500,color:C.textMid,letterSpacing:"0.01em"},
+  footer:    {fontSize:12,fontWeight:900,color:C.ink,letterSpacing:"0.25em",textTransform:"uppercase",marginTop:8,padding:"0 16px"},
+  bottomBand:{
+    background:`repeating-linear-gradient(90deg,${C.purple} 0,${C.purple} 14%,${C.blue} 14%,${C.blue} 28%,${C.green} 28%,${C.green} 42%,${C.orange} 42%,${C.orange} 57%,${C.yellow} 57%,${C.yellow} 71%,${C.red} 71%,${C.red} 85%,${C.purple} 85%,${C.purple} 100%)`,
+    height:22,marginTop:16,
+  },
 };
 
+// ─── RESULT STYLES ────────────────────────────────────────────
 const r={
-  page:{minHeight:"100vh",background:C.bg,padding:"18px 16px 40px",maxWidth:540,margin:"0 auto"},
-  verdict:{display:"flex",alignItems:"center",gap:14,marginBottom:12,borderRadius:8,padding:"14px 16px"},
-  figs:{display:"flex",gap:8,marginBottom:12},
-  msg:{color:C.textMid,fontSize:13,lineHeight:1.6,background:C.surface,borderRadius:8,
-       padding:"12px 14px",marginBottom:14,border:`1px solid ${C.border}`,fontStyle:"italic"},
-  shareWrap:{background:C.surface,borderRadius:8,padding:"14px",marginBottom:12,border:`1px solid ${C.border}`},
-  shareLabel:{fontSize:9,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.12em",
-              color:C.textDim,marginBottom:10,textAlign:"center"},
-  shareBtns:{display:"flex",gap:8,justifyContent:"center",flexWrap:"wrap"},
-  actions:{display:"flex",gap:10,marginTop:4,marginBottom:14},
-  btnPrimary:{flex:1,background:`linear-gradient(90deg,${C.yellow},${C.coral})`,border:"none",
-              color:C.bg,fontWeight:900,fontSize:14,padding:"13px 0",borderRadius:8,cursor:"pointer",fontFamily:"inherit"},
-  btnGhost:{flex:1,background:"transparent",border:`1px solid ${C.border}`,color:C.textMid,
-            fontWeight:600,fontSize:14,padding:"13px 0",borderRadius:8,cursor:"pointer",fontFamily:"inherit"},
+  page:      {minHeight:"100vh",background:C.bg,padding:"18px 16px 40px",maxWidth:540,margin:"0 auto"},
+  verdict:   {display:"flex",alignItems:"center",gap:14,marginBottom:12,padding:"14px 16px",border:`3px solid ${C.ink}`,boxShadow:`4px 4px 0 ${C.ink}`},
+  figs:      {display:"flex",gap:8,marginBottom:6},
+  msg:       {color:C.textMid,fontSize:13,lineHeight:1.6,background:C.surface,padding:"12px 14px",marginBottom:14,border:`2px solid ${C.border}`,fontStyle:"italic"},
+  shareWrap: {background:C.surface,padding:"14px",marginBottom:12,border:`2px solid ${C.ink}`},
+  shareLabel:{fontSize:9,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.14em",color:C.textDim,marginBottom:10,textAlign:"center"},
+  shareBtns: {display:"flex",gap:8,justifyContent:"center",flexWrap:"wrap"},
+  actions:   {display:"flex",gap:10,marginTop:4,marginBottom:14},
+  btnPrimary:{flex:1,background:C.red,border:`2px solid ${C.ink}`,color:"#fff",fontWeight:900,fontSize:14,padding:"13px 0",cursor:"pointer",fontFamily:"inherit",boxShadow:`3px 3px 0 ${C.ink}`},
+  btnGhost:  {flex:1,background:"transparent",border:`2px solid ${C.ink}`,color:C.ink,fontWeight:700,fontSize:14,padding:"13px 0",cursor:"pointer",fontFamily:"inherit"},
 };
 
+// ─── LEGAL STYLES ─────────────────────────────────────────────
 const lg={
-  page:{minHeight:"100vh",background:C.bg,display:"flex",justifyContent:"center",padding:"32px 16px 60px"},
-  card:{background:C.surface,border:`1px solid ${C.border}`,borderRadius:10,
-        padding:"28px 24px",width:"100%",maxWidth:560},
-  back:{background:"none",border:"none",color:C.textMid,cursor:"pointer",
-        fontSize:13,padding:0,fontFamily:"inherit",marginBottom:18,display:"block"},
-  title:{fontSize:22,fontWeight:900,color:C.text,marginBottom:4,letterSpacing:"-0.5px"},
-  date:{color:C.textDim,fontSize:12,marginBottom:22},
-  closeBtn:{width:"100%",marginTop:8,background:"transparent",
-            border:`1px solid ${C.border}`,color:C.textMid,fontWeight:700,
-            fontSize:14,padding:"12px 0",borderRadius:8,cursor:"pointer",fontFamily:"inherit"},
+  page:    {minHeight:"100vh",background:C.bg,display:"flex",justifyContent:"center",padding:"32px 16px 60px"},
+  card:    {background:C.surface,border:`2px solid ${C.ink}`,padding:"28px 24px",width:"100%",maxWidth:560},
+  back:    {background:"none",border:"none",color:C.textMid,cursor:"pointer",fontSize:13,padding:0,fontFamily:"inherit",marginBottom:18,display:"block"},
+  title:   {fontSize:22,fontWeight:900,color:C.ink,marginBottom:4,letterSpacing:"-0.5px",fontFamily:"'Georgia',serif"},
+  date:    {color:C.textDim,fontSize:12,marginBottom:22},
+  closeBtn:{width:"100%",marginTop:8,background:"transparent",border:`2px solid ${C.ink}`,color:C.ink,fontWeight:700,fontSize:14,padding:"12px 0",cursor:"pointer",fontFamily:"inherit"},
 };
 
-// ─────────────────────────────────────────────────────────────
-// SITE FOOTER — appears on every screen for AdSense compliance
-// ─────────────────────────────────────────────────────────────
+
 function SiteFooter({onLegal, onAbout, minimal}){
   return(
     <footer style={ft.wrap}>
@@ -1402,7 +1530,7 @@ function SponsorSlot(){
         rel="noopener noreferrer sponsored"
         style={ad.sponsorLink}
       >
-        <strong style={{color:C.yellow,fontSize:14}}>{SPONSOR_NAME}</strong>
+        <strong style={{color:C.blue,fontSize:14}}>{SPONSOR_NAME}</strong>
         <span style={{color:C.textMid,fontSize:12,marginLeft:10}}>{SPONSOR_MSG}</span>
       </a>
     </div>
@@ -1507,7 +1635,7 @@ function About({onBack, onLegal}){
 function AbSection({title, children}){
   return(
     <div style={{marginBottom:20}}>
-      <div style={{color:C.yellow,fontWeight:700,fontSize:14,marginBottom:6}}>{title}</div>
+      <div style={{color:C.red,fontWeight:700,fontSize:14,marginBottom:6}}>{title}</div>
       <p style={{color:C.textMid,fontSize:13,lineHeight:1.75,margin:0,whiteSpace:"pre-line"}}>{children}</p>
     </div>
   );
@@ -1516,8 +1644,9 @@ function AbSection({title, children}){
 // ─────────────────────────────────────────────────────────────
 // NEW STYLE OBJECTS
 // ─────────────────────────────────────────────────────────────
+
 const ft={
-  wrap:{background:C.surface,borderTop:`1px solid ${C.border}`,marginTop:32,padding:"24px 16px 32px"},
+  wrap:{background:C.surface,borderTop:`2px solid ${C.ink}`,marginTop:32,padding:"24px 16px 32px"},
   inner:{maxWidth:540,margin:"0 auto"},
   brand:{marginBottom:12},
   brandName:{color:C.text,fontWeight:700,fontSize:15,display:"block"},
@@ -1560,18 +1689,18 @@ const ck={
   },
   text:{marginBottom:14},
   body:{color:C.textMid,fontSize:12,lineHeight:1.6,margin:"6px 0 0"},
-  inlineLink:{background:"none",border:"none",color:C.teal,cursor:"pointer",
+  inlineLink:{background:"none",border:"none",color:C.blue,cursor:"pointer",
               fontFamily:"inherit",padding:0,fontSize:12,textDecoration:"underline"},
   btns:{display:"flex",gap:8},
   accept:{
-    flex:1,background:`linear-gradient(90deg,${C.yellow},${C.coral})`,
+    flex:1,background:`linear-gradient(90deg,${C.red},${C.blue})`,
     border:"none",color:C.bg,fontWeight:700,fontSize:13,padding:"10px 0",
     borderRadius:7,cursor:"pointer",fontFamily:"inherit",
   },
   decline:{
-    flex:1,background:"transparent",border:`1px solid ${C.border}`,
-    color:C.textMid,fontWeight:600,fontSize:13,padding:"10px 0",
-    borderRadius:7,cursor:"pointer",fontFamily:"inherit",
+    flex:1,background:"transparent",border:`2px solid ${C.ink}`,
+    color:C.ink,fontWeight:700,fontSize:13,padding:"10px 0",
+    cursor:"pointer",fontFamily:"inherit",
   },
 };
 
@@ -1584,8 +1713,8 @@ const ab={
   title:{fontSize:26,fontWeight:900,color:C.text,margin:0,letterSpacing:"-0.5px"},
   sub:{color:C.textMid,fontSize:13,margin:"3px 0 0"},
   legalBtn:{
-    flex:1,background:"transparent",border:`1px solid ${C.border}`,
-    color:C.textMid,fontWeight:600,fontSize:13,padding:"10px 0",
-    borderRadius:7,cursor:"pointer",fontFamily:"inherit",
+    flex:1,background:"transparent",border:`2px solid ${C.ink}`,
+    color:C.ink,fontWeight:700,fontSize:13,padding:"10px 0",
+    cursor:"pointer",fontFamily:"inherit",
   },
 };
