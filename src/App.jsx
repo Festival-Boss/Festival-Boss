@@ -285,7 +285,7 @@ function calcCost(lu){ return +lu.reduce((s,a)=>s+a.fee,0).toFixed(2); }
 function calcRevenue(lu){
   if(!lu.length) return 0;
   const avg = lu.reduce((s,a)=>s+a.draw,0)/lu.length;
-  const hl  = lu.filter(a=>a.tier==="Headliner"||a.assignedStage==="Main Stage"&&a.draw>=9.0).length;
+  const hl  = lu.filter(a=>(a.tier==="Headliner")||(a.assignedStage==="Main Stage"&&a.draw>=9.0)).length;
   const gs  = new Set(lu.map(a=>a.genre)).size;
 
   // Stage assignment score — reward correct placement
@@ -351,9 +351,6 @@ function dealHand(usedIds){
 function tCol(t){
   return {Headliner:C.yellow,"Main Stage":C.teal,"Second Stage":C.coral,"Smaller Stage":C.lilac}[t]||C.textMid;
 }
-function tBg(t){
-  return {Headliner:C.yellowDim,"Main Stage":C.tealDim,"Second Stage":C.coralDim,"Smaller Stage":"rgba(192,132,252,0.1)"}[t]||"rgba(255,255,255,0.05)";
-}
 
 // ─── FORMATTERS ──────────────────────────────────────────────
 function fmt(v){
@@ -362,9 +359,6 @@ function fmt(v){
   return `£${a>=1?a.toFixed(1):a.toFixed(2).replace(/\.?0+$/,"")}m`;
 }
 function fmtS(v){return `${v>=0?"+":"−"}${fmt(v)}`;}
-
-const GENRES=["All",...Array.from(new Set(ARTISTS.map(a=>a.genre))).sort()];
-const TIERS =["All","Headliner","Main Stage","Second Stage","Smaller Stage"];
 
 // ─── SHARE ───────────────────────────────────────────────────
 function shareText(n,res,lu){
@@ -635,13 +629,6 @@ function Kpi({l,v,c}){
     </div>
   );
 }
-function PnlRow({l,v,c}){
-  return(
-    <div style={{display:"flex",justifyContent:"space-between",marginBottom:5,fontSize:12,color:C.textMid}}>
-      <span>{l}</span><span style={{color:c,fontWeight:700}}>{v}</span>
-    </div>
-  );
-}
 function Chk({ok,t}){
   return(
     <div style={{display:"flex",alignItems:"center",gap:7,fontSize:11,color:ok?C.teal:C.textDim,marginTop:4}}>
@@ -652,16 +639,6 @@ function Chk({ok,t}){
       }}>{ok?"✓":""}</span>
       {t}
     </div>
-  );
-}
-function MobTab({active,col,onClick,children}){
-  return(
-    <button onClick={onClick} style={{
-      flex:1,padding:"10px 0",background:"none",border:"none",
-      borderBottom:`2px solid ${active?col:"transparent"}`,
-      color:active?col:C.textMid,fontWeight:active?700:400,
-      fontSize:13,cursor:"pointer",fontFamily:"inherit",
-    }}>{children}</button>
   );
 }
 function Ad({text}){
