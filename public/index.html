@@ -269,6 +269,8 @@ const MAX_SPINS     = 5;
 const HL_MIN        = 2;
 const HAND_SIZE     = 10;
 
+const GENRE_MIN     = 5;     // for About page reference only — genre variety is silent in scoring
+
 // Stage multipliers — harsher than before
 const STAGE_MULS = {
   "Main Stage":    1.0,
@@ -318,8 +320,8 @@ function calcRevenue(lu){
     // Harsh penalties for misplacement
     let match = 1.0;
     if(assigned !== ideal){
-      if(assigned==="Smaller Stage") match = 0.50;  // worst
-      else if(assigned==="Main Stage" && ideal!=="Main Stage") match = 0.72; // over-promoting
+      if(assigned==="Smaller Stage") match = 0.50;
+      else if(assigned==="Main Stage" && ideal!=="Main Stage") match = 0.72;
       else match = 0.78;
     }
     return s + match;
@@ -333,7 +335,8 @@ function calcRevenue(lu){
   const maxSameGenre = Math.max(...Object.values(genreCounts));
   const genreMul = maxSameGenre>=4 ? 0.78
                  : maxSameGenre===3 ? 0.91
-                 : maxSameGenre<=2  ? 1.05
+                 : maxSameGenre===2 ? 1.05
+                 : maxSameGenre===1 ? 1.05
                  : 1.0;
 
   // ── Draw quality ─────────────────────────────────────────────
