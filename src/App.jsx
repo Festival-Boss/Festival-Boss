@@ -267,7 +267,7 @@ const TARGET_PROFIT = 4;     // £4m profit after overheads
 const TOTAL_SLOTS   = 10;
 const MAX_SPINS     = 5;
 const HL_MIN        = 2;
-const HAND_SIZE     = 10;
+const HAND_SIZE = 10; // fixed
 
 const GENRE_MIN     = 5;     // for About page reference only — genre variety is silent in scoring
 
