@@ -252,45 +252,99 @@ const ALL_ARTISTS = [
 
 const ARTISTS = [...new Map(ALL_ARTISTS.map(a=>[a.id,a])).values()];
 
-// ─── GAME CONFIG — genuinely punishing ───────────────────────
-// Budget: £18m. Target: £4.5m profit.
-// Perfect ceiling revenue: ~£24m.
-// Max possible profit: ~£6m — but only with flawless execution.
-// Average play likely loses £1-2m on first attempt.
-const BUDGET        = 18;
-const TICKET_REV    = 24;
-const TARGET_PROFIT = 4.5;
-const TOTAL_SLOTS   = 20;
-const HL_MIN        = 3;
-const GENRE_MIN     = 8;
+// ─── GAME CONFIG ─────────────────────────────────────────────
+// 10 slots, £12m budget, £3.5m profit target.
+// 8 spins to fill 10 slots — every choice matters.
+// Stage assignment multipliers add strategic depth.
+const BUDGET        = 12;
+const TICKET_REV    = 20;
+const TARGET_PROFIT = 3.5;
+const TOTAL_SLOTS   = 10;
+const MAX_SPINS     = 8;
+const HL_MIN        = 2;
+const GENRE_MIN     = 5;
+const HAND_SIZE     = 10; // acts dealt per spin
+
+// Stage assignment multipliers — putting wrong acts on wrong stages costs you
+const STAGE_MULS = {
+  "Main Stage":    1.0,
+  "Second Stage":  0.82,
+  "Smaller Stage": 0.65,
+};
+
+// Ideal stage by tier — mismatching penalises revenue
+const IDEAL_STAGE = {
+  "Headliner":     "Main Stage",
+  "Main Stage":    "Main Stage",
+  "Second Stage":  "Second Stage",
+  "Smaller Stage": "Smaller Stage",
+};
 
 function calcCost(lu){ return +lu.reduce((s,a)=>s+a.fee,0).toFixed(2); }
+
 function calcRevenue(lu){
   if(!lu.length) return 0;
   const avg = lu.reduce((s,a)=>s+a.draw,0)/lu.length;
-  const hl  = lu.filter(a=>a.tier==="Headliner").length;
+  const hl  = lu.filter(a=>a.tier==="Headliner"||a.assignedStage==="Main Stage"&&a.draw>=9.0).length;
   const gs  = new Set(lu.map(a=>a.genre)).size;
 
-  // Headliner cliff — 0 or 1 headliners is catastrophic
-  const hMul = hl>=HL_MIN?1.08:hl===2?0.75:hl===1?0.55:0.38;
+  // Stage assignment score — reward correct placement
+  const stageMul = lu.reduce((s,a)=>{
+    const ideal = IDEAL_STAGE[a.tier]||"Second Stage";
+    const assigned = a.assignedStage||ideal;
+    const match = assigned===ideal?1.0:assigned==="Main Stage"&&ideal!=="Main Stage"?0.88:0.78;
+    return s + match;
+  },0) / lu.length;
 
-  // Genre diversity — 8 genres needed for full bonus
-  const dMul = gs>=GENRE_MIN?1.06:gs>=6?0.95:gs>=4?0.87:0.76;
+  // Headliner cliff
+  const hMul = hl>=HL_MIN?1.1:hl===1?0.72:0.45;
 
-  // Draw quality — average below 8.0 tanks the multiplier hard
-  const drawMul = avg>=8.8?1.08:avg>=8.5?1.03:avg>=8.0?0.97:avg>=7.5?0.88:0.76;
+  // Genre diversity
+  const dMul = gs>=GENRE_MIN?1.06:gs>=4?0.95:gs>=3?0.86:0.75;
 
-  // Slot penalty — every unfilled slot costs proportionally
-  const slotMul = 0.2 + 0.8*(lu.length/TOTAL_SLOTS);
+  // Draw quality
+  const drawMul = avg>=9.0?1.1:avg>=8.5?1.03:avg>=8.0?0.95:avg>=7.5?0.85:0.72;
 
-  // Headliner quality bonus — BIG headliners (draw >9.5) add extra pull
+  // Slot fill
+  const slotMul = 0.15 + 0.85*(lu.length/TOTAL_SLOTS);
+
+  // Headliner quality
   const hlActs = lu.filter(a=>a.tier==="Headliner");
-  const hlQual = hlActs.length>0
-    ? hlActs.reduce((s,a)=>s+a.draw,0)/hlActs.length
-    : 7;
-  const qualMul = hlQual>=9.8?1.06:hlQual>=9.5?1.03:hlQual>=9.0?1.0:0.94;
+  const hlQual = hlActs.length>0 ? hlActs.reduce((s,a)=>s+a.draw,0)/hlActs.length : 7;
+  const qualMul = hlQual>=9.8?1.07:hlQual>=9.5?1.03:hlQual>=9.0?1.0:0.92;
 
-  return +(TICKET_REV * hMul * dMul * drawMul * slotMul * qualMul).toFixed(2);
+  return +(TICKET_REV * hMul * dMul * drawMul * slotMul * stageMul * qualMul).toFixed(2);
+}
+
+// ─── SPIN MECHANIC ───────────────────────────────────────────
+// Deals a balanced hand of HAND_SIZE acts, guaranteed spread:
+// at least 1 headliner, 2 main stage, 3 second stage, rest smaller
+// and at least 4 different genres per hand
+function dealHand(usedIds){
+  const available = ARTISTS.filter(a=>!usedIds.includes(a.id));
+  if(available.length < HAND_SIZE) return available;
+
+  const shuffle = arr => [...arr].sort(()=>Math.random()-0.5);
+
+  const headliners  = shuffle(available.filter(a=>a.tier==="Headliner"));
+  const mainStage   = shuffle(available.filter(a=>a.tier==="Main Stage"));
+  const secondStage = shuffle(available.filter(a=>a.tier==="Second Stage"));
+  const smaller     = shuffle(available.filter(a=>a.tier==="Smaller Stage"));
+
+  // Guaranteed minimum spread
+  const hand = [
+    ...headliners.slice(0,2),
+    ...mainStage.slice(0,2),
+    ...secondStage.slice(0,3),
+    ...smaller.slice(0,2),
+  ];
+
+  // Top up to HAND_SIZE with random remaining
+  const handIds = new Set(hand.map(a=>a.id));
+  const rest = shuffle(available.filter(a=>!handIds.has(a.id)));
+  while(hand.length < HAND_SIZE && rest.length > 0) hand.push(rest.pop());
+
+  return shuffle(hand);
 }
 
 // ─── TIER COLOUR ─────────────────────────────────────────────
@@ -324,48 +378,68 @@ function doFb(){window.open(`https://www.facebook.com/sharer/sharer.php?u=${enco
 // ─────────────────────────────────────────────────────────────
 // ROOT
 // ─────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
+// ROOT
+// ─────────────────────────────────────────────────────────────
 export default function FestivalBoss(){
-  const [screen, setScreen] = useState("home");
-  const [name,   setName]   = useState("");
-  const [lineup, setLineup] = useState([]);
-  const [search, setSearch] = useState("");
-  const [genre,  setGenre]  = useState("All");
-  const [tier,   setTier]   = useState("All");
-  const [sort,   setSort]   = useState("draw");
-  const [result, setResult] = useState(null);
-  const [copied, setCopied] = useState(false);
-  const [tab,    setTab]    = useState("browse");
-  const [legal,  setLegal]  = useState(null);
+  const [screen,    setScreen]    = useState("home");
+  const [name,      setName]      = useState("");
+  const [lineup,    setLineup]    = useState([]);
+  const [hand,      setHand]      = useState([]);
+  const [spinsLeft, setSpinsLeft] = useState(MAX_SPINS);
+  const [spinning,  setSpinning]  = useState(false);
+  const [result,    setResult]    = useState(null);
+  const [copied,    setCopied]    = useState(false);
+  const [legal,     setLegal]     = useState(null);
+  const [picking,   setPicking]   = useState(null);
 
-  const spent    = calcCost(lineup);
-  const rem      = +(BUDGET-spent).toFixed(2);
-  const revenue  = calcRevenue(lineup);
-  const profit   = +(revenue-spent).toFixed(2);
-  const hlCount  = lineup.filter(a=>a.tier==="Headliner").length;
-  const gCount   = new Set(lineup.map(a=>a.genre)).size;
+  const spent   = calcCost(lineup);
+  const rem     = +(BUDGET-spent).toFixed(2);
+  const revenue = calcRevenue(lineup);
+  const profit  = +(revenue-spent).toFixed(2);
+  const hlCount = lineup.filter(a=>a.tier==="Headliner").length;
+  const gCount  = new Set(lineup.map(a=>a.genre)).size;
+  const full    = lineup.length>=TOTAL_SLOTS;
 
-  const pool = ARTISTS
-    .filter(a=>!lineup.find(l=>l.id===a.id))
-    .filter(a=>genre==="All"||a.genre===genre)
-    .filter(a=>tier==="All"||a.tier===tier)
-    .filter(a=>a.name.toLowerCase().includes(search.toLowerCase())||a.genre.toLowerCase().includes(search.toLowerCase()))
-    .sort((a,b)=>sort==="draw"?b.draw-a.draw:sort==="fee"?a.fee-b.fee:a.name.localeCompare(b.name));
-
-  function add(a){
-    if(lineup.length>=TOTAL_SLOTS||rem<a.fee-0.001||lineup.find(l=>l.id===a.id))return;
-    setLineup(p=>[...p,a]);
+  function spin(){
+    if(spinsLeft<=0||full||spinning) return;
+    setSpinning(true);
+    setTimeout(()=>{
+      const usedIds = lineup.map(a=>a.id);
+      setHand(dealHand(usedIds));
+      setSpinsLeft(p=>p-1);
+      setSpinning(false);
+    }, 600);
   }
-  function remove(id){setLineup(p=>p.filter(a=>a.id!==id));}
+
+  function pickAct(artist){
+    if(full||rem<artist.fee-0.001) return;
+    setPicking(artist);
+  }
+
+  function assignStage(stage){
+    if(!picking) return;
+    setLineup(p=>[...p,{...picking,assignedStage:stage}]);
+    setHand(p=>p.filter(a=>a.id!==picking.id));
+    setPicking(null);
+  }
+
+  function removeAct(id){ setLineup(p=>p.filter(a=>a.id!==id)); }
+
   function submit(){
     const cost=calcCost(lineup),rev=calcRevenue(lineup),pnl=+(rev-cost).toFixed(2);
     setResult({revenue:rev,cost,profit:pnl,win:pnl>=TARGET_PROFIT&&hlCount>=HL_MIN});
     setScreen("result");
   }
-  function reset(){setLineup([]);setResult(null);setCopied(false);setScreen("game");setTab("browse");}
+
+  function reset(){
+    setLineup([]);setHand([]);setSpinsLeft(MAX_SPINS);
+    setResult(null);setCopied(false);setPicking(null);setScreen("game");
+  }
 
   if(legal)            return <Legal  type={legal} onBack={()=>setLegal(null)}/>;
   if(screen==="about") return <About  onBack={()=>setScreen("home")} onLegal={setLegal}/>;
-  if(screen==="home")  return <Home   name={name} setName={setName} onStart={()=>setScreen("game")} onLegal={setLegal} onAbout={()=>setScreen("about")}/>;
+  if(screen==="home")  return <Home   name={name} setName={setName} onStart={()=>{setScreen("game");}} onLegal={setLegal} onAbout={()=>setScreen("about")}/>;
   if(screen==="result") return(
     <Result
       result={result} lineup={lineup} name={name||"My Festival"}
@@ -388,12 +462,29 @@ export default function FestivalBoss(){
         ::-webkit-scrollbar{width:4px}
         ::-webkit-scrollbar-track{background:${C.surface}}
         ::-webkit-scrollbar-thumb{background:${C.textDim};border-radius:2px}
-        @media(min-width:680px){
-          .mob-tabs{display:none!important}
-          .side-panel{display:flex!important}
-          .browse-panel{display:flex!important}
-        }
+        @keyframes spinAnim{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+        @keyframes deal{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
       `}</style>
+
+      {/* STAGE PICKER MODAL */}
+      {picking&&(
+        <div style={gm.overlay}>
+          <div style={gm.modal}>
+            <div style={gm.modalName}>{picking.name}</div>
+            <div style={gm.modalSub}>Which stage do you want them on?</div>
+            <div style={gm.modalFee}>{fmt(picking.fee)} · Draw {picking.draw}</div>
+            {Object.keys(STAGE_MULS).map(stage=>(
+              <button key={stage} style={{...gm.stageBtn,borderColor:stageColor(stage)+"55"}} onClick={()=>assignStage(stage)}>
+                <span style={{color:stageColor(stage),fontWeight:700,fontSize:14}}>{stage}</span>
+                <span style={gm.stageMulTxt}>
+                  {stage===IDEAL_STAGE[picking.tier]?"✓ Perfect fit":"Risk: revenue penalty"}
+                </span>
+              </button>
+            ))}
+            <button style={gm.cancelBtn} onClick={()=>setPicking(null)}>Cancel</button>
+          </div>
+        </div>
+      )}
 
       {/* HEADER */}
       <header style={s.hdr}>
@@ -404,124 +495,135 @@ export default function FestivalBoss(){
           </div>
         </div>
         <div style={s.kpis}>
-          <Kpi l="Budget left" v={fmt(rem)}               c={rem<2?C.coral:C.yellow}/>
+          <Kpi l="Budget"   v={fmt(rem)}                           c={rem<1?C.coral:C.yellow}/>
           <div style={s.kdiv}/>
-          <Kpi l="Acts"        v={`${lineup.length} / ${TOTAL_SLOTS}`} c={lineup.length===TOTAL_SLOTS?C.yellow:C.text}/>
+          <Kpi l="Acts"     v={`${lineup.length}/${TOTAL_SLOTS}`}  c={full?C.yellow:C.text}/>
           <div style={s.kdiv}/>
-          <Kpi l="P&L"         v={fmtS(profit)}           c={profit>=TARGET_PROFIT?C.teal:C.coral}/>
+          <Kpi l="Spins"    v={spinsLeft}                          c={spinsLeft<=2?C.coral:C.teal}/>
+          <div style={s.kdiv}/>
+          <Kpi l="P&L"      v={fmtS(profit)}                      c={profit>=TARGET_PROFIT?C.teal:C.coral}/>
         </div>
       </header>
 
-      {/* PROGRESS RAILS */}
+      {/* RAILS */}
       <div style={s.railWrap}>
-        <div style={s.rail}>
-          <div style={{...s.railFill,width:`${budPct}%`,background:rem<2?C.coral:C.yellow}}/>
-        </div>
-        <div style={s.rail}>
-          <div style={{...s.railFill,width:`${slotPct}%`,background:C.teal}}/>
-        </div>
-      </div>
-
-      {/* MOBILE TABS */}
-      <div className="mob-tabs" style={s.mobTabs}>
-        <MobTab active={tab==="browse"} col={C.yellow} onClick={()=>setTab("browse")}>Browse Acts</MobTab>
-        <MobTab active={tab==="lineup"} col={C.teal}   onClick={()=>setTab("lineup")}>
-          My Lineup{lineup.length>0?` (${lineup.length})`:""}
-        </MobTab>
+        <div style={s.rail}><div style={{...s.railFill,width:`${budPct}%`,background:rem<1?C.coral:C.yellow}}/></div>
+        <div style={s.rail}><div style={{...s.railFill,width:`${slotPct}%`,background:C.teal}}/></div>
       </div>
 
       {/* BODY */}
-      <div style={s.body}>
+      <div style={gm.body}>
 
-        {/* ── LINEUP SIDEBAR ── */}
-        <aside className="side-panel" style={{...s.side, display:tab==="lineup"?"flex":"none"}}>
+        {/* LINEUP SIDEBAR */}
+        <aside style={gm.sidebar}>
           <div style={s.panelLabel}>My Lineup</div>
-          <div style={s.sideScroll}>
-            {lineup.length===0&&<p style={s.sideEmpty}>Tap acts to add them →</p>}
+          <div style={gm.lineupScroll}>
+            {lineup.length===0&&<p style={s.sideEmpty}>Spin to get your first acts</p>}
             {lineup.map(a=>(
-              <div key={a.id} style={{...s.aRow,borderLeftColor:tCol(a.tier)}}>
+              <div key={a.id} style={{...gm.lineupRow,borderLeftColor:stageColor(a.assignedStage)}}>
                 <div style={{flex:1,minWidth:0}}>
                   <div style={s.aName}>{a.name}</div>
                   <div style={s.aMeta}>
-                    <span style={{...s.pill,background:tBg(a.tier),color:tCol(a.tier)}}>{a.tier}</span>
+                    <span style={{...s.pill,background:stageBg(a.assignedStage),color:stageColor(a.assignedStage)}}>{a.assignedStage}</span>
                     <span style={s.aGenre}>{a.genre}</span>
                   </div>
                 </div>
                 <div style={s.aRight}>
-                  <span style={{...s.aFee,color:tCol(a.tier)}}>{fmt(a.fee)}</span>
-                  <button style={s.xBtn} onClick={()=>remove(a.id)}>✕</button>
+                  <span style={{...s.aFee,color:stageColor(a.assignedStage)}}>{fmt(a.fee)}</span>
+                  <button style={s.xBtn} onClick={()=>removeAct(a.id)}>✕</button>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* P&L BOX */}
-          <div style={s.pnlBox}>
-            <PnlRow l="Projected revenue" v={fmt(revenue)}       c={C.teal}/>
-            <PnlRow l="Total artist fees"  v={`−${fmt(spent)}`}  c={C.coral}/>
-            <div style={s.pnlLine}/>
+          <div style={gm.checkBox}>
+            <Chk ok={hlCount>=HL_MIN}           t={`${hlCount}/${HL_MIN} headliners`}/>
+            <Chk ok={gCount>=GENRE_MIN}          t={`${gCount}/${GENRE_MIN} genres`}/>
+            <Chk ok={full}                       t={`${lineup.length}/${TOTAL_SLOTS} slots`}/>
+            <Chk ok={profit>=TARGET_PROFIT}      t={`${fmt(TARGET_PROFIT)}+ profit needed`}/>
+            <div style={gm.pnlLine}/>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-              <span style={{color:C.textMid,fontSize:12}}>Profit / Loss</span>
-              <span style={{color:profit>=TARGET_PROFIT?C.teal:C.coral,fontWeight:900,fontSize:20}}>{fmtS(profit)}</span>
-            </div>
-            {/* CHECKLIST */}
-            <div style={s.checks}>
-              <Chk ok={hlCount>=HL_MIN}             t={`${hlCount}/${HL_MIN} headliners`}/>
-              <Chk ok={gCount>=GENRE_MIN}            t={`${gCount}/${GENRE_MIN} genres needed`}/>
-              <Chk ok={lineup.length===TOTAL_SLOTS}  t={`${lineup.length}/${TOTAL_SLOTS} slots filled`}/>
-              <Chk ok={profit>=TARGET_PROFIT}        t={`Need ${fmt(TARGET_PROFIT)}+ profit`}/>
+              <span style={{color:C.textMid,fontSize:12}}>Projected P&L</span>
+              <span style={{color:profit>=TARGET_PROFIT?C.teal:C.coral,fontWeight:900,fontSize:18}}>{fmtS(profit)}</span>
             </div>
           </div>
 
-          {lineup.length===TOTAL_SLOTS&&(
-            <button style={s.releaseBtn} onClick={submit}>Release Lineup →</button>
-          )}
-
+          {full&&<button style={s.releaseBtn} onClick={submit}>Release Lineup →</button>}
           <Ad text="🎟 Ticketmaster — sell out in seconds"/>
         </aside>
 
-        {/* ── BROWSE PANEL ── */}
-        <main className="browse-panel" style={{...s.browse,display:tab==="browse"?"flex":"none"}}>
-          <div style={s.filterBar}>
-            <input style={s.searchBox} placeholder="Search acts or genres…" value={search} onChange={e=>setSearch(e.target.value)}/>
-            <div style={s.filterRow}>
-              <select style={s.sel} value={tier}  onChange={e=>setTier(e.target.value)}>
-                {TIERS.map(t=><option key={t}>{t}</option>)}
-              </select>
-              <select style={s.sel} value={genre} onChange={e=>setGenre(e.target.value)}>
-                {GENRES.map(g=><option key={g}>{g}</option>)}
-              </select>
-              <select style={s.sel} value={sort}  onChange={e=>setSort(e.target.value)}>
-                <option value="draw">Draw ↓</option>
-                <option value="fee">Fee ↑</option>
-                <option value="name">A – Z</option>
-              </select>
+        {/* SPIN AREA */}
+        <main style={gm.main}>
+          <div style={gm.spinWrap}>
+            <button
+              style={{
+                ...gm.spinBtn,
+                opacity:(spinsLeft<=0||full)?0.3:1,
+                cursor:(spinsLeft<=0||full)?"not-allowed":"pointer",
+                animation:spinning?"spinAnim 0.6s linear infinite":"none",
+              }}
+              onClick={spin}
+              disabled={spinsLeft<=0||full||spinning}
+            >⟳</button>
+            <div style={gm.spinLabel}>
+              {full?"Lineup full — release it!"
+                :spinsLeft<=0?"No spins left"
+                :hand.length===0?"Tap to spin your first acts"
+                :`${spinsLeft} spin${spinsLeft!==1?"s":""} left`}
             </div>
+            {hand.length>0&&!full&&spinsLeft>0&&(
+              <div style={gm.spinHint}>Pick one or spin again for a new hand</div>
+            )}
           </div>
-          <div style={s.grid}>
-            {pool.map(a=>{
-              const off=rem<a.fee-0.001||lineup.length>=TOTAL_SLOTS;
-              return(
-                <div key={a.id}
-                  style={{...s.card, opacity:off?0.28:1, cursor:off?"not-allowed":"pointer",
-                    borderTop:`3px solid ${tCol(a.tier)}`}}
-                  onClick={()=>!off&&add(a)}
-                >
-                  <div style={{color:tCol(a.tier),fontSize:8,fontWeight:800,textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:5}}>{a.tier}</div>
-                  <div style={s.cName}>{a.name}</div>
-                  <div style={s.cGenre}>{a.genre}</div>
-                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginTop:6}}>
-                    <span style={{color:tCol(a.tier),fontWeight:900,fontSize:14}}>{fmt(a.fee)}</span>
-                    <span style={{color:C.textDim,fontSize:10}}>Draw {a.draw}</span>
+
+          {hand.length>0&&!full&&(
+            <div style={gm.hand}>
+              {hand.map((a,i)=>{
+                const canAfford=rem>=a.fee-0.001;
+                return(
+                  <div key={a.id}
+                    style={{
+                      ...gm.actCard,
+                      opacity:canAfford?1:0.28,
+                      cursor:canAfford?"pointer":"not-allowed",
+                      borderTop:`3px solid ${tCol(a.tier)}`,
+                      animationDelay:`${i*0.04}s`,
+                    }}
+                    onClick={()=>canAfford&&pickAct(a)}
+                  >
+                    <div style={{color:tCol(a.tier),fontSize:8,fontWeight:800,textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:4}}>{a.tier}</div>
+                    <div style={gm.actName}>{a.name}</div>
+                    <div style={gm.actGenre}>{a.genre}</div>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginTop:6}}>
+                      <span style={{color:tCol(a.tier),fontWeight:900,fontSize:13}}>{fmt(a.fee)}</span>
+                      <span style={{color:C.textDim,fontSize:10}}>Draw {a.draw}</span>
+                    </div>
+                    {!canAfford&&<div style={gm.overBudget}>Over budget</div>}
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
+
+          {hand.length===0&&!full&&(
+            <div style={gm.emptyState}>
+              <div style={{fontSize:52,marginBottom:10,opacity:0.4}}>⟳</div>
+              <div style={{color:C.textMid,fontSize:15}}>Hit spin to get your first hand of acts</div>
+              <div style={{color:C.textDim,fontSize:12,marginTop:6}}>{MAX_SPINS} spins to fill {TOTAL_SLOTS} slots — choose wisely</div>
+            </div>
+          )}
         </main>
       </div>
     </div>
   );
+}
+
+// Stage colours
+function stageColor(stage){
+  return {"Main Stage":C.yellow,"Second Stage":C.teal,"Smaller Stage":C.coral}[stage]||C.textMid;
+}
+function stageBg(stage){
+  return {"Main Stage":C.yellowDim,"Second Stage":C.tealDim,"Smaller Stage":C.coralDim}[stage]||"rgba(255,255,255,0.05)";
 }
 
 // ─── MINI COMPONENTS ─────────────────────────────────────────
@@ -596,12 +698,12 @@ function Home({name,setName,onStart,onLegal,onAbout}){
       {/* CARD */}
       <div style={h.card}>
         <div style={h.rulesGrid}>
-          <Rule icon="💷" text={`${fmt(BUDGET)} booking budget`} c={C.yellow}/>
-          <Rule icon="🎤" text={`${TOTAL_SLOTS} acts to book`}   c={C.teal}/>
-          <Rule icon="⭐" text={`${HL_MIN} headliners required`} c={C.coral}/>
-          <Rule icon="🎸" text={`${GENRE_MIN} genres for bonus`} c={C.lilac}/>
-          <Rule icon="📈" text={`${fmt(TARGET_PROFIT)}+ profit to win`} c={C.yellow}/>
-          <Rule icon="🎵" text="200+ real artists to choose from" c={C.teal}/>
+          <Rule icon="💷" text={`${fmt(BUDGET)} booking budget`}/>
+          <Rule icon="🎰" text={`${MAX_SPINS} spins to build your lineup`}/>
+          <Rule icon="🎤" text={`Pick ${TOTAL_SLOTS} acts per festival`}/>
+          <Rule icon="⭐" text={`${HL_MIN} headliners required`}/>
+          <Rule icon="🎪" text="Assign each act to the right stage"/>
+          <Rule icon="📈" text={`${fmt(TARGET_PROFIT)}+ profit to win`}/>
         </div>
 
         <label style={h.label}>Name your festival</label>
@@ -629,7 +731,7 @@ function Home({name,setName,onStart,onLegal,onAbout}){
     </div>
   );
 }
-function Rule({icon,text,c}){
+function Rule({icon,text}){
   return(
     <div style={{display:"flex",alignItems:"center",gap:9,padding:"5px 0",borderBottom:`1px solid ${C.border}`}}>
       <span style={{fontSize:15,flexShrink:0}}>{icon}</span>
@@ -1021,6 +1123,60 @@ function Cl({h,children}){
 }
 
 // ─────────────────────────────────────────────────────────────
+// GAME STYLES
+// ─────────────────────────────────────────────────────────────
+const gm={
+  body:         {display:"flex",flex:1,overflow:"hidden",height:"calc(100vh - 62px)"},
+  sidebar:      {width:280,minWidth:240,background:C.surface,borderRight:`1px solid ${C.border}`,
+                 display:"flex",flexDirection:"column",padding:"12px 0",overflow:"hidden"},
+  lineupScroll: {flex:1,overflowY:"auto",padding:"0 10px"},
+  lineupRow:    {display:"flex",alignItems:"center",gap:8,borderLeft:"3px solid",
+                 padding:"7px 8px 7px 10px",marginBottom:5,background:C.card,borderRadius:"0 6px 6px 0"},
+  checkBox:     {margin:"8px 12px 0",padding:"11px 12px",background:C.card,borderRadius:8,border:`1px solid ${C.border}`},
+  pnlLine:      {height:1,background:C.border,margin:"8px 0"},
+  main:         {flex:1,display:"flex",flexDirection:"column",overflow:"hidden",padding:"0"},
+  spinWrap:     {textAlign:"center",padding:"20px 16px 14px",borderBottom:`1px solid ${C.border}`},
+  spinBtn:      {
+    width:72,height:72,borderRadius:"50%",
+    background:`linear-gradient(135deg,${C.yellow},${C.coral})`,
+    border:"none",color:C.bg,fontSize:36,cursor:"pointer",
+    display:"inline-flex",alignItems:"center",justifyContent:"center",
+    fontWeight:900,boxShadow:`0 0 24px ${C.yellow}33`,marginBottom:10,
+    transformOrigin:"center",
+  },
+  spinLabel:    {color:C.text,fontWeight:700,fontSize:14},
+  spinHint:     {color:C.textDim,fontSize:11,marginTop:4},
+  hand:         {
+    flex:1,overflowY:"auto",padding:"12px 14px",
+    display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(140px,1fr))",
+    gap:8,alignContent:"start",
+  },
+  actCard:      {
+    background:C.card,border:`1px solid ${C.border}`,borderRadius:7,
+    padding:"10px 11px",cursor:"pointer",userSelect:"none",
+    animation:"deal 0.25s ease both",
+  },
+  actName:      {fontWeight:700,fontSize:13,color:C.text,lineHeight:1.25,marginBottom:2},
+  actGenre:     {fontSize:11,color:C.textMid},
+  overBudget:   {fontSize:9,color:C.coral,fontWeight:700,marginTop:4,textTransform:"uppercase",letterSpacing:"0.06em"},
+  emptyState:   {flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:32,textAlign:"center"},
+  // Modal
+  overlay:      {position:"fixed",inset:0,background:"rgba(0,0,0,0.75)",zIndex:999,display:"flex",alignItems:"center",justifyContent:"center",padding:16},
+  modal:        {background:C.surface,borderRadius:14,padding:"24px 20px",width:"100%",maxWidth:340,border:`1px solid ${C.borderHi}`},
+  modalName:    {fontWeight:900,fontSize:20,color:C.text,marginBottom:4},
+  modalSub:     {color:C.textMid,fontSize:13,marginBottom:4},
+  modalFee:     {color:C.textDim,fontSize:12,marginBottom:16},
+  stageBtn:     {
+    display:"flex",justifyContent:"space-between",alignItems:"center",
+    width:"100%",background:C.card,border:"1px solid",borderRadius:8,
+    padding:"12px 14px",marginBottom:8,cursor:"pointer",fontFamily:"inherit",
+  },
+  stageMulTxt:  {color:C.textDim,fontSize:11},
+  cancelBtn:    {width:"100%",background:"transparent",border:`1px solid ${C.border}`,color:C.textMid,
+                 padding:"10px 0",borderRadius:8,cursor:"pointer",fontFamily:"inherit",fontSize:13,marginTop:4},
+};
+
+// ─────────────────────────────────────────────────────────────
 // STYLES
 // ─────────────────────────────────────────────────────────────
 const s={
@@ -1331,11 +1487,12 @@ function About({onBack, onLegal}){
         </AbSection>
 
         <AbSection title="How to play">
-          Browse over 200 real artists and tap to add them to your lineup. You have{" "}
-          {TOTAL_SLOTS} slots to fill and a £{BUDGET}m budget. You need at least{" "}
-          {HL_MIN} headliners, {GENRE_MIN} different genres for the diversity bonus, and
-          every slot filled. Generate enough revenue to clear {fmt(TARGET_PROFIT)} profit
-          and you win. Fall short and the festival goes under.
+          Spin to get a random hand of {HAND_SIZE} acts from across the roster. Pick one,
+          assign them to a stage — Main Stage, Second Stage, or Smaller Stage — then spin
+          again. You have {MAX_SPINS} spins to fill {TOTAL_SLOTS} slots. You need at least{" "}
+          {HL_MIN} headliners and {GENRE_MIN} different genres. Putting the right act on
+          the right stage matters — mismatch and your revenue drops. Generate enough to
+          clear {fmt(TARGET_PROFIT)} profit and you win.
         </AbSection>
 
         <AbSection title="The artists">
