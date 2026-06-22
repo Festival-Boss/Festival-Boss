@@ -1,0 +1,1457 @@
+import { useState } from "react";
+
+// ─────────────────────────────────────────────────────────────
+// FESTIVAL BOSS — bold, high-contrast, festival-poster energy
+// Palette: deep midnight blue canvas, electric yellow,
+// hot coral/orange, bright white. Like a Rick Griffin poster
+// or a modern Primavera lineup bill. Loud. Confident. Festive.
+// ─────────────────────────────────────────────────────────────
+
+const C = {
+  bg:       "#0a0e1a",   // deep midnight blue
+  surface:  "#111827",   // dark navy
+  card:     "#151d2e",   // card navy
+  cardHi:   "#1a2338",   // hover state
+
+  text:     "#f8f4e8",   // warm white
+  textMid:  "#8892a4",   // muted blue-grey
+  textDim:  "#3d4d63",   // very faded
+
+  yellow:   "#f5e642",   // electric festival yellow
+  yellowDim:"rgba(245,230,66,0.12)",
+  coral:    "#ff5c3a",   // hot coral/orange
+  coralDim: "rgba(255,92,58,0.12)",
+  teal:     "#00c9a7",   // bright teal
+  tealDim:  "rgba(0,201,167,0.11)",
+  lilac:    "#c084fc",   // warm lilac
+
+  green:    "#22c55e",   // profit green
+  greenDim: "rgba(34,197,94,0.12)",
+  red:      "#ff5c3a",   // same coral for loss
+  redDim:   "rgba(255,92,58,0.12)",
+
+  border:   "rgba(248,244,232,0.08)",
+  borderHi: "rgba(248,244,232,0.18)",
+
+  // Poster specific
+  posterBg:    "#0a0e1a",
+  posterYellow:"#f5e642",
+  posterCoral: "#ff5c3a",
+  posterTeal:  "#00c9a7",
+  posterWhite: "#f8f4e8",
+};
+
+// ─── ARTIST DB ───────────────────────────────────────────────
+const ALL_ARTISTS = [
+  // HEADLINERS
+  {id:1,  name:"Radiohead",            fee:2.2,  draw:9.8, genre:"Alt Rock",        tier:"Headliner"},
+  {id:2,  name:"Beyoncé",              fee:4.5,  draw:10.0,genre:"Pop / R&B",       tier:"Headliner"},
+  {id:3,  name:"The Rolling Stones",   fee:5.5,  draw:9.5, genre:"Rock",            tier:"Headliner"},
+  {id:4,  name:"Coldplay",             fee:3.5,  draw:9.7, genre:"Pop Rock",        tier:"Headliner"},
+  {id:5,  name:"Adele",                fee:4.0,  draw:9.9, genre:"Pop",             tier:"Headliner"},
+  {id:6,  name:"Taylor Swift",         fee:5.0,  draw:10.0,genre:"Pop",             tier:"Headliner"},
+  {id:7,  name:"Foo Fighters",         fee:2.8,  draw:9.3, genre:"Rock",            tier:"Headliner"},
+  {id:8,  name:"Arctic Monkeys",       fee:2.6,  draw:9.4, genre:"Indie Rock",      tier:"Headliner"},
+  {id:9,  name:"Jay-Z",                fee:3.2,  draw:9.1, genre:"Hip-Hop",         tier:"Headliner"},
+  {id:10, name:"Kendrick Lamar",       fee:3.8,  draw:9.6, genre:"Hip-Hop",         tier:"Headliner"},
+  {id:11, name:"Blur",                 fee:2.4,  draw:9.0, genre:"Britpop",         tier:"Headliner"},
+  {id:12, name:"Muse",                 fee:2.5,  draw:9.2, genre:"Alt Rock",        tier:"Headliner"},
+  {id:13, name:"David Bowie",          fee:3.0,  draw:9.9, genre:"Rock",            tier:"Headliner"},
+  {id:14, name:"Eminem",               fee:3.6,  draw:9.5, genre:"Hip-Hop",         tier:"Headliner"},
+  {id:15, name:"Bruce Springsteen",    fee:3.2,  draw:9.3, genre:"Rock",            tier:"Headliner"},
+  {id:16, name:"The Who",              fee:2.8,  draw:9.0, genre:"Rock",            tier:"Headliner"},
+  {id:17, name:"Paul McCartney",       fee:3.5,  draw:9.8, genre:"Rock",            tier:"Headliner"},
+  {id:18, name:"Elton John",           fee:3.8,  draw:9.7, genre:"Pop / Rock",      tier:"Headliner"},
+  {id:19, name:"Guns N' Roses",        fee:3.4,  draw:9.2, genre:"Rock",            tier:"Headliner"},
+  {id:20, name:"The Prodigy",          fee:1.8,  draw:8.8, genre:"Electronic",      tier:"Headliner"},
+  {id:21, name:"Chemical Brothers",   fee:1.6,  draw:8.5, genre:"Electronic",      tier:"Headliner"},
+  {id:22, name:"Dua Lipa",             fee:3.0,  draw:9.4, genre:"Pop",             tier:"Headliner"},
+  {id:23, name:"Ed Sheeran",           fee:4.2,  draw:9.8, genre:"Pop",             tier:"Headliner"},
+  {id:24, name:"Gorillaz",             fee:2.2,  draw:9.0, genre:"Alternative",     tier:"Headliner"},
+  {id:25, name:"Stormzy",              fee:2.0,  draw:8.9, genre:"Grime",           tier:"Headliner"},
+  {id:26, name:"Oasis",                fee:3.8,  draw:9.9, genre:"Britpop",         tier:"Headliner"},
+  {id:27, name:"Pulp",                 fee:1.8,  draw:8.7, genre:"Britpop",         tier:"Headliner"},
+  {id:28, name:"Neil Young",           fee:2.5,  draw:8.8, genre:"Rock",            tier:"Headliner"},
+  {id:29, name:"Arcade Fire",          fee:1.8,  draw:8.6, genre:"Indie",           tier:"Headliner"},
+  {id:30, name:"Fleetwood Mac",        fee:3.0,  draw:9.2, genre:"Rock",            tier:"Headliner"},
+  {id:176,name:"Green Day",            fee:2.2,  draw:9.0, genre:"Punk Rock",       tier:"Headliner"},
+  {id:189,name:"Blur (reunion)",       fee:2.6,  draw:9.3, genre:"Britpop",         tier:"Headliner"},
+  // MAIN STAGE
+  {id:31, name:"Florence + the Machine",fee:1.4, draw:8.3, genre:"Indie",           tier:"Main Stage"},
+  {id:32, name:"Jack White",           fee:1.2,  draw:8.0, genre:"Rock",            tier:"Main Stage"},
+  {id:33, name:"The National",         fee:0.9,  draw:7.8, genre:"Indie Rock",      tier:"Main Stage"},
+  {id:34, name:"Haim",                 fee:0.8,  draw:7.5, genre:"Pop Rock",        tier:"Main Stage"},
+  {id:35, name:"Billie Eilish",        fee:2.4,  draw:9.2, genre:"Pop",             tier:"Main Stage"},
+  {id:36, name:"Lizzo",                fee:1.4,  draw:8.4, genre:"Pop / R&B",       tier:"Main Stage"},
+  {id:37, name:"Hozier",               fee:1.0,  draw:8.1, genre:"Folk Rock",       tier:"Main Stage"},
+  {id:38, name:"Alt-J",                fee:0.9,  draw:7.9, genre:"Indie",           tier:"Main Stage"},
+  {id:39, name:"Wolf Alice",           fee:0.7,  draw:7.6, genre:"Alt Rock",        tier:"Main Stage"},
+  {id:40, name:"Idles",                fee:0.7,  draw:7.7, genre:"Post-Punk",       tier:"Main Stage"},
+  {id:41, name:"LCD Soundsystem",      fee:1.2,  draw:8.0, genre:"Electronic",      tier:"Main Stage"},
+  {id:42, name:"Disclosure",           fee:0.9,  draw:7.8, genre:"Electronic",      tier:"Main Stage"},
+  {id:43, name:"Massive Attack",       fee:1.1,  draw:8.2, genre:"Trip-Hop",        tier:"Main Stage"},
+  {id:44, name:"Portishead",           fee:1.0,  draw:8.0, genre:"Trip-Hop",        tier:"Main Stage"},
+  {id:45, name:"The Killers",          fee:2.0,  draw:8.9, genre:"Indie Rock",      tier:"Main Stage"},
+  {id:46, name:"Queens of the Stone Age",fee:1.5,draw:8.5, genre:"Rock",            tier:"Main Stage"},
+  {id:47, name:"Pearl Jam",            fee:2.4,  draw:9.0, genre:"Grunge",          tier:"Main Stage"},
+  {id:48, name:"Nine Inch Nails",      fee:1.8,  draw:8.6, genre:"Industrial",      tier:"Main Stage"},
+  {id:49, name:"Frank Ocean",          fee:2.8,  draw:9.0, genre:"R&B",             tier:"Main Stage"},
+  {id:50, name:"SZA",                  fee:1.6,  draw:8.7, genre:"R&B",             tier:"Main Stage"},
+  {id:51, name:"Limp Bizkit",          fee:1.2,  draw:7.8, genre:"Nu-Metal",        tier:"Main Stage"},
+  {id:52, name:"System of a Down",     fee:2.0,  draw:8.8, genre:"Metal",           tier:"Main Stage"},
+  {id:53, name:"Metallica",            fee:3.0,  draw:9.3, genre:"Metal",           tier:"Main Stage"},
+  {id:54, name:"Slipknot",             fee:1.6,  draw:8.4, genre:"Metal",           tier:"Main Stage"},
+  {id:55, name:"Dizzee Rascal",        fee:0.7,  draw:7.5, genre:"Grime",           tier:"Main Stage"},
+  {id:56, name:"Skepta",               fee:0.8,  draw:7.7, genre:"Grime",           tier:"Main Stage"},
+  {id:57, name:"Dave",                 fee:0.9,  draw:7.9, genre:"Hip-Hop",         tier:"Main Stage"},
+  {id:58, name:"Little Simz",          fee:0.7,  draw:7.6, genre:"Hip-Hop",         tier:"Main Stage"},
+  {id:59, name:"Rosalía",              fee:1.2,  draw:8.1, genre:"Latin / Alt",     tier:"Main Stage"},
+  {id:60, name:"Lana Del Rey",         fee:1.8,  draw:8.7, genre:"Indie Pop",       tier:"Main Stage"},
+  {id:61, name:"Calvin Harris",        fee:1.8,  draw:8.8, genre:"EDM",             tier:"Main Stage"},
+  {id:62, name:"Aphex Twin",           fee:1.2,  draw:8.2, genre:"Electronic",      tier:"Main Stage"},
+  {id:63, name:"Daft Punk",            fee:3.5,  draw:9.5, genre:"Electronic",      tier:"Main Stage"},
+  {id:64, name:"Underworld",           fee:0.9,  draw:7.9, genre:"Electronic",      tier:"Main Stage"},
+  {id:65, name:"The Cure",             fee:1.6,  draw:8.5, genre:"Post-Punk",       tier:"Main Stage"},
+  {id:66, name:"Depeche Mode",         fee:2.0,  draw:8.8, genre:"Synth-Pop",       tier:"Main Stage"},
+  {id:67, name:"New Order",            fee:1.4,  draw:8.3, genre:"Post-Punk",       tier:"Main Stage"},
+  {id:68, name:"Pet Shop Boys",        fee:1.2,  draw:8.1, genre:"Synth-Pop",       tier:"Main Stage"},
+  {id:69, name:"Suede",                fee:0.8,  draw:7.7, genre:"Britpop",         tier:"Main Stage"},
+  {id:70, name:"Primal Scream",        fee:0.9,  draw:7.8, genre:"Rock",            tier:"Main Stage"},
+  {id:71, name:"The Libertines",       fee:1.0,  draw:7.9, genre:"Indie Rock",      tier:"Main Stage"},
+  {id:72, name:"Amy Winehouse",        fee:1.4,  draw:8.5, genre:"Soul",            tier:"Main Stage"},
+  {id:73, name:"Noel Gallagher's HFB", fee:1.4,  draw:8.5, genre:"Rock",            tier:"Main Stage"},
+  {id:74, name:"Liam Gallagher",       fee:1.6,  draw:8.7, genre:"Rock",            tier:"Main Stage"},
+  {id:75, name:"Sam Fender",           fee:0.9,  draw:8.0, genre:"Indie Rock",      tier:"Main Stage"},
+  {id:76, name:"Wet Leg",              fee:0.6,  draw:7.5, genre:"Indie Rock",      tier:"Main Stage"},
+  {id:77, name:"Fontaines D.C.",       fee:0.7,  draw:7.7, genre:"Post-Punk",       tier:"Main Stage"},
+  {id:78, name:"Jungle",               fee:0.7,  draw:7.6, genre:"Funk / Soul",     tier:"Main Stage"},
+  {id:79, name:"Glass Animals",        fee:0.8,  draw:7.8, genre:"Indie",           tier:"Main Stage"},
+  {id:80, name:"Róisín Murphy",        fee:0.7,  draw:7.5, genre:"Electronic",      tier:"Main Stage"},
+  {id:81, name:"Justice",              fee:0.9,  draw:7.9, genre:"Electronic",      tier:"Main Stage"},
+  {id:82, name:"Bonobo",               fee:0.6,  draw:7.3, genre:"Electronic",      tier:"Main Stage"},
+  {id:83, name:"Four Tet",             fee:0.7,  draw:7.5, genre:"Electronic",      tier:"Main Stage"},
+  {id:84, name:"Jamie xx",             fee:0.7,  draw:7.4, genre:"Electronic",      tier:"Main Stage"},
+  {id:85, name:"Robyn",                fee:1.0,  draw:8.0, genre:"Pop / Electronic",tier:"Main Stage"},
+  {id:86, name:"Kylie Minogue",        fee:1.6,  draw:8.6, genre:"Pop",             tier:"Main Stage"},
+  {id:87, name:"Sam Smith",            fee:1.2,  draw:8.2, genre:"Pop / Soul",      tier:"Main Stage"},
+  {id:88, name:"Years & Years",        fee:0.7,  draw:7.4, genre:"Pop / Electronic",tier:"Main Stage"},
+  {id:89, name:"Elbow",                fee:1.0,  draw:7.9, genre:"Indie Rock",      tier:"Main Stage"},
+  {id:90, name:"James",                fee:0.7,  draw:7.3, genre:"Indie Rock",      tier:"Main Stage"},
+  {id:177,name:"Blink-182",            fee:1.8,  draw:8.7, genre:"Pop Punk",        tier:"Main Stage"},
+  {id:178,name:"My Chemical Romance",  fee:2.0,  draw:8.9, genre:"Emo Rock",        tier:"Main Stage"},
+  {id:179,name:"Fall Out Boy",         fee:1.2,  draw:8.2, genre:"Pop Punk",        tier:"Main Stage"},
+  {id:180,name:"Panic! At the Disco",  fee:1.4,  draw:8.4, genre:"Pop Rock",        tier:"Main Stage"},
+  {id:181,name:"twenty one pilots",    fee:1.8,  draw:8.7, genre:"Indie Pop",       tier:"Main Stage"},
+  {id:182,name:"Paramore",             fee:1.6,  draw:8.6, genre:"Pop Punk",        tier:"Main Stage"},
+  {id:183,name:"Halsey",               fee:1.0,  draw:8.0, genre:"Alt Pop",         tier:"Main Stage"},
+  {id:184,name:"Lorde",                fee:1.4,  draw:8.4, genre:"Pop",             tier:"Main Stage"},
+  {id:185,name:"Charli XCX",           fee:1.4,  draw:8.5, genre:"Pop",             tier:"Main Stage"},
+  {id:186,name:"Olivia Rodrigo",       fee:2.2,  draw:9.1, genre:"Pop",             tier:"Main Stage"},
+  {id:195,name:"The Streets",          fee:0.8,  draw:7.8, genre:"Garage / Rap",    tier:"Main Stage"},
+  {id:197,name:"Kasabian",             fee:1.2,  draw:8.2, genre:"Indie Rock",      tier:"Main Stage"},
+  {id:198,name:"Kaiser Chiefs",        fee:0.9,  draw:7.9, genre:"Indie Rock",      tier:"Main Stage"},
+  {id:200,name:"Bloc Party",           fee:0.8,  draw:7.7, genre:"Indie Rock",      tier:"Main Stage"},
+  {id:203,name:"Biffy Clyro",          fee:0.9,  draw:7.9, genre:"Alt Rock",        tier:"Main Stage"},
+  {id:205,name:"Mumford & Sons",       fee:1.4,  draw:8.4, genre:"Folk Rock",       tier:"Main Stage"},
+  {id:215,name:"Grace Jones",          fee:0.8,  draw:7.7, genre:"Funk / Electronic",tier:"Main Stage"},
+  {id:216,name:"Kraftwerk",            fee:1.2,  draw:8.1, genre:"Electronic",      tier:"Main Stage"},
+  // SECOND STAGE
+  {id:91, name:"The xx",               fee:0.9,  draw:7.8, genre:"Indie"},
+  {id:92, name:"Daughter",             fee:0.4,  draw:6.9, genre:"Indie Folk"},
+  {id:93, name:"Alvvays",              fee:0.35, draw:6.7, genre:"Indie Pop"},
+  {id:94, name:"Shame",                fee:0.3,  draw:6.8, genre:"Post-Punk"},
+  {id:95, name:"black midi",           fee:0.35, draw:6.9, genre:"Art Rock"},
+  {id:96, name:"Squid",                fee:0.3,  draw:6.7, genre:"Post-Punk"},
+  {id:97, name:"The Murder Capital",   fee:0.28, draw:6.5, genre:"Post-Punk"},
+  {id:98, name:"Yard Act",             fee:0.25, draw:6.6, genre:"Post-Punk"},
+  {id:99, name:"Dry Cleaning",         fee:0.28, draw:6.5, genre:"Post-Punk"},
+  {id:100,name:"Phoebe Bridgers",      fee:0.8,  draw:7.7, genre:"Indie Folk"},
+  {id:101,name:"beabadoobee",          fee:0.4,  draw:7.0, genre:"Indie Pop"},
+  {id:102,name:"Grimes",               fee:0.7,  draw:7.3, genre:"Electronic"},
+  {id:103,name:"Caroline Polachek",    fee:0.5,  draw:7.1, genre:"Art Pop"},
+  {id:104,name:"Arca",                 fee:0.45, draw:6.8, genre:"Electronic"},
+  {id:105,name:"slowthai",             fee:0.4,  draw:7.0, genre:"Hip-Hop"},
+  {id:106,name:"Loyle Carner",         fee:0.45, draw:7.1, genre:"Hip-Hop"},
+  {id:107,name:"Jorja Smith",          fee:0.7,  draw:7.5, genre:"R&B / Soul"},
+  {id:108,name:"Mahalia",              fee:0.35, draw:6.9, genre:"R&B / Soul"},
+  {id:109,name:"AJ Tracey",            fee:0.5,  draw:7.2, genre:"Grime / Rap"},
+  {id:110,name:"Joy Crookes",          fee:0.35, draw:6.8, genre:"Soul / Pop"},
+  {id:111,name:"Self Esteem",          fee:0.4,  draw:7.0, genre:"Alt Pop"},
+  {id:112,name:"Pa Salieu",            fee:0.3,  draw:6.6, genre:"Afro-Swing"},
+  {id:113,name:"Ghetts",               fee:0.35, draw:6.7, genre:"Grime"},
+  {id:114,name:"Kano",                 fee:0.4,  draw:7.0, genre:"Grime"},
+  {id:115,name:"Wiley",                fee:0.45, draw:7.1, genre:"Grime"},
+  {id:116,name:"M.I.A.",               fee:0.7,  draw:7.6, genre:"Electronic / Rap"},
+  {id:117,name:"Diplo",                fee:0.6,  draw:7.4, genre:"Electronic"},
+  {id:118,name:"Hot Chip",             fee:0.6,  draw:7.4, genre:"Electronic"},
+  {id:119,name:"Friendly Fires",       fee:0.4,  draw:7.0, genre:"Indie / Dance"},
+  {id:120,name:"Django Django",        fee:0.35, draw:6.8, genre:"Art Rock"},
+  {id:121,name:"Two Door Cinema Club", fee:0.55, draw:7.3, genre:"Indie Rock"},
+  {id:122,name:"Everything Everything",fee:0.4,  draw:7.0, genre:"Art Rock"},
+  {id:123,name:"Foals",                fee:0.9,  draw:7.9, genre:"Indie Rock"},
+  {id:124,name:"The Wombats",          fee:0.5,  draw:7.2, genre:"Indie Rock"},
+  {id:125,name:"Bombay Bicycle Club",  fee:0.55, draw:7.3, genre:"Indie Rock"},
+  {id:126,name:"Bastille",             fee:0.7,  draw:7.5, genre:"Indie Pop"},
+  {id:127,name:"Nothing But Thieves",  fee:0.6,  draw:7.4, genre:"Alt Rock"},
+  {id:128,name:"Pale Waves",           fee:0.35, draw:6.9, genre:"Indie Pop"},
+  {id:129,name:"YUNGBLUD",             fee:0.5,  draw:7.2, genre:"Punk Pop"},
+  {id:131,name:"Frank Turner",         fee:0.5,  draw:7.3, genre:"Folk Punk"},
+  {id:132,name:"Enter Shikari",        fee:0.45, draw:7.1, genre:"Post-Hardcore"},
+  {id:134,name:"Bring Me the Horizon", fee:1.1,  draw:8.1, genre:"Metal / Pop"},
+  {id:135,name:"Architects",           fee:0.55, draw:7.3, genre:"Metalcore"},
+  {id:136,name:"Amyl and the Sniffers",fee:0.3,  draw:6.8, genre:"Punk"},
+  {id:137,name:"Bob Vylan",            fee:0.25, draw:6.6, genre:"Punk / Grime"},
+  {id:138,name:"Rina Sawayama",        fee:0.45, draw:7.0, genre:"Pop / Rock"},
+  {id:140,name:"Bicep",                fee:0.7,  draw:7.6, genre:"Electronic"},
+  {id:141,name:"Fred again..",         fee:0.9,  draw:8.0, genre:"Electronic"},
+  {id:144,name:"Peggy Gou",            fee:0.6,  draw:7.4, genre:"Electronic"},
+  {id:145,name:"Honey Dijon",          fee:0.4,  draw:7.0, genre:"Electronic / DJ"},
+  {id:148,name:"Skrillex",             fee:1.0,  draw:7.9, genre:"EDM"},
+  {id:149,name:"Chase & Status",       fee:0.7,  draw:7.5, genre:"Drum & Bass"},
+  {id:150,name:"Rudimental",           fee:0.6,  draw:7.3, genre:"Drum & Bass"},
+  {id:172,name:"Khruangbin",           fee:0.7,  draw:7.5, genre:"Global / Psych"},
+  {id:192,name:"Caribou",              fee:0.5,  draw:7.1, genre:"Electronic"},
+  {id:193,name:"Jon Hopkins",          fee:0.45, draw:7.0, genre:"Electronic"},
+  {id:196,name:"Plan B",               fee:0.5,  draw:7.2, genre:"Rap / Soul"},
+  {id:199,name:"Razorlight",           fee:0.5,  draw:7.1, genre:"Indie Rock"},
+  {id:201,name:"Placebo",              fee:0.6,  draw:7.3, genre:"Alt Rock"},
+  {id:206,name:"The Lumineers",        fee:0.7,  draw:7.5, genre:"Folk Rock"},
+  {id:207,name:"Laura Marling",        fee:0.5,  draw:7.2, genre:"Folk"},
+  {id:208,name:"Sharon Van Etten",     fee:0.4,  draw:7.0, genre:"Indie Folk"},
+  {id:209,name:"Big Thief",            fee:0.5,  draw:7.2, genre:"Indie Folk"},
+  {id:210,name:"Angel Olsen",          fee:0.4,  draw:7.0, genre:"Indie Folk"},
+  {id:211,name:"Weyes Blood",          fee:0.4,  draw:7.0, genre:"Art Pop / Folk"},
+  {id:212,name:"Sufjan Stevens",       fee:0.7,  draw:7.4, genre:"Folk / Classical"},
+  {id:217,name:"Metronomy",            fee:0.45, draw:7.0, genre:"Indie / Electronic"},
+  // SMALLER STAGE — all default to "Smaller Stage" tier
+  {id:151,name:"Inhaler",              fee:0.35, draw:7.0, genre:"Indie Rock"},
+  {id:153,name:"Manic Street Preachers",fee:0.6, draw:7.3, genre:"Alt Rock"},
+  {id:154,name:"Interpol",             fee:0.7,  draw:7.4, genre:"Post-Punk"},
+  {id:155,name:"Editors",              fee:0.5,  draw:7.1, genre:"Post-Punk"},
+  {id:156,name:"White Lies",           fee:0.35, draw:6.8, genre:"Post-Punk"},
+  {id:158,name:"Let's Eat Grandma",    fee:0.2,  draw:6.4, genre:"Art Pop"},
+  {id:159,name:"MUNA",                 fee:0.28, draw:6.7, genre:"Indie Pop"},
+  {id:160,name:"Soccer Mommy",         fee:0.25, draw:6.5, genre:"Indie Rock"},
+  {id:161,name:"Snail Mail",           fee:0.25, draw:6.4, genre:"Indie Rock"},
+  {id:162,name:"Lucy Dacus",           fee:0.25, draw:6.5, genre:"Indie Rock"},
+  {id:163,name:"Cassandra Jenkins",    fee:0.18, draw:6.2, genre:"Folk"},
+  {id:164,name:"Wednesday",            fee:0.18, draw:6.3, genre:"Indie Rock"},
+  {id:165,name:"The Smile",            fee:0.6,  draw:7.3, genre:"Alternative"},
+  {id:166,name:"Mogwai",               fee:0.4,  draw:7.0, genre:"Post-Rock"},
+  {id:167,name:"65daysofstatic",       fee:0.2,  draw:6.3, genre:"Post-Rock"},
+  {id:168,name:"Porridge Radio",       fee:0.18, draw:6.3, genre:"Indie Rock"},
+  {id:169,name:"Indigo De Souza",      fee:0.18, draw:6.2, genre:"Indie Folk"},
+  {id:170,name:"Arlo Parks",           fee:0.4,  draw:7.0, genre:"Indie Pop"},
+  {id:173,name:"Black Country New Road",fee:0.4, draw:7.0, genre:"Art Rock"},
+  {id:174,name:"Tirzah",               fee:0.2,  draw:6.2, genre:"Electronic"},
+  {id:175,name:"Florist",              fee:0.15, draw:6.0, genre:"Folk"},
+  {id:202,name:"Feeder",               fee:0.35, draw:6.8, genre:"Alt Rock"},
+  {id:218,name:"Wild Beasts",          fee:0.3,  draw:6.7, genre:"Indie Rock"},
+  {id:220,name:"Honeyblood",           fee:0.15, draw:6.0, genre:"Indie Rock"},
+].map(a=>({...a, tier: a.tier || (a.fee>=0.9?"Second Stage":"Smaller Stage")}));
+
+const ARTISTS = [...new Map(ALL_ARTISTS.map(a=>[a.id,a])).values()];
+
+// ─── GAME CONFIG — genuinely punishing ───────────────────────
+// Budget: £18m. Target: £4.5m profit.
+// Perfect ceiling revenue: ~£24m.
+// Max possible profit: ~£6m — but only with flawless execution.
+// Average play likely loses £1-2m on first attempt.
+const BUDGET        = 18;
+const TICKET_REV    = 24;
+const TARGET_PROFIT = 4.5;
+const TOTAL_SLOTS   = 20;
+const HL_MIN        = 3;
+const GENRE_MIN     = 8;
+
+function calcCost(lu){ return +lu.reduce((s,a)=>s+a.fee,0).toFixed(2); }
+function calcRevenue(lu){
+  if(!lu.length) return 0;
+  const avg = lu.reduce((s,a)=>s+a.draw,0)/lu.length;
+  const hl  = lu.filter(a=>a.tier==="Headliner").length;
+  const gs  = new Set(lu.map(a=>a.genre)).size;
+
+  // Headliner cliff — 0 or 1 headliners is catastrophic
+  const hMul = hl>=HL_MIN?1.08:hl===2?0.75:hl===1?0.55:0.38;
+
+  // Genre diversity — 8 genres needed for full bonus
+  const dMul = gs>=GENRE_MIN?1.06:gs>=6?0.95:gs>=4?0.87:0.76;
+
+  // Draw quality — average below 8.0 tanks the multiplier hard
+  const drawMul = avg>=8.8?1.08:avg>=8.5?1.03:avg>=8.0?0.97:avg>=7.5?0.88:0.76;
+
+  // Slot penalty — every unfilled slot costs proportionally
+  const slotMul = 0.2 + 0.8*(lu.length/TOTAL_SLOTS);
+
+  // Headliner quality bonus — BIG headliners (draw >9.5) add extra pull
+  const hlActs = lu.filter(a=>a.tier==="Headliner");
+  const hlQual = hlActs.length>0
+    ? hlActs.reduce((s,a)=>s+a.draw,0)/hlActs.length
+    : 7;
+  const qualMul = hlQual>=9.8?1.06:hlQual>=9.5?1.03:hlQual>=9.0?1.0:0.94;
+
+  return +(TICKET_REV * hMul * dMul * drawMul * slotMul * qualMul).toFixed(2);
+}
+
+// ─── TIER COLOUR ─────────────────────────────────────────────
+function tCol(t){
+  return {Headliner:C.yellow,"Main Stage":C.teal,"Second Stage":C.coral,"Smaller Stage":C.lilac}[t]||C.textMid;
+}
+function tBg(t){
+  return {Headliner:C.yellowDim,"Main Stage":C.tealDim,"Second Stage":C.coralDim,"Smaller Stage":"rgba(192,132,252,0.1)"}[t]||"rgba(255,255,255,0.05)";
+}
+
+// ─── FORMATTERS ──────────────────────────────────────────────
+function fmt(v){
+  const a=Math.abs(v);
+  if(a===0) return "£0m";
+  return `£${a>=1?a.toFixed(1):a.toFixed(2).replace(/\.?0+$/,"")}m`;
+}
+function fmtS(v){return `${v>=0?"+":"−"}${fmt(v)}`;}
+
+const GENRES=["All",...Array.from(new Set(ARTISTS.map(a=>a.genre))).sort()];
+const TIERS =["All","Headliner","Main Stage","Second Stage","Smaller Stage"];
+
+// ─── SHARE ───────────────────────────────────────────────────
+function shareText(n,res,lu){
+  const hls=lu.filter(a=>a.tier==="Headliner").map(a=>a.name).join(", ")||"none";
+  return `🎪 ${n} — Festival Boss\nHeadliners: ${hls}\nRevenue: ${fmt(res.revenue)}  Costs: ${fmt(res.cost)}\n${res.win?"✅":"❌"} ${fmtS(res.profit)}\nThink you can do better? → festivalbossgame.com`;
+}
+async function doCopy(t){try{await navigator.clipboard.writeText(t);return true;}catch{return false;}}
+function doTweet(t){window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(t)}`,"_blank");}
+function doFb(){window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent("https://festivalbossgame.com")}`,"_blank");}
+
+// ─────────────────────────────────────────────────────────────
+// ROOT
+// ─────────────────────────────────────────────────────────────
+export default function FestivalBoss(){
+  const [screen, setScreen] = useState("home");
+  const [name,   setName]   = useState("");
+  const [lineup, setLineup] = useState([]);
+  const [search, setSearch] = useState("");
+  const [genre,  setGenre]  = useState("All");
+  const [tier,   setTier]   = useState("All");
+  const [sort,   setSort]   = useState("draw");
+  const [result, setResult] = useState(null);
+  const [copied, setCopied] = useState(false);
+  const [tab,    setTab]    = useState("browse");
+  const [legal,  setLegal]  = useState(null);
+
+  const spent    = calcCost(lineup);
+  const rem      = +(BUDGET-spent).toFixed(2);
+  const revenue  = calcRevenue(lineup);
+  const profit   = +(revenue-spent).toFixed(2);
+  const hlCount  = lineup.filter(a=>a.tier==="Headliner").length;
+  const gCount   = new Set(lineup.map(a=>a.genre)).size;
+
+  const pool = ARTISTS
+    .filter(a=>!lineup.find(l=>l.id===a.id))
+    .filter(a=>genre==="All"||a.genre===genre)
+    .filter(a=>tier==="All"||a.tier===tier)
+    .filter(a=>a.name.toLowerCase().includes(search.toLowerCase())||a.genre.toLowerCase().includes(search.toLowerCase()))
+    .sort((a,b)=>sort==="draw"?b.draw-a.draw:sort==="fee"?a.fee-b.fee:a.name.localeCompare(b.name));
+
+  function add(a){
+    if(lineup.length>=TOTAL_SLOTS||rem<a.fee-0.001||lineup.find(l=>l.id===a.id))return;
+    setLineup(p=>[...p,a]);
+  }
+  function remove(id){setLineup(p=>p.filter(a=>a.id!==id));}
+  function submit(){
+    const cost=calcCost(lineup),rev=calcRevenue(lineup),pnl=+(rev-cost).toFixed(2);
+    setResult({revenue:rev,cost,profit:pnl,win:pnl>=TARGET_PROFIT&&hlCount>=HL_MIN});
+    setScreen("result");
+  }
+  function reset(){setLineup([]);setResult(null);setCopied(false);setScreen("game");setTab("browse");}
+
+  if(legal)            return <Legal  type={legal} onBack={()=>setLegal(null)}/>;
+  if(screen==="about") return <About  onBack={()=>setScreen("home")} onLegal={setLegal}/>;
+  if(screen==="home")  return <Home   name={name} setName={setName} onStart={()=>setScreen("game")} onLegal={setLegal} onAbout={()=>setScreen("about")}/>;
+  if(screen==="result") return(
+    <Result
+      result={result} lineup={lineup} name={name||"My Festival"}
+      onReset={reset} onHome={()=>setScreen("home")}
+      copied={copied}
+      onCopy={async()=>{const ok=await doCopy(shareText(name||"My Festival",result,lineup));setCopied(ok);}}
+      onTweet={()=>doTweet(shareText(name||"My Festival",result,lineup))}
+      onFb={doFb}
+      onLegal={setLegal} onAbout={()=>setScreen("about")}
+    />
+  );
+
+  const budPct  = Math.min((spent/BUDGET)*100,100);
+  const slotPct = (lineup.length/TOTAL_SLOTS)*100;
+
+  return(
+    <div style={s.app}>
+      <style>{`
+        *{box-sizing:border-box}
+        ::-webkit-scrollbar{width:4px}
+        ::-webkit-scrollbar-track{background:${C.surface}}
+        ::-webkit-scrollbar-thumb{background:${C.textDim};border-radius:2px}
+        @media(min-width:680px){
+          .mob-tabs{display:none!important}
+          .side-panel{display:flex!important}
+          .browse-panel{display:flex!important}
+        }
+      `}</style>
+
+      {/* HEADER */}
+      <header style={s.hdr}>
+        <div style={s.brand}>
+          <div style={s.logoBox}>
+            <span style={s.logoTop}>FESTIVAL</span>
+            <span style={s.logoBoss}>BOSS</span>
+          </div>
+        </div>
+        <div style={s.kpis}>
+          <Kpi l="Budget left" v={fmt(rem)}               c={rem<2?C.coral:C.yellow}/>
+          <div style={s.kdiv}/>
+          <Kpi l="Acts"        v={`${lineup.length} / ${TOTAL_SLOTS}`} c={lineup.length===TOTAL_SLOTS?C.yellow:C.text}/>
+          <div style={s.kdiv}/>
+          <Kpi l="P&L"         v={fmtS(profit)}           c={profit>=TARGET_PROFIT?C.teal:C.coral}/>
+        </div>
+      </header>
+
+      {/* PROGRESS RAILS */}
+      <div style={s.railWrap}>
+        <div style={s.rail}>
+          <div style={{...s.railFill,width:`${budPct}%`,background:rem<2?C.coral:C.yellow}}/>
+        </div>
+        <div style={s.rail}>
+          <div style={{...s.railFill,width:`${slotPct}%`,background:C.teal}}/>
+        </div>
+      </div>
+
+      {/* MOBILE TABS */}
+      <div className="mob-tabs" style={s.mobTabs}>
+        <MobTab active={tab==="browse"} col={C.yellow} onClick={()=>setTab("browse")}>Browse Acts</MobTab>
+        <MobTab active={tab==="lineup"} col={C.teal}   onClick={()=>setTab("lineup")}>
+          My Lineup{lineup.length>0?` (${lineup.length})`:""}
+        </MobTab>
+      </div>
+
+      {/* BODY */}
+      <div style={s.body}>
+
+        {/* ── LINEUP SIDEBAR ── */}
+        <aside className="side-panel" style={{...s.side, display:tab==="lineup"?"flex":"none"}}>
+          <div style={s.panelLabel}>My Lineup</div>
+          <div style={s.sideScroll}>
+            {lineup.length===0&&<p style={s.sideEmpty}>Tap acts to add them →</p>}
+            {lineup.map(a=>(
+              <div key={a.id} style={{...s.aRow,borderLeftColor:tCol(a.tier)}}>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={s.aName}>{a.name}</div>
+                  <div style={s.aMeta}>
+                    <span style={{...s.pill,background:tBg(a.tier),color:tCol(a.tier)}}>{a.tier}</span>
+                    <span style={s.aGenre}>{a.genre}</span>
+                  </div>
+                </div>
+                <div style={s.aRight}>
+                  <span style={{...s.aFee,color:tCol(a.tier)}}>{fmt(a.fee)}</span>
+                  <button style={s.xBtn} onClick={()=>remove(a.id)}>✕</button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* P&L BOX */}
+          <div style={s.pnlBox}>
+            <PnlRow l="Projected revenue" v={fmt(revenue)}       c={C.teal}/>
+            <PnlRow l="Total artist fees"  v={`−${fmt(spent)}`}  c={C.coral}/>
+            <div style={s.pnlLine}/>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <span style={{color:C.textMid,fontSize:12}}>Profit / Loss</span>
+              <span style={{color:profit>=TARGET_PROFIT?C.teal:C.coral,fontWeight:900,fontSize:20}}>{fmtS(profit)}</span>
+            </div>
+            {/* CHECKLIST */}
+            <div style={s.checks}>
+              <Chk ok={hlCount>=HL_MIN}             t={`${hlCount}/${HL_MIN} headliners`}/>
+              <Chk ok={gCount>=GENRE_MIN}            t={`${gCount}/${GENRE_MIN} genres needed`}/>
+              <Chk ok={lineup.length===TOTAL_SLOTS}  t={`${lineup.length}/${TOTAL_SLOTS} slots filled`}/>
+              <Chk ok={profit>=TARGET_PROFIT}        t={`Need ${fmt(TARGET_PROFIT)}+ profit`}/>
+            </div>
+          </div>
+
+          {lineup.length===TOTAL_SLOTS&&(
+            <button style={s.releaseBtn} onClick={submit}>Release Lineup →</button>
+          )}
+
+          <Ad text="🎟 Ticketmaster — sell out in seconds"/>
+        </aside>
+
+        {/* ── BROWSE PANEL ── */}
+        <main className="browse-panel" style={{...s.browse,display:tab==="browse"?"flex":"none"}}>
+          <div style={s.filterBar}>
+            <input style={s.searchBox} placeholder="Search acts or genres…" value={search} onChange={e=>setSearch(e.target.value)}/>
+            <div style={s.filterRow}>
+              <select style={s.sel} value={tier}  onChange={e=>setTier(e.target.value)}>
+                {TIERS.map(t=><option key={t}>{t}</option>)}
+              </select>
+              <select style={s.sel} value={genre} onChange={e=>setGenre(e.target.value)}>
+                {GENRES.map(g=><option key={g}>{g}</option>)}
+              </select>
+              <select style={s.sel} value={sort}  onChange={e=>setSort(e.target.value)}>
+                <option value="draw">Draw ↓</option>
+                <option value="fee">Fee ↑</option>
+                <option value="name">A – Z</option>
+              </select>
+            </div>
+          </div>
+          <div style={s.grid}>
+            {pool.map(a=>{
+              const off=rem<a.fee-0.001||lineup.length>=TOTAL_SLOTS;
+              return(
+                <div key={a.id}
+                  style={{...s.card, opacity:off?0.28:1, cursor:off?"not-allowed":"pointer",
+                    borderTop:`3px solid ${tCol(a.tier)}`}}
+                  onClick={()=>!off&&add(a)}
+                >
+                  <div style={{color:tCol(a.tier),fontSize:8,fontWeight:800,textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:5}}>{a.tier}</div>
+                  <div style={s.cName}>{a.name}</div>
+                  <div style={s.cGenre}>{a.genre}</div>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginTop:6}}>
+                    <span style={{color:tCol(a.tier),fontWeight:900,fontSize:14}}>{fmt(a.fee)}</span>
+                    <span style={{color:C.textDim,fontSize:10}}>Draw {a.draw}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}
+
+// ─── MINI COMPONENTS ─────────────────────────────────────────
+function Kpi({l,v,c}){
+  return(
+    <div style={{textAlign:"center"}}>
+      <div style={{color:c,fontWeight:900,fontSize:16,letterSpacing:"-0.3px"}}>{v}</div>
+      <div style={{color:C.textDim,fontSize:9,textTransform:"uppercase",letterSpacing:"0.1em",marginTop:1}}>{l}</div>
+    </div>
+  );
+}
+function PnlRow({l,v,c}){
+  return(
+    <div style={{display:"flex",justifyContent:"space-between",marginBottom:5,fontSize:12,color:C.textMid}}>
+      <span>{l}</span><span style={{color:c,fontWeight:700}}>{v}</span>
+    </div>
+  );
+}
+function Chk({ok,t}){
+  return(
+    <div style={{display:"flex",alignItems:"center",gap:7,fontSize:11,color:ok?C.teal:C.textDim,marginTop:4}}>
+      <span style={{
+        width:13,height:13,borderRadius:"50%",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",
+        background:ok?C.tealDim:"transparent",
+        border:`1.5px solid ${ok?C.teal:C.textDim}`,fontSize:8,
+      }}>{ok?"✓":""}</span>
+      {t}
+    </div>
+  );
+}
+function MobTab({active,col,onClick,children}){
+  return(
+    <button onClick={onClick} style={{
+      flex:1,padding:"10px 0",background:"none",border:"none",
+      borderBottom:`2px solid ${active?col:"transparent"}`,
+      color:active?col:C.textMid,fontWeight:active?700:400,
+      fontSize:13,cursor:"pointer",fontFamily:"inherit",
+    }}>{children}</button>
+  );
+}
+function Ad({text}){
+  return(
+    <div style={{margin:"10px 12px 0",padding:"7px 10px",border:`1px dashed ${C.border}`,borderRadius:6,display:"flex",gap:7,alignItems:"center"}}>
+      <span style={{fontSize:8,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.1em",color:C.textDim,background:C.surface,padding:"2px 5px",borderRadius:3,flexShrink:0}}>Ad</span>
+      <span style={{fontSize:11,color:C.textMid}}>{text}</span>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// HOME SCREEN
+// ─────────────────────────────────────────────────────────────
+function Home({name,setName,onStart,onLegal,onAbout}){
+  const ok=name.trim().length>=2;
+  return(
+    <div style={h.page}>
+      <style>{`
+        @keyframes drift{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}
+      `}</style>
+
+      {/* BIG POSTER TITLE BLOCK */}
+      <div style={h.posterBlock}>
+        <div style={h.preTitle}>— THE GAME —</div>
+        <div style={h.mainTitle}>
+          <span style={{color:C.yellow}}>FESTIVAL</span>
+          <br/>
+          <span style={{color:C.text,WebkitTextStroke:`2px ${C.yellow}`}}>BOSS</span>
+        </div>
+        <div style={h.tagline}>Book your lineup. Fill the field. Turn a profit.</div>
+      </div>
+
+      {/* CARD */}
+      <div style={h.card}>
+        <div style={h.rulesGrid}>
+          <Rule icon="💷" text={`${fmt(BUDGET)} booking budget`} c={C.yellow}/>
+          <Rule icon="🎤" text={`${TOTAL_SLOTS} acts to book`}   c={C.teal}/>
+          <Rule icon="⭐" text={`${HL_MIN} headliners required`} c={C.coral}/>
+          <Rule icon="🎸" text={`${GENRE_MIN} genres for bonus`} c={C.lilac}/>
+          <Rule icon="📈" text={`${fmt(TARGET_PROFIT)}+ profit to win`} c={C.yellow}/>
+          <Rule icon="🎵" text="200+ real artists to choose from" c={C.teal}/>
+        </div>
+
+        <label style={h.label}>Name your festival</label>
+        <input
+          style={h.input}
+          placeholder="e.g. Dave's Fantastic Fest"
+          value={name}
+          maxLength={32}
+          onChange={e=>setName(e.target.value)}
+        />
+
+        <button
+          style={{...h.btn,opacity:ok?1:0.35,cursor:ok?"pointer":"not-allowed"}}
+          onClick={()=>ok&&onStart()}
+        >
+          Start Booking →
+        </button>
+
+        {/* CARBON ADS — small, below the button */}
+        <CarbonAd/>
+
+      </div>
+
+      <SiteFooter onLegal={onLegal} onAbout={onAbout}/>
+    </div>
+  );
+}
+function Rule({icon,text,c}){
+  return(
+    <div style={{display:"flex",alignItems:"center",gap:9,padding:"5px 0",borderBottom:`1px solid ${C.border}`}}>
+      <span style={{fontSize:15,flexShrink:0}}>{icon}</span>
+      <span style={{color:C.textMid,fontSize:13,flex:1}}>{text}</span>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// RESULT SCREEN — FESTIVAL POSTER
+// ─────────────────────────────────────────────────────────────
+function Result({result,lineup,name,onReset,onHome,copied,onCopy,onTweet,onFb,onLegal,onAbout}){
+  const {revenue,cost,profit,win}=result;
+  const hls=lineup.filter(a=>a.tier==="Headliner");
+  const ms =lineup.filter(a=>a.tier==="Main Stage");
+  const ss =lineup.filter(a=>a.tier==="Second Stage");
+  const sm =lineup.filter(a=>a.tier==="Smaller Stage");
+
+  return(
+    <div style={r.page}>
+      <Ad text="🎪 Eventbrite — sell your tickets in minutes"/>
+
+      {/* VERDICT BANNER */}
+      <div style={{...r.verdict,
+        background:win?`linear-gradient(135deg,${C.tealDim},transparent)`:
+                       `linear-gradient(135deg,${C.coralDim},transparent)`,
+        borderLeft:`4px solid ${win?C.teal:C.coral}`,
+      }}>
+        <span style={{fontSize:28}}>{win?"⬟":"⬡"}</span>
+        <div>
+          <div style={{fontWeight:900,fontSize:22,color:win?C.teal:C.coral,letterSpacing:"-0.5px",lineHeight:1}}>
+            {win?"In the Black.":"Bankrupt."}
+          </div>
+          <div style={{color:C.textMid,fontSize:13,marginTop:3}}>{name}</div>
+        </div>
+      </div>
+
+      {/* FIGURES */}
+      <div style={r.figs}>
+        <Fig l="Revenue" v={fmt(revenue)}    c={C.teal}/>
+        <Fig l="Costs"   v={`−${fmt(cost)}`} c={C.coral}/>
+        <Fig l={profit>=0?"Profit":"Loss"} v={fmtS(profit)} c={profit>=TARGET_PROFIT?C.yellow:C.coral} big/>
+      </div>
+
+      <p style={r.msg}>
+        {win
+          ?`${name} turned ${fmt(profit)} profit. ${hls[0]?.name||"Your headliner"} packed the field and the tills. Not bad.`
+          :profit>0
+            ?`${fmt(profit)} profit — but you needed ${fmt(TARGET_PROFIT)}. One bigger headliner might've cracked it.`
+            :`${name} lost ${fmt(Math.abs(profit))}. The portaloos were the only things that made money.`
+        }
+      </p>
+
+      {/* ════ FESTIVAL POSTER ════ */}
+      <div style={po.wrap}>
+        {/* Decorative angled stripe top */}
+        <div style={po.stripeTop}/>
+        <div style={po.poster}>
+
+          {/* Header bar */}
+          <div style={po.hBar}>
+            <span style={po.hBarText}>FESTIVAL BOSS PRESENTS</span>
+          </div>
+
+          {/* Festival name */}
+          <div style={po.festName}>{name.toUpperCase()}</div>
+          <div style={po.festSub}>ONE DAY · ONE STAGE · ONE CHANCE</div>
+
+          <div style={po.divider}/>
+
+          {/* HEADLINERS */}
+          {hls.length>0
+            ? hls.map(a=><div key={a.id} style={po.hlAct}>{a.name.toUpperCase()}</div>)
+            : <div style={{...po.hlAct,opacity:0.2,fontSize:18}}>NO HEADLINER</div>
+          }
+
+          <div style={po.divider}/>
+
+          {/* MAIN STAGE */}
+          {ms.length>0&&(
+            <div style={po.tier}>
+              {ms.map((a,i)=>(
+                <span key={a.id} style={po.msAct}>{a.name}{i<ms.length-1?" · ":""}</span>
+              ))}
+            </div>
+          )}
+
+          {/* SECOND STAGE */}
+          {ss.length>0&&(
+            <>
+              <div style={po.thinRule}/>
+              <div style={po.tier}>
+                {ss.map((a,i)=>(
+                  <span key={a.id} style={po.ssAct}>{a.name}{i<ss.length-1?"  ":""}</span>
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* SMALLER */}
+          {sm.length>0&&(
+            <>
+              <div style={po.thinRule}/>
+              <div style={po.tier}>
+                {sm.map((a,i)=>(
+                  <span key={a.id} style={po.smAct}>{a.name}{i<sm.length-1?"  ":""}</span>
+                ))}
+              </div>
+            </>
+          )}
+
+          <div style={po.divider}/>
+          <div style={po.footer}>
+            {win?"★★ SOLD OUT — ALL WEEKEND ★★":"✕ EVENT CANCELLED ✕"}
+          </div>
+        </div>
+        <div style={po.stripeBot}/>
+      </div>
+
+      {/* SHARE */}
+      <div style={r.shareWrap}>
+        <div style={r.shareLabel}>Share your lineup</div>
+        <div style={r.shareBtns}>
+          <SBtn onClick={onTweet}>𝕏 Post</SBtn>
+          <SBtn onClick={onFb}>f Share</SBtn>
+          <SBtn onClick={onCopy} hi={copied}>{copied?"✓ Copied":"⧉ Copy"}</SBtn>
+        </div>
+      </div>
+
+      <div style={r.actions}>
+        <button style={r.btnPrimary} onClick={onReset}>Try Again</button>
+        <button style={r.btnGhost}   onClick={onHome}>Home</button>
+      </div>
+
+      {/* SPONSOR SLOT — activate this when you have a sponsor (see SponsorSlot component) */}
+      <SponsorSlot/>
+
+      {/* CARBON ADS */}
+      <CarbonAd/>
+
+      <SiteFooter onLegal={onLegal} onAbout={onAbout}/>
+    </div>
+  );
+}
+function Fig({l,v,c,big}){
+  return(
+    <div style={{flex:1,textAlign:"center",background:C.card,borderRadius:8,padding:"10px 6px",border:`1px solid ${C.border}`}}>
+      <div style={{color:c,fontWeight:900,fontSize:big?22:17}}>{v}</div>
+      <div style={{color:C.textDim,fontSize:10,marginTop:3}}>{l}</div>
+    </div>
+  );
+}
+function SBtn({onClick,hi,children}){
+  return(
+    <button onClick={onClick} style={{
+      background:hi?C.tealDim:"transparent",border:`1px solid ${hi?C.teal:C.border}`,
+      color:hi?C.teal:C.textMid,padding:"8px 14px",borderRadius:6,cursor:"pointer",
+      fontSize:12,fontFamily:"inherit",fontWeight:600,
+    }}>{children}</button>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// LEGAL — comprehensive, watertight
+// ─────────────────────────────────────────────────────────────
+function Legal({type,onBack}){
+  const isT=type==="terms";
+  // helper so legal screen can link to the other doc
+  return(
+    <div style={lg.page}>
+      <div style={lg.card}>
+        <button style={lg.back} onClick={onBack}>← Back</button>
+        <h2 style={lg.title}>{isT?"Terms & Conditions":"Privacy Policy"}</h2>
+        <p style={lg.date}>Last updated: June 2026 · festivalbossgame.com</p>
+
+        {isT ? <>
+
+          <Cl h="1. Nature of the game">
+            Festival Boss is a free-to-play browser-based entertainment game. It is a work of
+            fiction and is provided for amusement purposes only. Festival Boss is not a real
+            festival booking service, talent agency, ticketing platform, or financial product
+            of any kind. No real festival is being organised, promoted, or represented through
+            this game.
+          </Cl>
+
+          <Cl h="2. Artist names, likenesses and trademarks">
+            The names of musical artists, bands and performers that appear in Festival Boss are
+            used solely for the purposes of a fictional entertainment game. Their inclusion does
+            not imply any affiliation with, endorsement by, sponsorship of, or participation in
+            Festival Boss by any artist, their management, record label, booking agency, or any
+            associated party. All artist names, likenesses, and associated trademarks remain the
+            exclusive property of their respective owners. No artist has authorised, approved,
+            or is associated with this game in any way.
+          </Cl>
+
+          <Cl h="3. Fictional data — fees, ratings and figures">
+            All booking fees, draw ratings, popularity scores, revenue projections and any other
+            numerical data displayed within Festival Boss are entirely invented for game-balance
+            purposes. They bear no relation to any artist's real-world booking fees, earnings,
+            commercial value, popularity, or market position. No inference should be drawn from
+            any figure shown in the game about any real person or entity. The display of any
+            figure alongside an artist's name does not constitute a statement of fact about that
+            artist.
+          </Cl>
+
+          <Cl h="4. No financial transactions">
+            Festival Boss does not involve any real money. No purchase is required to play.
+            No real booking, ticket sale, financial transaction, or contract of any kind is
+            created or implied by use of this game. All in-game currency and financial results
+            are fictional and have no monetary value whatsoever.
+          </Cl>
+
+          <Cl h="5. Intellectual property — the game itself">
+            The Festival Boss game, its design, code, branding, and all original content are
+            the intellectual property of their respective creators. You may not copy, reproduce,
+            distribute, or create derivative works from any part of Festival Boss without
+            express written permission.
+          </Cl>
+
+          <Cl h="6. No affiliation with festivals or promoters">
+            Festival Boss is not affiliated with, endorsed by, or connected to any music
+            festival, concert promoter, ticketing company, venue, or event organisation.
+            Any similarity to real festival names, structures, or events is coincidental.
+          </Cl>
+
+          <Cl h="7. Advertising">
+            Festival Boss displays third-party banner advertisements to support free access to
+            the game. All advertisements are clearly labelled. We do not endorse the products
+            or services advertised, and we are not responsible for the content of
+            third-party advertisements or any websites they link to. Advertising is served
+            in compliance with applicable advertising standards.
+          </Cl>
+
+          <Cl h="8. Disclaimer of warranties">
+            Festival Boss is provided on an "as is" and "as available" basis without any
+            warranties of any kind, express or implied, including but not limited to warranties
+            of merchantability, fitness for a particular purpose, or non-infringement. We do
+            not warrant that the game will be uninterrupted, error-free, or free of viruses
+            or other harmful components.
+          </Cl>
+
+          <Cl h="9. Limitation of liability">
+            To the fullest extent permitted by law, the operators of Festival Boss shall not
+            be liable for any direct, indirect, incidental, consequential, or punitive damages
+            arising from your use of or inability to use the game, including but not limited
+            to loss of data, loss of profits, or any other loss, even if we have been advised
+            of the possibility of such damages.
+          </Cl>
+
+          <Cl h="10. Age restriction">
+            Festival Boss is intended for users aged 13 and over. By using the game you confirm
+            that you are aged 13 or over. If you are under 13, please do not use this game.
+          </Cl>
+
+          <Cl h="11. User conduct">
+            You agree not to use Festival Boss in any way that is unlawful, harmful, or
+            disruptive. You agree not to attempt to reverse-engineer, scrape, or reproduce
+            the game's code or content without permission.
+          </Cl>
+
+          <Cl h="12. Modifications">
+            We reserve the right to modify or discontinue Festival Boss at any time without
+            notice. We may update these Terms at any time. Continued use of the game after
+            changes are posted constitutes acceptance of the revised Terms.
+          </Cl>
+
+          <Cl h="13. Governing law and jurisdiction">
+            These Terms are governed by the laws of England and Wales. Any disputes arising
+            from these Terms or your use of Festival Boss shall be subject to the exclusive
+            jurisdiction of the courts of England and Wales.
+          </Cl>
+
+          <Cl h="14. Contact">
+            For any queries relating to these Terms, please contact: festivalboss.game@mail.com
+          </Cl>
+
+        </> : <>
+
+          <Cl h="1. Who we are">
+            Festival Boss ("we", "us", "our") operates the game at festivalbossgame.com. This
+            Privacy Policy explains how we handle information in connection with your use of
+            the game. We are committed to protecting your privacy and complying with the UK
+            General Data Protection Regulation (UK GDPR) and the Data Protection Act 2018.
+          </Cl>
+
+          <Cl h="2. What personal data we collect">
+            Festival Boss does not require you to create an account or provide any personal
+            information to play. Your chosen festival name and lineup selections exist only
+            within your browser session and are not transmitted to or stored on our servers.
+            We do not collect your name, email address, or any directly identifying information
+            through the game itself.
+          </Cl>
+
+          <Cl h="3. Cookies and analytics">
+            We may use cookies and similar tracking technologies to collect anonymised,
+            aggregated data about how the game is used — for example, the number of visitors,
+            session duration, and which features are used most. This may be collected via
+            tools such as Google Analytics. This data cannot be used to identify you
+            personally. You can disable or delete cookies at any time through your browser
+            settings. Disabling cookies may affect the game's functionality.
+          </Cl>
+
+          <Cl h="4. Cookie consent">
+            Where required by law, we will ask for your consent before setting non-essential
+            cookies (such as analytics or advertising cookies). You can withdraw consent at
+            any time via the cookie settings on the site. Essential cookies required for the
+            game to function are set without consent on the basis of legitimate interest.
+          </Cl>
+
+          <Cl h="5. Advertising and third-party cookies">
+            Festival Boss displays third-party banner advertisements, which may be served by
+            advertising networks such as Google AdSense. These networks may set their own
+            cookies on your device to serve relevant advertisements based on your browsing
+            behaviour. We do not control these cookies and do not share your personal data
+            with advertisers. You can opt out of personalised advertising via
+            Google's Ad Settings at adssettings.google.com or via the Network Advertising
+            Initiative opt-out tool at optout.networkadvertising.org.
+          </Cl>
+
+          <Cl h="6. Social sharing">
+            When you use the Share buttons within the game, information you choose to share
+            (your festival name and result) is sent directly to the relevant platform
+            (X/Twitter or Facebook). We do not intercept, store, or process this data. Your
+            use of those platforms is governed by their own privacy policies. We have no
+            control over how those platforms handle data you submit to them.
+          </Cl>
+
+          <Cl h="7. Legal basis for processing">
+            Where we process any personal data (for example, anonymised analytics data),
+            we do so on the basis of legitimate interests in understanding how the game is
+            used and improving it, or with your consent where required. We do not sell
+            personal data to any third party.
+          </Cl>
+
+          <Cl h="8. Data retention">
+            We do not store personal gameplay data. Anonymised analytics data may be retained
+            for up to 26 months in line with Google Analytics default retention settings.
+          </Cl>
+
+          <Cl h="9. Children">
+            Festival Boss is not directed at children under the age of 13. We do not knowingly
+            collect personal data from children under 13. If you believe a child under 13 has
+            provided us with personal data, please contact us at the address below and we will
+            take steps to delete it promptly.
+          </Cl>
+
+          <Cl h="10. Your rights under UK GDPR">
+            You have the right to: access any personal data we hold about you; request
+            correction of inaccurate data; request deletion of your data ("right to be
+            forgotten"); object to or restrict processing of your data; and lodge a complaint
+            with the Information Commissioner's Office (ICO) at ico.org.uk if you believe
+            your rights have been infringed. To exercise any of these rights, contact us at:
+            festivalboss.game@mail.com
+          </Cl>
+
+          <Cl h="11. International transfers">
+            Some of our service providers (such as Google Analytics) may transfer data
+            outside the UK or EEA. Where this occurs, we ensure appropriate safeguards are
+            in place in accordance with UK GDPR requirements, such as Standard Contractual
+            Clauses.
+          </Cl>
+
+          <Cl h="12. Changes to this policy">
+            We may update this Privacy Policy from time to time. Changes will be posted on
+            this page with a revised "last updated" date. We encourage you to review this
+            policy periodically.
+          </Cl>
+
+          <Cl h="13. Contact us">
+            For any privacy-related queries, requests, or complaints:
+            Email: festivalboss.game@mail.com
+            For complaints to the regulator: ico.org.uk / 0303 123 1113
+          </Cl>
+
+        </>}
+        <button style={lg.closeBtn} onClick={onBack}>Close</button>
+      </div>
+      <SiteFooter onLegal={()=>{}} onAbout={()=>{}} minimal/>
+    </div>
+  );
+}
+function Cl({h,children}){
+  return(
+    <div style={{marginBottom:18}}>
+      <div style={{color:C.coral,fontWeight:700,fontSize:13,marginBottom:5}}>{h}</div>
+      <p style={{color:C.textMid,fontSize:13,lineHeight:1.75,margin:0}}>{children}</p>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// STYLES
+// ─────────────────────────────────────────────────────────────
+const s={
+  app:  {minHeight:"100vh",background:C.bg,color:C.text,fontFamily:"system-ui,-apple-system,sans-serif",display:"flex",flexDirection:"column"},
+  hdr:  {display:"flex",justifyContent:"space-between",alignItems:"center",padding:"0 16px",height:56,
+         background:C.surface,borderBottom:`1px solid ${C.border}`,flexWrap:"wrap",gap:10},
+  brand:{display:"flex",alignItems:"center"},
+  logoBox:{display:"flex",flexDirection:"column",lineHeight:1,gap:0},
+  logoTop:{fontSize:9,fontWeight:900,letterSpacing:"0.28em",color:C.yellow,textTransform:"uppercase"},
+  logoBoss:{fontSize:22,fontWeight:900,letterSpacing:"-0.5px",color:C.text,lineHeight:0.9,
+    textShadow:`0 0 20px ${C.yellow}44`},
+  kpis:{display:"flex",alignItems:"center",gap:18,flexWrap:"wrap"},
+  kdiv:{width:1,height:24,background:C.border},
+  railWrap:{display:"flex",flexDirection:"column"},
+  rail:{height:3,background:C.card},
+  railFill:{height:"100%",transition:"width 0.3s"},
+  mobTabs:{display:"flex",borderBottom:`1px solid ${C.border}`,background:C.surface},
+  body:{display:"flex",flex:1,overflow:"hidden",height:"calc(100vh - 98px)"},
+  side:{width:290,minWidth:260,background:C.surface,borderRight:`1px solid ${C.border}`,
+        flexDirection:"column",padding:"14px 0",overflow:"hidden"},
+  panelLabel:{fontSize:9,fontWeight:800,textTransform:"uppercase",letterSpacing:"0.14em",
+              color:C.textDim,padding:"0 14px 10px",borderBottom:`1px solid ${C.border}`,marginBottom:8},
+  sideScroll:{flex:1,overflowY:"auto",padding:"0 10px"},
+  sideEmpty:{color:C.textDim,fontSize:13,padding:"28px 0",textAlign:"center",margin:0},
+  aRow:{display:"flex",alignItems:"center",gap:8,borderLeft:"3px solid",
+        padding:"7px 8px 7px 10px",marginBottom:5,background:C.card,borderRadius:"0 6px 6px 0"},
+  aName:{fontWeight:700,fontSize:13,color:C.text,marginBottom:2,lineHeight:1.2},
+  aMeta:{display:"flex",gap:5,alignItems:"center",flexWrap:"wrap"},
+  aGenre:{fontSize:10,color:C.textMid},
+  aRight:{display:"flex",alignItems:"center",gap:7,flexShrink:0},
+  aFee:{fontWeight:800,fontSize:12},
+  xBtn:{background:"none",border:"none",color:C.textDim,cursor:"pointer",fontSize:11,padding:0,fontFamily:"inherit"},
+  pill:{fontSize:8,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.06em",padding:"2px 7px",borderRadius:20},
+  pnlBox:{margin:"8px 12px 0",padding:"11px 12px",background:C.card,borderRadius:8,border:`1px solid ${C.border}`},
+  pnlLine:{height:1,background:C.border,margin:"8px 0"},
+  checks:{marginTop:9,paddingTop:8,borderTop:`1px solid ${C.border}`},
+  releaseBtn:{margin:"10px 12px 0",background:`linear-gradient(90deg,${C.yellow},${C.coral})`,
+              border:"none",color:C.bg,fontWeight:900,fontSize:14,padding:"12px 0",
+              borderRadius:8,cursor:"pointer",fontFamily:"inherit",letterSpacing:"0.03em"},
+  browse:{flex:1,display:"flex",flexDirection:"column",overflow:"hidden"},
+  filterBar:{padding:"12px 14px 8px",borderBottom:`1px solid ${C.border}`,background:C.surface},
+  searchBox:{width:"100%",background:C.card,border:`1px solid ${C.border}`,borderRadius:7,
+             padding:"8px 12px",color:C.text,fontSize:13,outline:"none",fontFamily:"inherit",marginBottom:8},
+  filterRow:{display:"flex",gap:6,flexWrap:"wrap"},
+  sel:{flex:1,minWidth:88,background:C.card,border:`1px solid ${C.border}`,borderRadius:7,
+       padding:"7px 8px",color:C.textMid,fontSize:12,outline:"none",cursor:"pointer",fontFamily:"inherit"},
+  grid:{flex:1,overflowY:"auto",padding:"12px 14px",display:"grid",
+        gridTemplateColumns:"repeat(auto-fill,minmax(145px,1fr))",gap:8,alignContent:"start"},
+  card:{background:C.card,border:`1px solid ${C.border}`,borderRadius:7,
+        padding:"10px 11px",transition:"opacity 0.15s",userSelect:"none"},
+  cName:{fontWeight:700,fontSize:13,color:C.text,lineHeight:1.25,marginBottom:2},
+  cGenre:{fontSize:11,color:C.textMid},
+};
+
+const h={
+  page:{minHeight:"100vh",background:C.bg,display:"flex",flexDirection:"column",
+        alignItems:"center",padding:"36px 16px 60px"},
+  posterBlock:{textAlign:"center",marginBottom:32},
+  preTitle:{fontSize:10,letterSpacing:"0.3em",color:C.textDim,textTransform:"uppercase",marginBottom:10},
+  mainTitle:{
+    fontSize:"clamp(52px,16vw,96px)",fontWeight:900,lineHeight:0.9,letterSpacing:"-2px",
+    textTransform:"uppercase",
+    textShadow:`0 0 60px ${C.yellow}33`,
+  },
+  tagline:{fontSize:14,color:C.textMid,marginTop:14,letterSpacing:"0.05em"},
+  card:{background:C.surface,border:`1px solid ${C.border}`,borderRadius:12,
+        padding:"24px 22px",width:"100%",maxWidth:420},
+  rulesGrid:{marginBottom:20},
+  label:{display:"block",fontSize:10,fontWeight:700,textTransform:"uppercase",
+         letterSpacing:"0.1em",color:C.textMid,marginBottom:8},
+  input:{width:"100%",background:C.card,border:`1px solid ${C.borderHi}`,borderRadius:8,
+         padding:"12px 14px",color:C.text,fontSize:16,outline:"none",fontFamily:"inherit"},
+  btn:{width:"100%",marginTop:14,
+       background:`linear-gradient(90deg,${C.yellow},${C.coral})`,
+       border:"none",color:C.bg,fontWeight:900,fontSize:15,padding:"14px 0",
+       borderRadius:9,cursor:"pointer",fontFamily:"inherit",letterSpacing:"0.04em"},
+  legalRow:{display:"flex",gap:10,justifyContent:"center",marginTop:12,alignItems:"center"},
+  lBtn:{background:"none",border:"none",color:C.textDim,fontSize:11,cursor:"pointer",
+        fontFamily:"inherit",textDecoration:"underline",padding:0},
+};
+
+// POSTER
+const po={
+  wrap:{margin:"14px 0",position:"relative"},
+  stripeTop:{height:8,background:`linear-gradient(90deg,${C.yellow},${C.coral},${C.teal})`,borderRadius:"4px 4px 0 0"},
+  stripeBot:{height:8,background:`linear-gradient(90deg,${C.teal},${C.coral},${C.yellow})`,borderRadius:"0 0 4px 4px"},
+  poster:{
+    background:`radial-gradient(ellipse at 50% 0%,#1a1040 0%,${C.bg} 70%)`,
+    padding:"20px 18px 18px",textAlign:"center",
+    border:`1px solid ${C.border}`,borderTop:"none",borderBottom:"none",
+  },
+  hBar:{background:C.yellow,padding:"3px 0",marginBottom:14,marginLeft:-18,marginRight:-18,marginTop:-20},
+  hBarText:{fontSize:9,fontWeight:900,letterSpacing:"0.3em",color:C.bg,textTransform:"uppercase"},
+  festName:{
+    fontSize:"clamp(22px,6vw,36px)",fontWeight:900,color:C.yellow,
+    letterSpacing:"0.1em",textTransform:"uppercase",lineHeight:1.1,marginBottom:4,
+    textShadow:`0 0 30px ${C.yellow}66`,wordBreak:"break-word",
+  },
+  festSub:{fontSize:9,color:C.textDim,letterSpacing:"0.25em",textTransform:"uppercase",marginBottom:8},
+  divider:{height:1,background:`linear-gradient(90deg,transparent,${C.yellow}44,transparent)`,margin:"12px 0"},
+  thinRule:{height:1,background:C.border,margin:"8px 0"},
+  hlAct:{fontSize:22,fontWeight:900,color:C.coral,letterSpacing:"0.08em",
+         textTransform:"uppercase",lineHeight:1.3,
+         textShadow:`0 0 20px ${C.coral}55`,marginBottom:2},
+  tier:{display:"flex",flexWrap:"wrap",justifyContent:"center",gap:"2px 0",padding:"3px 0"},
+  msAct:{fontSize:13,fontWeight:700,color:C.teal,letterSpacing:"0.04em"},
+  ssAct:{fontSize:11,fontWeight:600,color:C.text,letterSpacing:"0.02em"},
+  smAct:{fontSize:9,fontWeight:500,color:C.textMid,letterSpacing:"0.01em"},
+  footer:{fontSize:11,fontWeight:800,color:C.yellow,letterSpacing:"0.2em",
+          textTransform:"uppercase",marginTop:4},
+};
+
+const r={
+  page:{minHeight:"100vh",background:C.bg,padding:"18px 16px 40px",maxWidth:540,margin:"0 auto"},
+  verdict:{display:"flex",alignItems:"center",gap:14,marginBottom:12,borderRadius:8,padding:"14px 16px"},
+  figs:{display:"flex",gap:8,marginBottom:12},
+  msg:{color:C.textMid,fontSize:13,lineHeight:1.6,background:C.surface,borderRadius:8,
+       padding:"12px 14px",marginBottom:14,border:`1px solid ${C.border}`,fontStyle:"italic"},
+  shareWrap:{background:C.surface,borderRadius:8,padding:"14px",marginBottom:12,border:`1px solid ${C.border}`},
+  shareLabel:{fontSize:9,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.12em",
+              color:C.textDim,marginBottom:10,textAlign:"center"},
+  shareBtns:{display:"flex",gap:8,justifyContent:"center",flexWrap:"wrap"},
+  actions:{display:"flex",gap:10,marginTop:4,marginBottom:14},
+  btnPrimary:{flex:1,background:`linear-gradient(90deg,${C.yellow},${C.coral})`,border:"none",
+              color:C.bg,fontWeight:900,fontSize:14,padding:"13px 0",borderRadius:8,cursor:"pointer",fontFamily:"inherit"},
+  btnGhost:{flex:1,background:"transparent",border:`1px solid ${C.border}`,color:C.textMid,
+            fontWeight:600,fontSize:14,padding:"13px 0",borderRadius:8,cursor:"pointer",fontFamily:"inherit"},
+};
+
+const lg={
+  page:{minHeight:"100vh",background:C.bg,display:"flex",justifyContent:"center",padding:"32px 16px 60px"},
+  card:{background:C.surface,border:`1px solid ${C.border}`,borderRadius:10,
+        padding:"28px 24px",width:"100%",maxWidth:560},
+  back:{background:"none",border:"none",color:C.textMid,cursor:"pointer",
+        fontSize:13,padding:0,fontFamily:"inherit",marginBottom:18,display:"block"},
+  title:{fontSize:22,fontWeight:900,color:C.text,marginBottom:4,letterSpacing:"-0.5px"},
+  date:{color:C.textDim,fontSize:12,marginBottom:22},
+  closeBtn:{width:"100%",marginTop:8,background:"transparent",
+            border:`1px solid ${C.border}`,color:C.textMid,fontWeight:700,
+            fontSize:14,padding:"12px 0",borderRadius:8,cursor:"pointer",fontFamily:"inherit"},
+};
+
+// ─────────────────────────────────────────────────────────────
+// SITE FOOTER — appears on every screen for AdSense compliance
+// ─────────────────────────────────────────────────────────────
+function SiteFooter({onLegal, onAbout, minimal}){
+  return(
+    <footer style={ft.wrap}>
+      <div style={ft.inner}>
+        <div style={ft.brand}>
+          <span style={ft.brandName}>Festival Boss</span>
+          <span style={ft.brandTag}>The festival booking game</span>
+        </div>
+        {!minimal && (
+          <div style={ft.links}>
+            <FtBtn onClick={onAbout}>About</FtBtn>
+            <FtBtn onClick={()=>onLegal("terms")}>Terms &amp; Conditions</FtBtn>
+            <FtBtn onClick={()=>onLegal("privacy")}>Privacy Policy</FtBtn>
+            <a href="mailto:festivalboss.game@mail.com" style={ft.link}>Contact</a>
+          </div>
+        )}
+        <div style={ft.legal}>
+          <p style={ft.legalText}>
+            Festival Boss is a free entertainment game. Artist names are used for fictional
+            game purposes only and do not imply endorsement, affiliation, or association.
+            All booking fees, draw ratings and figures are entirely invented and bear no
+            relation to any real-world values. © {new Date().getFullYear()} Festival Boss.
+            All rights reserved.
+          </p>
+          <p style={ft.legalText}>
+            Advertising is served by third-party networks. We are not responsible for
+            advertiser content. Cookie and privacy settings can be managed via our{" "}
+            <button onClick={()=>onLegal&&onLegal("privacy")} style={ft.inlineLink}>
+              Privacy Policy
+            </button>.
+          </p>
+        </div>
+      </div>
+    </footer>
+  );
+}
+function FtBtn({onClick, children}){
+  return(
+    <button onClick={onClick} style={ft.link}>{children}</button>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// CARBON ADS SLOT
+// To activate: replace the placeholder div below with your
+// Carbon Ads script tag from carbonads.com.
+// It looks like:
+//   <script async type="text/javascript"
+//     src="//cdn.carbonads.com/carbon.js?serve=YOURCODE&placement=festivalbossgamecom"
+//     id="_carbonads_js"></script>
+// ─────────────────────────────────────────────────────────────
+function CarbonAd(){
+  // ─────────────────────────────────────────────────────
+  // TO ACTIVATE: replace the inner placeholder div with
+  // your Carbon Ads <script> tag from carbonads.com.
+  // The script renders a single small ad automatically.
+  // Keep the outer carbonWrap div — it handles the styling.
+  // ─────────────────────────────────────────────────────
+  return(
+    <div style={ad.carbonWrap}>
+      {/* ↓ REPLACE FROM HERE with your Carbon Ads script ↓ */}
+      <div style={ad.carbonPlaceholder}>
+        <span style={ad.adLabel}>Ad</span>
+        <span style={{color:C.textDim,fontSize:11}}>
+          Carbon Ads will appear here once approved
+        </span>
+      </div>
+      {/* ↑ REPLACE TO HERE with your Carbon Ads script ↑ */}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// SPONSOR SLOT
+// When a sponsor comes in, replace the content of this
+// component with their branding. Keep the "Sponsored by"
+// label to stay compliant with ASA/CAP advertising rules.
+// Example: change the inner div to show sponsor logo + message.
+// ─────────────────────────────────────────────────────────────
+function SponsorSlot(){
+  // ─────────────────────────────────────────────────────
+  // TO ACTIVATE A SPONSOR:
+  // 1. Change SPONSOR_ACTIVE to true
+  // 2. Fill in SPONSOR_NAME, SPONSOR_MSG, SPONSOR_URL
+  // 3. Save and redeploy — that's it.
+  // The "Sponsored by" label stays visible for ASA compliance.
+  // ─────────────────────────────────────────────────────
+  const SPONSOR_ACTIVE = false;
+  const SPONSOR_NAME   = "Your Brand";
+  const SPONSOR_MSG    = "Your sponsor message here";
+  const SPONSOR_URL    = "https://example.com";
+
+  if(!SPONSOR_ACTIVE) return null;
+
+  return(
+    <div style={ad.sponsorWrap}>
+      <span style={ad.sponsorLabel}>Sponsored by</span>
+      <a
+        href={SPONSOR_URL}
+        target="_blank"
+        rel="noopener noreferrer sponsored"
+        style={ad.sponsorLink}
+      >
+        <strong style={{color:C.yellow,fontSize:14}}>{SPONSOR_NAME}</strong>
+        <span style={{color:C.textMid,fontSize:12,marginLeft:10}}>{SPONSOR_MSG}</span>
+      </a>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// COOKIE CONSENT BANNER
+// Shown on first visit. Stores consent in localStorage.
+// Required under UK GDPR / PECR before setting analytics
+// or advertising cookies.
+// ─────────────────────────────────────────────────────────────
+export function CookieBanner({onAccept, onDecline}){
+  return(
+    <div style={ck.overlay}>
+      <div style={ck.banner}>
+        <div style={ck.text}>
+          <strong style={{color:C.text}}>We use cookies</strong>
+          <p style={ck.body}>
+            Festival Boss uses cookies to measure how the game is used (analytics) and to
+            serve relevant advertisements. No personally identifying information is collected.
+            You can accept all cookies, or decline non-essential ones. See our{" "}
+            <button style={ck.inlineLink} onClick={()=>{}}>Privacy Policy</button>{" "}
+            for details.
+          </p>
+        </div>
+        <div style={ck.btns}>
+          <button style={ck.accept}  onClick={onAccept}>Accept all</button>
+          <button style={ck.decline} onClick={onDecline}>Essential only</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// ABOUT SCREEN — required by AdSense for site legitimacy
+// ─────────────────────────────────────────────────────────────
+function About({onBack, onLegal}){
+  return(
+    <div style={ab.page}>
+      <div style={ab.card}>
+        <button style={lg.back} onClick={onBack}>← Back to game</button>
+        <div style={ab.logoRow}>
+          <span style={{fontSize:32}}>🎪</span>
+          <div>
+            <h1 style={ab.title}>Festival Boss</h1>
+            <p style={ab.sub}>The festival booking game</p>
+          </div>
+        </div>
+
+        <AbSection title="What is Festival Boss?">
+          Festival Boss is a free browser-based strategy game where you take on the role of
+          a festival promoter. You have a fixed budget and must book a lineup of real musical
+          artists — balancing headliner costs, genre diversity, and crowd draw — to build a
+          festival that turns a profit. The bigger and more balanced your lineup, the more
+          tickets you sell. But the budget is tight and the profit target is unforgiving.
+          Most players lose on their first attempt.
+        </AbSection>
+
+        <AbSection title="How to play">
+          Browse over 200 real artists and tap to add them to your lineup. You have{" "}
+          {TOTAL_SLOTS} slots to fill and a £{BUDGET}m budget. You need at least{" "}
+          {HL_MIN} headliners, {GENRE_MIN} different genres for the diversity bonus, and
+          every slot filled. Generate enough revenue to clear {fmt(TARGET_PROFIT)} profit
+          and you win. Fall short and the festival goes under.
+        </AbSection>
+
+        <AbSection title="The artists">
+          The artist roster features over 200 real musicians and bands drawn from decades
+          of major UK festival history. All booking fees, draw ratings and popularity scores
+          displayed in the game are entirely fictional and invented for game-balance purposes
+          only. They bear no relation to any artist's real-world fees, earnings, or
+          commercial value. No artist has endorsed or is affiliated with Festival Boss in
+          any way.
+        </AbSection>
+
+        <AbSection title="Free to play">
+          Festival Boss is completely free. The game is supported by non-intrusive banner
+          advertising. We do not sell in-app purchases, subscriptions, or user data.
+        </AbSection>
+
+        <AbSection title="Contact us">
+          Questions, feedback, or press enquiries: festivalboss.game@mail.com{"\n"}
+          Legal and privacy matters: festivalboss.game@mail.com
+        </AbSection>
+
+        <div style={{display:"flex",gap:10,marginTop:24,flexWrap:"wrap"}}>
+          <button style={ab.legalBtn} onClick={()=>onLegal("terms")}>
+            Terms &amp; Conditions
+          </button>
+          <button style={ab.legalBtn} onClick={()=>onLegal("privacy")}>
+            Privacy Policy
+          </button>
+        </div>
+      </div>
+      <SiteFooter onLegal={onLegal} onAbout={()=>{}} minimal/>
+    </div>
+  );
+}
+function AbSection({title, children}){
+  return(
+    <div style={{marginBottom:20}}>
+      <div style={{color:C.yellow,fontWeight:700,fontSize:14,marginBottom:6}}>{title}</div>
+      <p style={{color:C.textMid,fontSize:13,lineHeight:1.75,margin:0,whiteSpace:"pre-line"}}>{children}</p>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// NEW STYLE OBJECTS
+// ─────────────────────────────────────────────────────────────
+const ft={
+  wrap:{background:C.surface,borderTop:`1px solid ${C.border}`,marginTop:32,padding:"24px 16px 32px"},
+  inner:{maxWidth:540,margin:"0 auto"},
+  brand:{marginBottom:12},
+  brandName:{color:C.text,fontWeight:700,fontSize:15,display:"block"},
+  brandTag:{color:C.textDim,fontSize:11,marginTop:2,display:"block"},
+  links:{display:"flex",gap:16,flexWrap:"wrap",marginBottom:14},
+  link:{background:"none",border:"none",color:C.textMid,fontSize:12,cursor:"pointer",
+        fontFamily:"inherit",padding:0,textDecoration:"none"},
+  legal:{borderTop:`1px solid ${C.border}`,paddingTop:12,marginTop:4},
+  legalText:{color:C.textDim,fontSize:11,lineHeight:1.6,margin:"0 0 6px"},
+  inlineLink:{background:"none",border:"none",color:C.textMid,cursor:"pointer",
+              fontFamily:"inherit",padding:0,fontSize:11,textDecoration:"underline"},
+};
+
+const ad={
+  carbonWrap:{marginTop:12},
+  carbonPlaceholder:{
+    display:"flex",alignItems:"center",gap:8,padding:"6px 10px",
+    border:`1px solid ${C.border}`,borderRadius:5,opacity:0.6,
+  },
+  adLabel:{fontSize:7,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.12em",
+           color:C.textDim,background:C.card,padding:"1px 4px",borderRadius:2,flexShrink:0},
+  sponsorWrap:{
+    display:"flex",alignItems:"center",gap:10,padding:"12px 14px",
+    background:C.card,border:`1px solid ${C.border}`,borderRadius:8,marginTop:14,
+  },
+  sponsorLabel:{fontSize:9,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.1em",
+                color:C.textDim,flexShrink:0},
+  sponsorLink:{display:"flex",alignItems:"center",textDecoration:"none",flex:1,flexWrap:"wrap"},
+};
+
+const ck={
+  overlay:{
+    position:"fixed",bottom:0,left:0,right:0,zIndex:9999,
+    padding:"0 16px 16px",
+  },
+  banner:{
+    background:C.surface,border:`1px solid ${C.borderHi}`,borderRadius:12,
+    padding:"16px",maxWidth:600,margin:"0 auto",
+    boxShadow:"0 -4px 24px rgba(0,0,0,0.4)",
+  },
+  text:{marginBottom:14},
+  body:{color:C.textMid,fontSize:12,lineHeight:1.6,margin:"6px 0 0"},
+  inlineLink:{background:"none",border:"none",color:C.teal,cursor:"pointer",
+              fontFamily:"inherit",padding:0,fontSize:12,textDecoration:"underline"},
+  btns:{display:"flex",gap:8},
+  accept:{
+    flex:1,background:`linear-gradient(90deg,${C.yellow},${C.coral})`,
+    border:"none",color:C.bg,fontWeight:700,fontSize:13,padding:"10px 0",
+    borderRadius:7,cursor:"pointer",fontFamily:"inherit",
+  },
+  decline:{
+    flex:1,background:"transparent",border:`1px solid ${C.border}`,
+    color:C.textMid,fontWeight:600,fontSize:13,padding:"10px 0",
+    borderRadius:7,cursor:"pointer",fontFamily:"inherit",
+  },
+};
+
+const ab={
+  page:{minHeight:"100vh",background:C.bg,display:"flex",flexDirection:"column",
+        alignItems:"center",padding:"32px 16px 0"},
+  card:{background:C.surface,border:`1px solid ${C.border}`,borderRadius:12,
+        padding:"28px 24px",width:"100%",maxWidth:560,marginBottom:0},
+  logoRow:{display:"flex",alignItems:"center",gap:14,marginBottom:24},
+  title:{fontSize:26,fontWeight:900,color:C.text,margin:0,letterSpacing:"-0.5px"},
+  sub:{color:C.textMid,fontSize:13,margin:"3px 0 0"},
+  legalBtn:{
+    flex:1,background:"transparent",border:`1px solid ${C.border}`,
+    color:C.textMid,fontWeight:600,fontSize:13,padding:"10px 0",
+    borderRadius:7,cursor:"pointer",fontFamily:"inherit",
+  },
+};
