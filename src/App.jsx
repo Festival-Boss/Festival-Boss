@@ -1594,7 +1594,7 @@ function About({onBack, onLegal}){
         </AbSection>
 
         <AbSection title="How to play">
-          Spin to get a random hand of {HAND_SIZE} acts from across the roster. Pick one,
+          Spin to get a random hand of 10 acts from across the roster. Pick one,
           assign them to a stage — Main Stage, Second Stage, or Smaller Stage — then spin
           again. You have {MAX_SPINS} spins to fill {TOTAL_SLOTS} slots. You need at least{" "}
           {HL_MIN} headliners and {GENRE_MIN} different genres. Putting the right act on
