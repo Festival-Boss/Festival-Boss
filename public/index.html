@@ -331,9 +331,9 @@ function calcRevenue(lu){
     genreCounts[a.genre] = (genreCounts[a.genre]||0)+1;
   });
   const maxSameGenre = Math.max(...Object.values(genreCounts));
-  const genreMul = maxSameGenre>=4 ? 0.78   // 4+ same genre: painful
-                 : maxSameGenre===3 ? 0.91   // 3 same: noticeable penalty
-                 : maxSameGenre<=2  ? 1.05   // good variety: small bonus
+  const genreMul = maxSameGenre>=4 ? 0.78
+                 : maxSameGenre===3 ? 0.91
+                 : maxSameGenre<=2  ? 1.05
                  : 1.0;
 
   // ── Draw quality ─────────────────────────────────────────────
