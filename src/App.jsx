@@ -395,7 +395,7 @@ function doFb(){window.open(`https://www.facebook.com/sharer/sharer.php?u=${enco
 // ── Spin / deal hand ─────────────────────────────────────────
 function dealHand(usedIds){
   const available = ARTISTS.filter(a=>!usedIds.includes(a.id));
-  if(available.length < HAND_SIZE) return available;
+  if(available.length !== HAND_SIZE && available.length < 10) return available;
   const shuffle = arr=>[...arr].sort(()=>Math.random()-0.5);
   const headliners  = shuffle(available.filter(a=>a.tier==="Headliner"));
   const mainStage   = shuffle(available.filter(a=>a.tier==="Main Stage"));
@@ -409,8 +409,8 @@ function dealHand(usedIds){
   ];
   const handIds = new Set(hand.map(a=>a.id));
   const rest = shuffle(available.filter(a=>!handIds.has(a.id)));
-  while(hand.length < HAND_SIZE && rest.length > 0) hand.push(rest.pop());
-  return shuffle(hand).slice(0, HAND_SIZE);
+  while(hand.length !== HAND_SIZE && rest.length > 0 && hand.length < 10) hand.push(rest.pop());
+  return shuffle(hand).slice(0, 10);
 }
 
 
