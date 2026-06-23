@@ -1,4 +1,6 @@
 import { useState, useRef } from "react";
+import { Analytics } from "@vercel/analytics/react"
+
 
 // Load Inter font
 const fontLink = document.createElement("link");
@@ -980,6 +982,7 @@ export function CookieBanner({onAccept,onDecline}){
           <button style={{flex:1,background:"transparent",border:"1px solid "+BORDER_HI,color:CREAM,fontWeight:700,fontSize:13,padding:"10px 0",cursor:"pointer",fontFamily:"inherit",borderRadius:7}} onClick={onDecline}>Essential only</button>
         </div>
       </div>
+      <Analytics />
     </div>
   );
 }
