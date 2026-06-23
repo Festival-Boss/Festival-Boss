@@ -543,7 +543,7 @@ export default function FestivalBoss(){
       {/* HEADER */}
       <header style={s.hdr}>
         <div style={s.brand}>
-          <span style={s.brandF}>F</span>
+
           <div style={s.brandText}>
             <span style={s.brandTitle}>Festival Boss</span>
           </div>
