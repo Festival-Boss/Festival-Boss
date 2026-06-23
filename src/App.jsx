@@ -1,5 +1,5 @@
 // Festival Boss v2 — simplified stage system
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 const C = {
   bg:"#ffffff",surface:"#f5f0e8",card:"#faf6ee",ink:"#0a0a0a",
@@ -16,7 +16,7 @@ const C = {
 
 const BUDGET        = 14;
 const OVERHEADS     = 2;
-const TICKET_REV    = 24;
+const TICKET_REV    = 32;
 const TARGET_PROFIT = 4;
 const TOTAL_SLOTS   = 10;
 const MAX_SPINS     = 3;
@@ -243,12 +243,50 @@ function calcRevenue(lu){
   const slotMul = 0.1 + 0.9*(lu.length/TOTAL_SLOTS);
   const mainActs = lu.filter(a=>a.assignedStage==="Main Stage");
   const mainAvgDraw = mainActs.length > 0 ? mainActs.reduce((s,a)=>s+a.draw,0)/mainActs.length : 0;
-  const mainMul = mainAvgDraw >= 9.5 ? 1.15 : mainAvgDraw >= 9.0 ? 1.08 : mainAvgDraw >= 8.5 ? 1.0 : mainAvgDraw >= 8.0 ? 0.88 : mainAvgDraw >= 7.0 ? 0.72 : 0.55;
+  const mainMul = mainAvgDraw >= 9.5 ? 1.15 : mainAvgDraw >= 9.0 ? 1.10 : mainAvgDraw >= 8.5 ? 1.04 : mainAvgDraw >= 8.0 ? 0.90 : mainAvgDraw >= 7.0 ? 0.72 : 0.50;
   const gross = TICKET_REV * scoreRatio * genreMul * slotMul * mainMul;
   return +gross.toFixed(2);
 }
 
 function calcTotalCost(lu){ return +(calcCost(lu) + OVERHEADS).toFixed(2); }
+
+// Generate post-game feedback
+function calcFeedback(lu, profit){
+  const tips = [];
+  const genreCounts = {};
+  lu.forEach(a=>{ genreCounts[a.genre]=(genreCounts[a.genre]||0)+1; });
+  const maxSameGenre = Math.max(...Object.values(genreCounts));
+  const worstGenre = Object.entries(genreCounts).sort((a,b)=>b[1]-a[1])[0];
+
+  if(maxSameGenre >= 4) tips.push(`Too many ${worstGenre[0]} acts — genre stacking killed your revenue.`);
+  else if(maxSameGenre === 3) tips.push(`${worstGenre[0]} is overrepresented — more variety helps.`);
+
+  const mainActs = lu.filter(a=>a.assignedStage==="Main Stage");
+  const mainAvg = mainActs.length > 0 ? mainActs.reduce((s,a)=>s+a.draw,0)/mainActs.length : 0;
+  if(mainAvg < 8.5 && mainActs.length > 0) tips.push(`Your Main Stage averaged only ${mainAvg.toFixed(1)} draw — stronger acts there multiply your revenue.`);
+
+  const smallerActs = lu.filter(a=>a.assignedStage==="Smaller Stage");
+  const expensiveSmaller = smallerActs.filter(a=>a.fee > 1.0);
+  if(expensiveSmaller.length > 0) tips.push(`${expensiveSmaller[0].name} wasted on Smaller Stage — high-fee acts need big stages.`);
+
+  const secondActs = lu.filter(a=>a.assignedStage==="Second Stage");
+  const avgSecond = secondActs.length > 0 ? secondActs.reduce((s,a)=>s+a.draw,0)/secondActs.length : 0;
+  if(avgSecond > 0 && avgSecond < 7.0) tips.push(`Second Stage was weak — try higher draw acts there.`);
+
+  if(tips.length === 0 && profit < TARGET_PROFIT){
+    if(profit > 0) tips.push("So close! You need slightly stronger acts or better stage placement.");
+    else tips.push("Try booking premium acts for Main Stage and cheap acts for Smaller Stage.");
+  }
+  return tips.slice(0, 2);
+}
+
+// Best score helpers (localStorage)
+function getBestScore(){
+  try{ return parseFloat(localStorage.getItem("fb_best")||"-999"); }catch{ return -999; }
+}
+function saveBestScore(p){
+  try{ const b=getBestScore(); if(p>b) localStorage.setItem("fb_best",p.toString()); }catch{}
+}
 
 function stageColor(stage){
   return {"Main Stage":C.blue,"Second Stage":C.purple,"Smaller Stage":C.orange}[stage]||C.textMid;
@@ -266,8 +304,12 @@ function fmtP(v){ return fmt(v); }
 function fmtS(v){return `${v>=0?"+":"−"}${fmt(Math.abs(v))}`;}
 
 function shareText(n,res,lu){
-  const main=lu.filter(a=>a.assignedStage==="Main Stage").map(a=>a.name).join(", ")||"none";
-  return `Festival Boss\n${n}\nMain Stage: ${main}\nProfit: ${fmtS(res.profit)}\n${res.win?"WIN":"LOSS"}\nfestivalbossgame.com`;
+  const main=lu.filter(a=>a.assignedStage==="Main Stage").map(a=>a.name).join(", ")||"no one";
+  const winMsg = `🎪 I just booked ${n} on Festival Boss and turned a ${fmtS(res.profit)} profit. ${main} headlined. Think you can do better? festivalbossgame.com`;
+  const lossMsg = res.profit > 0
+    ? `🎪 I tried to run ${n} on Festival Boss. ${main} headlined. Made some money but not enough — ${fmtS(res.profit)} short of the target. Can you do better? festivalbossgame.com`
+    : `🎪 I just bankrupted ${n} on Festival Boss. ${main} headlined and nobody came. Lost ${fmt(Math.abs(res.profit))}. Absolute disaster. Can you do better? festivalbossgame.com`;
+  return res.win ? winMsg : lossMsg;
 }
 async function doCopy(t){try{await navigator.clipboard.writeText(t);return true;}catch{return false;}}
 function doTweet(t){window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(t)}`,"_blank");}
@@ -358,7 +400,9 @@ export default function FestivalBoss(){
 
   function finalise(){
     const cost=calcCost(lineup), rev=calcRevenue(lineup), tc=calcTotalCost(lineup), pnl=+(rev-tc).toFixed(2);
-    setResult({revenue:rev, cost:tc, profit:pnl, artistCost:cost, win:pnl>=TARGET_PROFIT});
+    saveBestScore(pnl);
+    const feedback = calcFeedback(lineup, pnl);
+    setResult({revenue:rev, cost:tc, profit:pnl, artistCost:cost, win:pnl>=TARGET_PROFIT, feedback});
     setScreen("result");
   }
 
@@ -573,6 +617,8 @@ function Ad({text}){
 }
 
 function HomeScreen({onStart,onLegal,onAbout}){
+  const best = getBestScore();
+  const hasBest = best > -999;
   return(
     <div style={h.page}>
       <div style={h.heroWrap}>
@@ -594,6 +640,13 @@ function HomeScreen({onStart,onLegal,onAbout}){
           <RuleItem icon="win"  label={`${TARGET_PROFIT}m+ profit`}  desc="to win"                      col={C.red}/>
         </div>
         <button style={h.startBtn} onClick={onStart}>Build Your Festival</button>
+        {hasBest && (
+          <div style={{marginTop:12,padding:"8px 12px",background:best>=TARGET_PROFIT?C.greenDim:C.blueDim,border:`2px solid ${best>=TARGET_PROFIT?C.green:C.blue}`,textAlign:"center"}}>
+            <span style={{fontSize:12,fontWeight:700,color:best>=TARGET_PROFIT?C.green:C.blue}}>
+              Your best: {fmtS(best)} {best>=TARGET_PROFIT?"🏆":"— can you turn a profit?"}
+            </span>
+          </div>
+        )}
         <CarbonAd/>
         <SponsorSlot/>
         <div style={h.legalRow}>
@@ -644,13 +697,39 @@ function NameScreen({name,setName,lineup,onConfirm,onBack}){
 }
 
 function Result({result,lineup,name,onReset,onHome,copied,onCopy,onTweet,onFb,onWhatsApp,onShare,onLegal,onAbout}){
-  const {revenue,cost,profit,win,artistCost}=result;
+  const {revenue,cost,profit,win,artistCost,feedback}=result;
+  const posterRef = useRef(null);
+  const [imgUrl, setImgUrl] = useState(null);
+  const bestScore = getBestScore();
+  const isNewBest = profit >= bestScore;
+
   const main   = lineup.filter(a=>a.assignedStage==="Main Stage");
   const second = lineup.filter(a=>a.assignedStage==="Second Stage");
   const smaller= lineup.filter(a=>a.assignedStage==="Smaller Stage");
+
+  async function downloadPoster(){
+    if(!posterRef.current) return;
+    try{
+      const html2canvas = (await import("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.esm.min.js")).default;
+      const canvas = await html2canvas(posterRef.current, {scale:2, backgroundColor:"#fffff8"});
+      const url = canvas.toDataURL("image/png");
+      const a = document.createElement("a");
+      a.href = url; a.download = `${name||"festival"}-boss.png`; a.click();
+    }catch(e){ console.error(e); }
+  }
   return(
     <div style={r.page}>
       <Ad text="Eventbrite - sell your tickets in minutes"/>
+
+      {/* BEST SCORE BANNER */}
+      {isNewBest && profit > -999 && (
+        <div style={{background:win?C.greenDim:C.blueDim,border:`2px solid ${win?C.green:C.blue}`,padding:"8px 14px",marginBottom:10,textAlign:"center"}}>
+          <span style={{fontWeight:900,fontSize:13,color:win?C.green:C.blue}}>
+            {profit > 0 ? `New personal best: ${fmtS(profit)}` : `Personal best: ${fmtS(profit)}`}
+          </span>
+        </div>
+      )}
+
       <div style={{...r.verdict, background:win?C.greenDim:C.lossDim, borderLeft:`4px solid ${win?C.green:C.red}`}}>
         <span style={{fontSize:28}}>{win?"WIN":"LOSS"}</span>
         <div>
@@ -668,6 +747,26 @@ function Result({result,lineup,name,onReset,onHome,copied,onCopy,onTweet,onFb,on
       <div style={{color:C.textDim,fontSize:11,textAlign:"center",marginBottom:12}}>
         Includes £{OVERHEADS}m overheads · Artist fees: {fmtP(artistCost||cost-OVERHEADS)}
       </div>
+
+      {/* POST-GAME FEEDBACK */}
+      {!win && feedback && feedback.length > 0 && (
+        <div style={{background:C.surface,border:`2px solid ${C.orange}`,padding:"12px 14px",marginBottom:14}}>
+          <div style={{fontWeight:900,fontSize:11,textTransform:"uppercase",letterSpacing:"0.1em",color:C.orange,marginBottom:8}}>What went wrong</div>
+          {feedback.map((tip,i)=>(
+            <div key={i} style={{fontSize:12,color:C.textMid,lineHeight:1.5,marginBottom:i<feedback.length-1?6:0}}>• {tip}</div>
+          ))}
+        </div>
+      )}
+      {win && (
+        <div style={{background:C.greenDim,border:`2px solid ${C.green}`,padding:"12px 14px",marginBottom:14}}>
+          <div style={{fontWeight:900,fontSize:11,textTransform:"uppercase",letterSpacing:"0.1em",color:C.green,marginBottom:4}}>What worked</div>
+          <div style={{fontSize:12,color:C.textMid,lineHeight:1.5}}>
+            {main.length>0&&main[0].draw>=9?"Strong Main Stage acts drove your revenue. ":""}
+            Good balance across all three stages. Can you beat your score?
+          </div>
+        </div>
+      )}
+
       <p style={r.msg}>
         {win
           ?`${name} turned ${fmtP(profit)} profit. ${main[0]?.name||"Your headliner"} packed the Main Stage.`
@@ -677,7 +776,7 @@ function Result({result,lineup,name,onReset,onHome,copied,onCopy,onTweet,onFb,on
         }
       </p>
       <div style={po.wrap}>
-        <div style={po.poster}>
+        <div ref={posterRef} style={po.poster}>
           <div style={po.topBand}/>
           <div style={po.hBar}><span style={po.hBarText}>Festival Boss Presents</span></div>
           <div style={po.festName}>{name.toUpperCase()}</div>
@@ -702,6 +801,9 @@ function Result({result,lineup,name,onReset,onHome,copied,onCopy,onTweet,onFb,on
           <SBtn onClick={onShare}>Share</SBtn>
           <SBtn onClick={onCopy} hi={copied}>{copied?"Copied!":"Copy"}</SBtn>
         </div>
+        <button onClick={downloadPoster} style={{marginTop:10,width:"100%",background:"transparent",border:`2px solid ${C.ink}`,color:C.ink,fontWeight:700,fontSize:12,padding:"9px 0",cursor:"pointer",fontFamily:"inherit",letterSpacing:"0.05em"}}>
+          ⬇ Download Poster
+        </button>
       </div>
       <div style={r.actions}>
         <button style={r.btnPrimary} onClick={onReset}>Try Again</button>
