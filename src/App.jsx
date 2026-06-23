@@ -19,7 +19,7 @@ const OVERHEADS     = 2;
 const TICKET_REV    = 24;
 const TARGET_PROFIT = 4;
 const TOTAL_SLOTS   = 10;
-const MAX_SPINS     = 3;
+const MAX_SPINS     = 5;
 const HAND_SIZE     = 8;
 
 const STAGE_CAPS = {"Main Stage":3,"Second Stage":4,"Smaller Stage":3};
@@ -324,7 +324,8 @@ export default function FestivalBoss(){
     setSpinning(true);
     setTimeout(()=>{
       setHand(dealHand(lineup.map(a=>a.id)));
-      setSpinsLeft(p=>p-1);
+      // First spin (hand is empty) is free — only subsequent spins cost
+      if(hand.length > 0) setSpinsLeft(p=>p-1);
       setSpinning(false);
     }, 500);
   }
@@ -340,16 +341,11 @@ export default function FestivalBoss(){
     const newLineup = [...lineup, {...picking, assignedStage:stage}];
     setLineup(newLineup);
     setPicking(null);
-    // Auto-reshuffle if spins remain and lineup not full
-    if(spinsLeft > 0 && newLineup.length < TOTAL_SLOTS){
-      setSpinning(true);
-      setTimeout(()=>{
-        setHand(dealHand(newLineup.map(a=>a.id)));
-        setSpinsLeft(p=>p-1);
-        setSpinning(false);
-      }, 400);
+    // Reshuffle hand for free after picking — no spin cost
+    if(newLineup.length < TOTAL_SLOTS){
+      setHand(dealHand(newLineup.map(a=>a.id)));
     } else {
-      setHand(p=>p.filter(a=>a.id!==picking.id));
+      setHand([]);
     }
   }
 
