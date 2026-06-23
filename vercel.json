@@ -1,4 +1,17 @@
 {
-  "buildCommand": "CI= npm run build",
-  "outputDirectory": "build"
+  "name": "festival-boss",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.0.0",
+    "vite": "^4.4.0"
+  },
+  "scripts": {
+    "start": "vite",
+    "build": "vite build"
+  }
 }
