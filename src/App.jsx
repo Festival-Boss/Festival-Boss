@@ -397,7 +397,7 @@ function doFb(){window.open(`https://www.facebook.com/sharer/sharer.php?u=${enco
 function dealHand(usedIds){
   const maxCards = 10;
   const available = ARTISTS.filter(a=>!usedIds.includes(a.id));
- if(available.length <= maxCards return available;
+ if(available.length <= maxCards) return available;
   const shuffle = arr=>[...arr].sort(()=>Math.random()-0.5);
   const headliners  = shuffle(available.filter(a=>a.tier==="Headliner"));
   const mainStage   = shuffle(available.filter(a=>a.tier==="Main Stage"));
