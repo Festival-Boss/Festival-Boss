@@ -1,3 +1,4 @@
+// Festival Boss - fixed build
 import { useState } from "react";
 
 // ─────────────────────────────────────────────────────────────
