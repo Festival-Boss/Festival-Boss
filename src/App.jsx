@@ -718,13 +718,18 @@ function HomeScreen({onStart,onLegal,onAbout}){
           <RuleItem icon="win"  label={`$Break even to survive                      col={C.red}/>
         </div>
         <button style={h.startBtn} onClick={onStart}>Build Your Festival</button>
-        {hasBest && (
-          <div style={{marginTop:12,padding:"8px 12px",background:best>=3.5?C.greenDim:best>=0?C.blueDim:C.redDim,border:`2px solid ${best>=3.5?C.green:best>=0?C.blue:C.red}`,textAlign:"center"}}>
-            <span style={{fontSize:12,fontWeight:700,color:best>=3.5?C.green:best>=0?C.blue:C.red}}>
-              Your best: {fmtS(best)} {best>=3.5?"🏆":best>=2.0?"⭐⭐⭐":best>=0.5?"⭐⭐":best>=0?"⭐":"💀"}
-            </span>
-          </div>
-        )}
+        {hasBest && (()=>{
+          const bc = best>=3.5?C.greenDim:best>=0?C.blueDim:C.redDim;
+          const brd = best>=3.5?C.green:best>=0?C.blue:C.red;
+          const stars = best>=3.5?"🏆":best>=2.0?"⭐⭐⭐":best>=0.5?"⭐⭐":best>=0?"⭐":"💀";
+          return(
+            <div style={{marginTop:12,padding:"8px 12px",background:bc,border:`2px solid ${brd}`,textAlign:"center"}}>
+              <span style={{fontSize:12,fontWeight:700,color:brd}}>
+                Your best: {fmtS(best)} {stars}
+              </span>
+            </div>
+          );
+        })()}
         <CarbonAd/>
         <SponsorSlot/>
         <div style={h.legalRow}>
