@@ -1,6 +1,4 @@
 import { useState, useRef } from "react";
-import { Analytics } from "@vercel/analytics/react"
-
 
 // Load Inter font
 const fontLink = document.createElement("link");
@@ -455,15 +453,15 @@ export default function FestivalBoss(){
       )}
 
       {/* HEADER */}
-      <header style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"0 16px",height:56,background:SURFACE,borderBottom:"2px solid "+ORANGE,flexShrink:0}}>
-        <span style={{fontWeight:900,fontSize:17,color:CREAM,letterSpacing:"-0.3px",whiteSpace:"nowrap"}}>Festival Boss</span>
-        <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
+      <header style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 12px",minHeight:52,background:SURFACE,borderBottom:"2px solid "+ORANGE,flexShrink:0,flexWrap:"wrap",gap:6}}>
+        <span style={{fontWeight:900,fontSize:15,color:CREAM,letterSpacing:"-0.3px",whiteSpace:"nowrap"}}>Festival Boss</span>
+        <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"nowrap"}}>
           <Kpi l="Budget" v={fmt(rem)}                          c={rem<2?YELLOW:CREAM}/>
-          <div style={{width:1,height:20,background:"rgba(245,240,232,0.2)"}}/>
+          <div style={{width:1,height:16,background:"rgba(245,240,232,0.2)"}}/>
           <Kpi l="Acts"   v={lineup.length+"/"+TOTAL_SLOTS}     c={full?YELLOW:CREAM}/>
-          <div style={{width:1,height:20,background:"rgba(245,240,232,0.2)"}}/>
+          <div style={{width:1,height:16,background:"rgba(245,240,232,0.2)"}}/>
           <Kpi l="Spins"  v={spinsLeft}                         c={spinsLeft<=1?YELLOW:CREAM}/>
-          <div style={{width:1,height:20,background:"rgba(245,240,232,0.2)"}}/>
+          <div style={{width:1,height:16,background:"rgba(245,240,232,0.2)"}}/>
           <Kpi l="P&L"    v={fmtS(profit)}                      c={profit>=0?GREEN:RED}/>
         </div>
       </header>
@@ -598,8 +596,8 @@ export default function FestivalBoss(){
 function Kpi({l,v,c}){
   return(
     <div style={{textAlign:"center"}}>
-      <div style={{color:c,fontWeight:900,fontSize:14,letterSpacing:"-0.3px",fontFamily:"'Inter','Helvetica Neue',Arial,sans-serif"}}>{v}</div>
-      <div style={{color:"rgba(245,240,232,0.5)",fontSize:9,textTransform:"uppercase",letterSpacing:"0.1em",marginTop:1}}>{l}</div>
+      <div style={{color:c,fontWeight:900,fontSize:13,letterSpacing:"-0.3px"}}>{v}</div>
+      <div style={{color:"rgba(245,240,232,0.5)",fontSize:8,textTransform:"uppercase",letterSpacing:"0.08em",marginTop:1}}>{l}</div>
     </div>
   );
 }
@@ -982,7 +980,6 @@ export function CookieBanner({onAccept,onDecline}){
           <button style={{flex:1,background:"transparent",border:"1px solid "+BORDER_HI,color:CREAM,fontWeight:700,fontSize:13,padding:"10px 0",cursor:"pointer",fontFamily:"inherit",borderRadius:7}} onClick={onDecline}>Essential only</button>
         </div>
       </div>
-      <Analytics />
     </div>
   );
 }
