@@ -261,11 +261,11 @@ function stageBg(stage){
 
 function fmt(v){
   const a=Math.abs(v);
-  if(a===0) return "0m";
-  return `${a>=1?a.toFixed(1):a.toFixed(2).replace(/\.?0+$/,"")}m`;
+  if(a===0) return "£0m";
+  return `£${a>=1?a.toFixed(1):a.toFixed(2).replace(/\.?0+$/,"")}m`;
 }
-function fmtP(v){ return `${fmt(v)}`; }
-function fmtS(v){return `${v>=0?"+":"-"}${fmt(Math.abs(v))}`;}
+function fmtP(v){ return fmt(v); }
+function fmtS(v){return `${v>=0?"+":"−"}${fmt(Math.abs(v))}`;}
 
 function shareText(n,res,lu){
   const main=lu.filter(a=>a.assignedStage==="Main Stage").map(a=>a.name).join(", ")||"none";
@@ -337,9 +337,20 @@ export default function FestivalBoss(){
   function assignStage(stage){
     if(!picking) return;
     if(stageCounts[stage] >= STAGE_CAPS[stage]) return;
-    setLineup(p=>[...p,{...picking, assignedStage:stage}]);
-    setHand(p=>p.filter(a=>a.id!==picking.id));
+    const newLineup = [...lineup, {...picking, assignedStage:stage}];
+    setLineup(newLineup);
     setPicking(null);
+    // Auto-reshuffle if spins remain and lineup not full
+    if(spinsLeft > 0 && newLineup.length < TOTAL_SLOTS){
+      setSpinning(true);
+      setTimeout(()=>{
+        setHand(dealHand(newLineup.map(a=>a.id)));
+        setSpinsLeft(p=>p-1);
+        setSpinning(false);
+      }, 400);
+    } else {
+      setHand(p=>p.filter(a=>a.id!==picking.id));
+    }
   }
 
   function removeAct(id){ setLineup(p=>p.filter(a=>a.id!==id)); }
@@ -381,7 +392,7 @@ export default function FestivalBoss(){
           <div style={gm.modal}>
             <div style={gm.modalName}>{picking.name}</div>
             <div style={gm.modalSub}>Which stage?</div>
-            <div style={gm.modalFee}>Fee: {fmtP(picking.fee)}m · Draw: {picking.draw} · {picking.genre}</div>
+            <div style={gm.modalFee}>Fee: {fmtP(picking.fee)} · Draw: {picking.draw} · {picking.genre}</div>
             {STAGES.map(stage=>{
               const count = stageCounts[stage];
               const cap   = STAGE_CAPS[stage];
@@ -407,7 +418,7 @@ export default function FestivalBoss(){
       <header style={s.hdr}>
         <span style={s.brandTitle}>Festival Boss</span>
         <div style={s.kpis}>
-          <Kpi l="Budget" v={`${fmtP(rem)}m`}                    c={rem<2?C.yellow:"#fff"}/>
+          <Kpi l="Budget" v={`${fmtP(rem)}`}                    c={rem<2?C.yellow:"#fff"}/>
           <div style={s.kdiv}/>
           <Kpi l="Acts"   v={`${lineup.length}/${TOTAL_SLOTS}`}   c={full?C.yellow:"#fff"}/>
           <div style={s.kdiv}/>
@@ -442,7 +453,7 @@ export default function FestivalBoss(){
                   </div>
                 </div>
                 <div style={s.aRight}>
-                  <span style={{color:stageColor(a.assignedStage),fontWeight:800,fontSize:12}}>{fmtP(a.fee)}m</span>
+                  <span style={{color:stageColor(a.assignedStage),fontWeight:800,fontSize:12}}>{fmtP(a.fee)}</span>
                   <button style={s.xBtn} onClick={()=>removeAct(a.id)}>x</button>
                 </div>
               </div>
@@ -494,7 +505,7 @@ export default function FestivalBoss(){
                     <div style={gm.actName}>{a.name}</div>
                     <div style={gm.actGenre}>{a.genre}</div>
                     <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginTop:6}}>
-                      <span style={{color:a.draw>=9?C.red:C.blue,fontWeight:900,fontSize:13}}>{fmtP(a.fee)}m</span>
+                      <span style={{color:a.draw>=9?C.red:C.blue,fontWeight:900,fontSize:13}}>{fmtP(a.fee)}</span>
                     </div>
                     {!canAfford&&<div style={{fontSize:9,color:C.red,fontWeight:700,marginTop:4,textTransform:"uppercase"}}>Over budget</div>}
                   </div>
@@ -648,19 +659,19 @@ function Result({result,lineup,name,onReset,onHome,copied,onCopy,onTweet,onFb,on
         </div>
       </div>
       <div style={r.figs}>
-        <Fig l="Revenue"   v={`${fmtP(revenue)}m`} c={C.green}/>
-        <Fig l="All Costs" v={`-${fmtP(cost)}m`}   c={C.red}/>
+        <Fig l="Revenue"   v={`${fmtP(revenue)}`} c={C.green}/>
+        <Fig l="All Costs" v={`-${fmtP(cost)}`}   c={C.red}/>
         <Fig l={profit>=0?"Profit":"Loss"} v={fmtS(profit)} c={profit>=TARGET_PROFIT?C.green:C.red} big/>
       </div>
       <div style={{color:C.textDim,fontSize:11,textAlign:"center",marginBottom:12}}>
-        Includes {OVERHEADS}m overheads · Artist fees: {fmtP(artistCost||cost-OVERHEADS)}m
+        Includes £{OVERHEADS}m overheads · Artist fees: {fmtP(artistCost||cost-OVERHEADS)}
       </div>
       <p style={r.msg}>
         {win
-          ?`${name} turned ${fmtP(profit)}m profit. ${main[0]?.name||"Your headliner"} packed the Main Stage.`
+          ?`${name} turned ${fmtP(profit)} profit. ${main[0]?.name||"Your headliner"} packed the Main Stage.`
           :profit>0
-            ?`So close — ${fmtP(profit)}m profit but you needed ${TARGET_PROFIT}m. Check your stage placements.`
-            :`${name} lost ${fmtP(Math.abs(profit))}m. Even the portaloos turned a profit.`
+            ?`So close — ${fmtP(profit)} profit but you needed £${TARGET_PROFIT}m. Check your stage placements.`
+            :`${name} lost ${fmtP(Math.abs(profit))}. Even the portaloos turned a profit.`
         }
       </p>
       <div style={po.wrap}>
