@@ -38,7 +38,6 @@ const ARTISTS = [
   {id:9,name:"Jay-Z",fee:3.2,draw:9.1,genre:"Hip-Hop"},
   {id:10,name:"Kendrick Lamar",fee:3.8,draw:9.6,genre:"Hip-Hop"},
   {id:11,name:"Blur",fee:2.4,draw:9.0,genre:"Britpop"},
-  {id:12,name:"Muse",fee:2.5,draw:9.2,genre:"Alt Rock"},
   {id:13,name:"David Bowie",fee:3.0,draw:9.9,genre:"Rock"},
   {id:14,name:"Eminem",fee:3.6,draw:9.5,genre:"Hip-Hop"},
   {id:15,name:"Bruce Springsteen",fee:3.2,draw:9.3,genre:"Rock"},
@@ -58,7 +57,6 @@ const ARTISTS = [
   {id:29,name:"Arcade Fire",fee:1.8,draw:8.6,genre:"Indie"},
   {id:30,name:"Fleetwood Mac",fee:3.0,draw:9.2,genre:"Rock"},
   {id:176,name:"Green Day",fee:2.2,draw:9.0,genre:"Punk Rock"},
-  {id:189,name:"Blur reunion",fee:2.6,draw:9.3,genre:"Britpop"},
   {id:31,name:"Florence and the Machine",fee:1.4,draw:8.3,genre:"Indie"},
   {id:32,name:"Jack White",fee:1.2,draw:8.0,genre:"Rock"},
   {id:33,name:"The National",fee:0.9,draw:7.8,genre:"Indie Rock"},
@@ -274,6 +272,12 @@ function shareText(n,res,lu){
 async function doCopy(t){try{await navigator.clipboard.writeText(t);return true;}catch{return false;}}
 function doTweet(t){window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(t)}`,"_blank");}
 function doFb(){window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent("https://festivalbossgame.com")}`,"_blank");}
+function doWhatsApp(t){window.open(`https://wa.me/?text=${encodeURIComponent(t)}`,"_blank");}
+async function doNativeShare(t){
+  if(navigator.share){
+    try{await navigator.share({title:"Festival Boss",text:t,url:"https://festivalbossgame.com"});}catch{}
+  }
+}
 
 function dealHand(usedIds){
   const available = ARTISTS.filter(a=>!usedIds.includes(a.id));
@@ -372,7 +376,9 @@ export default function FestivalBoss(){
       onReset={reset} onHome={()=>setScreen("home")} copied={copied}
       onCopy={async()=>{const ok=await doCopy(shareText(name||"My Festival",result,lineup));setCopied(ok);}}
       onTweet={()=>doTweet(shareText(name||"My Festival",result,lineup))}
-      onFb={doFb} onLegal={setLegal} onAbout={()=>setScreen("about")}
+      onFb={doFb} onWhatsApp={()=>doWhatsApp(shareText(name||"My Festival",result,lineup))}
+      onShare={()=>doNativeShare(shareText(name||"My Festival",result,lineup))}
+      onLegal={setLegal} onAbout={()=>setScreen("about")}
     />
   );
 
@@ -637,7 +643,7 @@ function NameScreen({name,setName,lineup,onConfirm,onBack}){
   );
 }
 
-function Result({result,lineup,name,onReset,onHome,copied,onCopy,onTweet,onFb,onLegal,onAbout}){
+function Result({result,lineup,name,onReset,onHome,copied,onCopy,onTweet,onFb,onWhatsApp,onShare,onLegal,onAbout}){
   const {revenue,cost,profit,win,artistCost}=result;
   const main   = lineup.filter(a=>a.assignedStage==="Main Stage");
   const second = lineup.filter(a=>a.assignedStage==="Second Stage");
@@ -690,9 +696,11 @@ function Result({result,lineup,name,onReset,onHome,copied,onCopy,onTweet,onFb,on
       <div style={r.shareWrap}>
         <div style={r.shareLabel}>Share your festival</div>
         <div style={r.shareBtns}>
-          <SBtn onClick={onTweet}>Post on X</SBtn>
-          <SBtn onClick={onFb}>Share on Facebook</SBtn>
-          <SBtn onClick={onCopy} hi={copied}>{copied?"Copied!":"Copy result"}</SBtn>
+          <SBtn onClick={onTweet}>𝕏 Post</SBtn>
+          <SBtn onClick={onFb}>Facebook</SBtn>
+          <SBtn onClick={onWhatsApp}>WhatsApp</SBtn>
+          <SBtn onClick={onShare}>Share</SBtn>
+          <SBtn onClick={onCopy} hi={copied}>{copied?"Copied!":"Copy"}</SBtn>
         </div>
       </div>
       <div style={r.actions}>
