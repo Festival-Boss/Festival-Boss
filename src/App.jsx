@@ -721,7 +721,7 @@ function HomeScreen({onStart,onLegal,onAbout}){
         {hasBest && (
           <div style={{marginTop:12,padding:"8px 12px",background:best>=3.5?C.greenDim:best>=0?C.blueDim:C.redDim,border:`2px solid ${best>=3.5?C.green:best>=0?C.blue:C.red}`,textAlign:"center"}}>
             <span style={{fontSize:12,fontWeight:700,color:best>=3.5?C.green:best>=0?C.blue:C.red}}>
-              Your best: {fmtS(best)} {"🏆":"— can you turn a profit?"}
+              Your best: {fmtS(best)} {best>=3.5?"🏆":best>=2.0?"⭐⭐⭐":best>=0.5?"⭐⭐":best>=0?"⭐":"💀"}
             </span>
           </div>
         )}
