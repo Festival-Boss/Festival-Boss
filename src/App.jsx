@@ -2,25 +2,98 @@
 import { useState, useRef, useEffect } from "react";
 
 const C = {
-  bg:"#ffffff",surface:"#f5f0e8",card:"#faf6ee",ink:"#0a0a0a",
-  text:"#0a0a0a",textMid:"#4a4a4a",textDim:"#999999",textFaint:"#cccccc",
-  red:"#e8191f",redDim:"rgba(232,25,31,0.1)",
-  blue:"#0038a8",blueDim:"rgba(0,56,168,0.1)",
-  orange:"#f47920",orangeDim:"rgba(244,121,32,0.1)",
-  purple:"#7b2d8b",purpleDim:"rgba(123,45,139,0.1)",
-  green:"#1a7a3c",greenDim:"rgba(26,122,60,0.1)",
-  yellow:"#ffd400",yellowDim:"rgba(255,212,0,0.15)",
-  win:"#1a7a3c",winDim:"rgba(26,122,60,0.1)",loss:"#e8191f",lossDim:"rgba(232,25,31,0.1)",
-  border:"rgba(10,10,10,0.12)",borderHi:"rgba(10,10,10,0.25)",borderBold:"rgba(10,10,10,0.8)",
+  bg:        "#1a3344",   // deep navy teal — main background
+  surface:   "#1e3d52",   // slightly lighter navy for cards/panels
+  card:      "#243f55",   // card background
+  ink:       "#f5f0e8",   // warm cream — primary text/type
+
+  text:      "#f5f0e8",
+  textMid:   "#b8c9d4",   // muted blue-white
+  textDim:   "#6a8a9a",   // dimmed
+  textFaint: "#3a5a6a",   // very dim
+
+  red:       "#e8191f",
+  redDim:    "rgba(232,25,31,0.15)",
+  blue:      "#4db8d4",   // bright teal accent
+  blueDim:   "rgba(77,184,212,0.15)",
+  orange:    "#f47920",   // warm festival orange — main accent
+  orangeDim: "rgba(244,121,32,0.15)",
+  purple:    "#c084d4",
+  purpleDim: "rgba(192,132,212,0.15)",
+  green:     "#4caf82",   // fresh green
+  greenDim:  "rgba(76,175,130,0.15)",
+  yellow:    "#ffd400",
+  yellowDim: "rgba(255,212,0,0.15)",
+
+  win:       "#4caf82",
+  winDim:    "rgba(76,175,130,0.15)",
+  loss:      "#e8191f",
+  lossDim:   "rgba(232,25,31,0.15)",
+
+  border:    "rgba(245,240,232,0.12)",
+  borderHi:  "rgba(245,240,232,0.25)",
+  borderBold:"rgba(245,240,232,0.6)",
 };
 
 const BUDGET        = 14;
 const OVERHEADS     = 2;
-const TICKET_REV    = 32;
-const TARGET_PROFIT = 4;
+const TICKET_REV    = 34;
 const TOTAL_SLOTS   = 10;
 const MAX_SPINS     = 3;
 const HAND_SIZE     = 8;
+
+// Profit tiers — real festivals barely break even
+const TIERS = [
+  { min: 3.5,  stars: 4, label: "Legendary",   sub: "This is the stuff of festival history.",         color: "#ffd400", poster: "LEGENDARY ⭐⭐⭐⭐" },
+  { min: 2.0,  stars: 3, label: "Established",  sub: "People are talking. You're a name in the game.", color: "#4caf82", poster: "ESTABLISHED ⭐⭐⭐" },
+  { min: 0.5,  stars: 2, label: "In the Black", sub: "You turned a profit. Real promoters dream of this.", color: "#4db8d4", poster: "IN THE BLACK ⭐⭐" },
+  { min: -1.0, stars: 1, label: "Bad Year",     sub: "We lost money but we'll be back next summer.",   color: "#f47920", poster: "BAD YEAR ⭐" },
+  { min: -999, stars: 0, label: "Cancelled",    sub: "Nobody came. The site is empty. Creditors are circling.", color: "#e8191f", poster: "CANCELLED 💀" },
+];
+
+const SOLD_OUT_THRESHOLD = 4.2; // teased but almost unreachable
+
+const CROWD_REVIEWS = {
+  4: [
+    "Best festival ever. I can't even find my knickers.",
+    "I lost my shoes and found my soulmate.",
+    "I'm never going home. Someone bring my post here.",
+    "I cried. My mate cried. The security guard cried.",
+  ],
+  3: [
+    "Already bought tickets for next year before I left the site.",
+    "My mate cried during the headline set. In a good way.",
+    "Best weekend of the year. And my wedding was this year.",
+    "I don't know what happened but I need to do it again.",
+  ],
+  2: [
+    "Decent. Not life-changing, but decent.",
+    "The halloumi wrap queue was only 45 minutes. Respect.",
+    "I lost my phone but found it again. Net neutral.",
+    "Better than Reading 2011. And that's saying something.",
+  ],
+  1: [
+    "It rained. Then it rained some more. Then it rained again.",
+    "The sound cut out twice during the headline set.",
+    "Queue for the bar was longer than the set.",
+    "My tent flooded on night one. Slept in the car.",
+  ],
+  0: [
+    "I got locked in a portaloo for 6 hours.",
+    "Me and my mate were the only ones there. We left at 3pm.",
+    "The catering gave everyone food poisoning. Everyone.",
+    "I drove 4 hours for this. 4 hours.",
+  ],
+};
+
+function getCrowdReview(stars){
+  const reviews = CROWD_REVIEWS[stars] || CROWD_REVIEWS[0];
+  return reviews[Math.floor(Math.random()*reviews.length)];
+}
+
+function getTier(profit){
+  return TIERS.find(t=>profit>=t.min) || TIERS[TIERS.length-1];
+}
 
 const STAGE_CAPS = {"Main Stage":3,"Second Stage":4,"Smaller Stage":3};
 const STAGE_MULS = {"Main Stage":1.0,"Second Stage":0.65,"Smaller Stage":0.35};
@@ -273,9 +346,10 @@ function calcFeedback(lu, profit){
   const avgSecond = secondActs.length > 0 ? secondActs.reduce((s,a)=>s+a.draw,0)/secondActs.length : 0;
   if(avgSecond > 0 && avgSecond < 7.0) tips.push(`Second Stage was weak — try higher draw acts there.`);
 
-  if(tips.length === 0 && profit < TARGET_PROFIT){
-    if(profit > 0) tips.push("So close! You need slightly stronger acts or better stage placement.");
-    else tips.push("Try booking premium acts for Main Stage and cheap acts for Smaller Stage.");
+  if(tips.length === 0 && profit < 3.5){
+    if(profit >= 2.0) tips.push("Great run! To hit Legendary you need perfect Main Stage acts AND tight budget management.");
+    else if(profit >= 0) tips.push("You survived! Try stronger acts on Main Stage — that's where the revenue multiplier really kicks in.");
+    else tips.push("Try booking premium acts for Main Stage and cheap acts for Smaller Stage — and mix your genres.");
   }
   return tips.slice(0, 2);
 }
@@ -305,11 +379,13 @@ function fmtS(v){return `${v>=0?"+":"−"}${fmt(Math.abs(v))}`;}
 
 function shareText(n,res,lu){
   const main=lu.filter(a=>a.assignedStage==="Main Stage").map(a=>a.name).join(", ")||"no one";
-  const winMsg = `🎪 I just booked ${n} on Festival Boss and turned a ${fmtS(res.profit)} profit. ${main} headlined. Think you can do better? festivalbossgame.com`;
-  const lossMsg = res.profit > 0
-    ? `🎪 I tried to run ${n} on Festival Boss. ${main} headlined. Made some money but not enough — ${fmtS(res.profit)} short of the target. Can you do better? festivalbossgame.com`
-    : `🎪 I just bankrupted ${n} on Festival Boss. ${main} headlined and nobody came. Lost ${fmt(Math.abs(res.profit))}. Absolute disaster. Can you do better? festivalbossgame.com`;
-  return res.win ? winMsg : lossMsg;
+  const stars = res.tier.stars;
+  if(res.profit>=SOLD_OUT_THRESHOLD) return `🏆 SOLD OUT on Festival Boss! ${n} turned ${fmtS(res.profit)} profit. The holy grail. festivalbossgame.com`;
+  if(stars===4) return `⭐⭐⭐⭐ LEGENDARY on Festival Boss! ${n} turned ${fmtS(res.profit)} profit with ${main} on Main Stage. Can you beat it? festivalbossgame.com`;
+  if(stars===3) return `⭐⭐⭐ Established promoter! I ran ${n} on Festival Boss — ${fmtS(res.profit)} in the black. Think you can go Legendary? festivalbossgame.com`;
+  if(stars===2) return `⭐⭐ In the Black! I ran ${n} on Festival Boss and turned ${fmtS(res.profit)} profit. Can you do better? festivalbossgame.com`;
+  if(stars===1) return `⭐ Bad year but we go again. ${n} on Festival Boss — lost ${fmtS(res.profit)}. I'll be back. Can you survive? festivalbossgame.com`;
+  return `💀 I just cancelled my own festival on Festival Boss. ${n} lost ${fmtS(res.profit)}. Even the portaloos turned a profit. festivalbossgame.com`;
 }
 async function doCopy(t){try{await navigator.clipboard.writeText(t);return true;}catch{return false;}}
 function doTweet(t){window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(t)}`,"_blank");}
@@ -402,7 +478,9 @@ export default function FestivalBoss(){
     const cost=calcCost(lineup), rev=calcRevenue(lineup), tc=calcTotalCost(lineup), pnl=+(rev-tc).toFixed(2);
     saveBestScore(pnl);
     const feedback = calcFeedback(lineup, pnl);
-    setResult({revenue:rev, cost:tc, profit:pnl, artistCost:cost, win:pnl>=TARGET_PROFIT, feedback});
+    const tier = getTier(pnl);
+    const crowdReview = getCrowdReview(tier.stars);
+    setResult({revenue:rev, cost:tc, profit:pnl, artistCost:cost, tier, feedback, crowdReview});
     setScreen("result");
   }
 
@@ -470,7 +548,7 @@ export default function FestivalBoss(){
           <div style={s.kdiv}/>
           <Kpi l="Spins"  v={spinsLeft}                           c={spinsLeft<=1?C.yellow:"#fff"}/>
           <div style={s.kdiv}/>
-          <Kpi l="P&L"    v={fmtS(profit)}                        c={profit>=TARGET_PROFIT?C.yellow:C.red}/>
+          <Kpi l="P&L"    v={fmtS(profit)}                        c={profit>=3.5?C.yellow:profit>=0?C.orange:C.red}/>
         </div>
       </header>
 
@@ -516,7 +594,7 @@ export default function FestivalBoss(){
             <Chk ok={varietyGood} t={varietyGood?"Good genre mix":"Too many same genre"}/>
             <div style={{marginTop:8,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
               <span style={{color:C.textMid,fontSize:12}}>Projected P&L</span>
-              <span style={{color:profit>=TARGET_PROFIT?C.green:C.red,fontWeight:900,fontSize:18}}>{fmtS(profit)}</span>
+              <span style={{color:profit>=0?C.green:C.red,fontWeight:900,fontSize:18}}>{fmtS(profit)}</span>
             </div>
             <div style={{fontSize:10,color:C.textDim,marginTop:2}}>Incl. {OVERHEADS}m overheads</div>
           </div>
@@ -565,7 +643,7 @@ export default function FestivalBoss(){
               <div style={{fontSize:48,marginBottom:12,opacity:0.2}}>SPIN</div>
               <div style={{color:C.textMid,fontSize:16,fontWeight:700,fontFamily:"'Georgia',serif"}}>Spin to get your acts</div>
               <div style={{color:C.textDim,fontSize:12,marginTop:8}}>{MAX_SPINS} spins to fill {TOTAL_SLOTS} slots on {BUDGET}m budget</div>
-              <div style={{color:C.textDim,fontSize:11,marginTop:4}}>Need {TARGET_PROFIT}m+ profit to win</div>
+              <div style={{color:C.textDim,fontSize:11,marginTop:4}}>Break even to survive · £3.5m+ for Legendary</div>
               <div style={{marginTop:16,display:"flex",gap:12,flexWrap:"wrap",justifyContent:"center"}}>
                 {STAGES.map(stage=>(
                   <div key={stage} style={{fontSize:11,color:stageColor(stage),fontWeight:700,textAlign:"center"}}>
@@ -637,13 +715,13 @@ function HomeScreen({onStart,onLegal,onAbout}){
           <RuleItem icon="main" label="Main Stage: 3 slots"          desc="100% revenue — pick wisely"  col={C.blue}/>
           <RuleItem icon="2nd"  label="Second Stage: 4 slots"        desc="65% revenue"                 col={C.purple}/>
           <RuleItem icon="sml"  label="Smaller Stage: 3 slots"       desc="35% revenue"                 col={C.orange}/>
-          <RuleItem icon="win"  label={`${TARGET_PROFIT}m+ profit`}  desc="to win"                      col={C.red}/>
+          <RuleItem icon="win"  label={`$Break even to survive                      col={C.red}/>
         </div>
         <button style={h.startBtn} onClick={onStart}>Build Your Festival</button>
         {hasBest && (
-          <div style={{marginTop:12,padding:"8px 12px",background:best>=TARGET_PROFIT?C.greenDim:C.blueDim,border:`2px solid ${best>=TARGET_PROFIT?C.green:C.blue}`,textAlign:"center"}}>
-            <span style={{fontSize:12,fontWeight:700,color:best>=TARGET_PROFIT?C.green:C.blue}}>
-              Your best: {fmtS(best)} {best>=TARGET_PROFIT?"🏆":"— can you turn a profit?"}
+          <div style={{marginTop:12,padding:"8px 12px",background:best>=3.5?C.greenDim:best>=0?C.blueDim:C.redDim,border:`2px solid ${best>=3.5?C.green:best>=0?C.blue:C.red}`,textAlign:"center"}}>
+            <span style={{fontSize:12,fontWeight:700,color:best>=3.5?C.green:best>=0?C.blue:C.red}}>
+              Your best: {fmtS(best)} {"🏆":"— can you turn a profit?"}
             </span>
           </div>
         )}
@@ -697,11 +775,13 @@ function NameScreen({name,setName,lineup,onConfirm,onBack}){
 }
 
 function Result({result,lineup,name,onReset,onHome,copied,onCopy,onTweet,onFb,onWhatsApp,onShare,onLegal,onAbout}){
-  const {revenue,cost,profit,win,artistCost,feedback}=result;
+  const {revenue,cost,profit,artistCost,feedback,tier,crowdReview}=result;
   const posterRef = useRef(null);
-  const [imgUrl, setImgUrl] = useState(null);
   const bestScore = getBestScore();
   const isNewBest = profit >= bestScore;
+  const stars = tier.stars;
+  const cancelled = stars === 0;
+  const isSoldOut = profit >= SOLD_OUT_THRESHOLD;
 
   const main   = lineup.filter(a=>a.assignedStage==="Main Stage");
   const second = lineup.filter(a=>a.assignedStage==="Second Stage");
@@ -717,64 +797,92 @@ function Result({result,lineup,name,onReset,onHome,copied,onCopy,onTweet,onFb,on
       a.href = url; a.download = `${name||"festival"}-boss.png`; a.click();
     }catch(e){ console.error(e); }
   }
+
   return(
     <div style={r.page}>
       <Ad text="Eventbrite - sell your tickets in minutes"/>
 
       {/* BEST SCORE BANNER */}
-      {isNewBest && profit > -999 && (
-        <div style={{background:win?C.greenDim:C.blueDim,border:`2px solid ${win?C.green:C.blue}`,padding:"8px 14px",marginBottom:10,textAlign:"center"}}>
-          <span style={{fontWeight:900,fontSize:13,color:win?C.green:C.blue}}>
-            {profit > 0 ? `New personal best: ${fmtS(profit)}` : `Personal best: ${fmtS(profit)}`}
-          </span>
+      {isNewBest && profit > -50 && (
+        <div style={{background:C.blueDim,border:`2px solid ${C.blue}`,padding:"8px 14px",marginBottom:10,textAlign:"center"}}>
+          <span style={{fontWeight:900,fontSize:13,color:C.blue}}>New personal best: {fmtS(profit)}</span>
         </div>
       )}
 
-      <div style={{...r.verdict, background:win?C.greenDim:C.lossDim, borderLeft:`4px solid ${win?C.green:C.red}`}}>
-        <span style={{fontSize:28}}>{win?"WIN":"LOSS"}</span>
-        <div>
-          <div style={{fontWeight:900,fontSize:22,color:win?C.green:C.red,fontFamily:"'Georgia',serif",lineHeight:1}}>
-            {win?"In the Black.":"Bankrupt."}
+      {/* TIER VERDICT */}
+      <div style={{...r.verdict, background:`${tier.color}18`, borderLeft:`5px solid ${tier.color}`}}>
+        <div style={{textAlign:"center",flexShrink:0,width:44}}>
+          <div style={{fontSize:22,lineHeight:1}}>
+            {stars===0?"💀":Array.from({length:stars},(_,i)=><span key={i}>⭐</span>)}
           </div>
-          <div style={{color:C.textMid,fontSize:13,marginTop:3}}>{name}</div>
+          <div style={{fontSize:9,fontWeight:900,color:tier.color,textTransform:"uppercase",letterSpacing:"0.08em",marginTop:2}}>{stars}/4</div>
+        </div>
+        <div>
+          <div style={{fontWeight:900,fontSize:22,color:tier.color,fontFamily:"'Georgia',serif",lineHeight:1}}>{tier.label}.</div>
+          <div style={{color:C.textMid,fontSize:12,marginTop:3}}>{tier.sub}</div>
+          <div style={{color:C.textDim,fontSize:11,marginTop:2}}>{name}</div>
         </div>
       </div>
+
+      {/* FIGURES */}
       <div style={r.figs}>
-        <Fig l="Revenue"   v={`${fmtP(revenue)}`} c={C.green}/>
-        <Fig l="All Costs" v={`-${fmtP(cost)}`}   c={C.red}/>
-        <Fig l={profit>=0?"Profit":"Loss"} v={fmtS(profit)} c={profit>=TARGET_PROFIT?C.green:C.red} big/>
+        <Fig l="Revenue"   v={fmtP(revenue)} c={C.green}/>
+        <Fig l="All Costs" v={`-${fmtP(cost)}`} c={C.red}/>
+        <Fig l={profit>=0?"Profit":"Loss"} v={fmtS(profit)} c={profit>=0?C.green:C.red} big/>
       </div>
       <div style={{color:C.textDim,fontSize:11,textAlign:"center",marginBottom:12}}>
         Includes £{OVERHEADS}m overheads · Artist fees: {fmtP(artistCost||cost-OVERHEADS)}
       </div>
 
-      {/* POST-GAME FEEDBACK */}
-      {!win && feedback && feedback.length > 0 && (
-        <div style={{background:C.surface,border:`2px solid ${C.orange}`,padding:"12px 14px",marginBottom:14}}>
-          <div style={{fontWeight:900,fontSize:11,textTransform:"uppercase",letterSpacing:"0.1em",color:C.orange,marginBottom:8}}>What went wrong</div>
+      {/* SOLD OUT / TEASER */}
+      {isSoldOut ? (
+        <div style={{background:C.yellowDim,border:`2px solid ${C.yellow}`,padding:"10px 14px",marginBottom:12,textAlign:"center"}}>
+          <div style={{fontSize:13,fontWeight:900,color:C.yellow}}>🏆 SOLD OUT — You've done the impossible. Share this immediately.</div>
+        </div>
+      ) : stars < 4 ? (
+        <div style={{background:"rgba(245,240,232,0.05)",border:`1px solid ${C.border}`,padding:"10px 14px",marginBottom:12,textAlign:"center"}}>
+          <div style={{fontSize:11,color:C.textDim,marginBottom:3}}>
+            {stars===0&&"Can you survive? Break even for ⭐ Bad Year"}
+            {stars===1&&"Need £0.5m+ profit for ⭐⭐ In the Black"}
+            {stars===2&&"Need £2m+ profit for ⭐⭐⭐ Established"}
+            {stars===3&&"Need £3.5m+ for ⭐⭐⭐⭐ Legendary — and £4.2m+ for the holy grail: 🏆 Sold Out"}
+          </div>
+          <div style={{fontSize:10,color:C.textFaint}}>The Sold Out record is £{SOLD_OUT_THRESHOLD}m+. Almost nobody gets there.</div>
+        </div>
+      ) : (
+        <div style={{background:C.yellowDim,border:`2px solid ${C.yellow}`,padding:"10px 14px",marginBottom:12,textAlign:"center"}}>
+          <div style={{fontSize:12,fontWeight:900,color:C.yellow}}>⭐⭐⭐⭐ Legendary. Can you go one further and hit Sold Out at £{SOLD_OUT_THRESHOLD}m+?</div>
+        </div>
+      )}
+
+      {/* FEEDBACK */}
+      {!cancelled && feedback && feedback.length > 0 && (
+        <div style={{background:"rgba(244,121,32,0.1)",border:`2px solid ${C.orange}`,padding:"12px 14px",marginBottom:14}}>
+          <div style={{fontWeight:900,fontSize:11,textTransform:"uppercase",letterSpacing:"0.1em",color:C.orange,marginBottom:8}}>
+            {stars>=3?"What worked":"What went wrong"}
+          </div>
           {feedback.map((tip,i)=>(
             <div key={i} style={{fontSize:12,color:C.textMid,lineHeight:1.5,marginBottom:i<feedback.length-1?6:0}}>• {tip}</div>
           ))}
         </div>
       )}
-      {win && (
-        <div style={{background:C.greenDim,border:`2px solid ${C.green}`,padding:"12px 14px",marginBottom:14}}>
-          <div style={{fontWeight:900,fontSize:11,textTransform:"uppercase",letterSpacing:"0.1em",color:C.green,marginBottom:4}}>What worked</div>
-          <div style={{fontSize:12,color:C.textMid,lineHeight:1.5}}>
-            {main.length>0&&main[0].draw>=9?"Strong Main Stage acts drove your revenue. ":""}
-            Good balance across all three stages. Can you beat your score?
-          </div>
-        </div>
-      )}
 
       <p style={r.msg}>
-        {win
-          ?`${name} turned ${fmtP(profit)} profit. ${main[0]?.name||"Your headliner"} packed the Main Stage.`
-          :profit>0
-            ?`So close — ${fmtP(profit)} profit but you needed £${TARGET_PROFIT}m. Check your stage placements.`
-            :`${name} lost ${fmtP(Math.abs(profit))}. Even the portaloos turned a profit.`
+        {cancelled
+          ?`${name} never opened its gates. ${main[0]?.name||"Nobody"} played to an empty field.`
+          :profit>=3.5
+            ?`${name} turned ${fmtP(profit)} profit. ${main[0]?.name||"Your headliner"} packed the Main Stage. The crowd won't forget it.`
+            :profit>=0
+              ?`${name} made ${fmtP(profit)} profit. Not bad — but Legendary is still out there.`
+              :`${name} lost ${fmtP(Math.abs(profit))}. Even the portaloos turned a profit.`
         }
       </p>
+
+      {/* CROWD REVIEW */}
+      <div style={{background:"rgba(245,240,232,0.05)",border:`1px solid ${C.border}`,padding:"12px 14px",marginBottom:16}}>
+        <div style={{fontWeight:900,fontSize:10,textTransform:"uppercase",letterSpacing:"0.12em",color:C.textDim,marginBottom:6}}>One festival-goer said</div>
+        <div style={{fontSize:14,color:C.textMid,fontStyle:"italic",lineHeight:1.5}}>"{crowdReview}"</div>
+      </div>
       <div style={po.wrap}>
         <div ref={posterRef} style={po.poster}>
           <div style={po.topBand}/>
@@ -788,7 +896,7 @@ function Result({result,lineup,name,onReset,onHome,copied,onCopy,onTweet,onFb,on
           {second.length>0&&<><div style={po.divider}/><div style={po.tier}>{second.map((a,i)=><span key={a.id} style={po.msAct}>{a.name}{i<second.length-1?" · ":""}</span>)}</div></>}
           {smaller.length>0&&<><div style={po.thinRule}/><div style={po.tier}>{smaller.map((a,i)=><span key={a.id} style={po.smAct}>{a.name}{i<smaller.length-1?"  ":""}</span>)}</div></>}
           <div style={po.divider}/>
-          <div style={po.footer}>{win?"SOLD OUT — ALL WEEKEND":"EVENT CANCELLED"}</div>
+          <div style={po.footer}>{tier.poster}</div>
           <div style={po.bottomBand}/>
         </div>
       </div>
@@ -885,7 +993,7 @@ function About({onBack, onLegal}){
           A free browser-based strategy game. Book acts across three stages and try to turn a profit. Most players lose on their first attempt.
         </AbSection>
         <AbSection title="How to play">
-          You have {MAX_SPINS} spins to fill {TOTAL_SLOTS} slots across Main Stage (3 slots, 100% revenue), Second Stage (4 slots, 65% revenue), and Smaller Stage (3 slots, 35% revenue). Budget is {BUDGET}m. Target profit is {TARGET_PROFIT}m+.
+          You have {MAX_SPINS} spins to fill {TOTAL_SLOTS} slots across Main Stage (3 slots, 100% revenue), Second Stage (4 slots, 65% revenue), and Smaller Stage (3 slots, 35% revenue). Budget is {BUDGET}m. Break even to survive — Legendary status requires £3.5m+ profit. The best ever is £4.5m.
         </AbSection>
         <AbSection title="The artists">
           Over 200 real musicians from UK festival history. All fees and draw ratings are fictional, invented for game balance only.
@@ -914,18 +1022,18 @@ const gm={
   sidebar:{position:"fixed",bottom:0,left:0,right:0,zIndex:100,background:C.surface,borderTop:`3px solid ${C.ink}`,maxHeight:"75vh",display:"flex",flexDirection:"column",overflow:"hidden",boxShadow:"0 -4px 24px rgba(0,0,0,0.15)"},
   lineupScroll:{flex:1,overflowY:"auto",padding:"0 10px"},
   lineupRow:{display:"flex",alignItems:"center",gap:8,borderLeft:"4px solid",padding:"7px 8px 7px 10px",marginBottom:5,background:C.card,borderBottom:`1px solid ${C.border}`},
-  checkBox:{margin:"8px 12px",padding:"11px 12px",background:C.card,border:`2px solid ${C.ink}`,flexShrink:0},
+  checkBox:{margin:"8px 12px",padding:"11px 12px",background:C.card,border:`1px solid ${C.border}`,flexShrink:0},
   pnlLine:{height:2,background:C.ink,margin:"8px 0"},
-  releaseBtn:{margin:"10px 12px",flexShrink:0,background:C.red,border:"none",color:"#fff",fontWeight:900,fontSize:14,padding:"13px 0",cursor:"pointer",fontFamily:"inherit",letterSpacing:"0.05em",textTransform:"uppercase",boxShadow:`3px 3px 0 ${C.ink}`},
+  releaseBtn:{margin:"10px 12px",flexShrink:0,background:C.orange,border:"none",color:C.bg,fontWeight:900,fontSize:14,padding:"13px 0",cursor:"pointer",fontFamily:"inherit",letterSpacing:"0.05em",textTransform:"uppercase",boxShadow:`3px 3px 0 ${C.ink}`},
   drawerBtn:{position:"fixed",bottom:0,left:0,right:0,zIndex:101,color:"#fff",fontWeight:900,fontSize:13,padding:"16px 20px",border:"none",cursor:"pointer",fontFamily:"'Georgia',serif",letterSpacing:"0.03em",textAlign:"center",boxShadow:`0 -2px 0 ${C.ink}`},
   drawerClose:{background:"none",border:"none",color:C.textMid,cursor:"pointer",fontFamily:"inherit",fontSize:12,fontWeight:600,padding:0,flexShrink:0},
   main:{flex:1,display:"flex",flexDirection:"column",overflowY:"auto",background:C.bg},
   spinWrap:{textAlign:"center",padding:"20px 16px 14px",borderBottom:`2px solid ${C.ink}`,background:C.surface,flexShrink:0},
-  spinBtn:{width:88,height:88,borderRadius:"50%",background:C.red,border:`4px solid ${C.ink}`,color:"#fff",fontSize:18,fontWeight:900,display:"inline-flex",alignItems:"center",justifyContent:"center",cursor:"pointer",marginBottom:10,transformOrigin:"center",boxShadow:`5px 5px 0 ${C.ink}`,fontFamily:"'Georgia',serif"},
+  spinBtn:{width:88,height:88,borderRadius:"50%",background:C.orange,border:`4px solid rgba(0,0,0,0.3)`,color:"#fff",fontSize:18,fontWeight:900,display:"inline-flex",alignItems:"center",justifyContent:"center",cursor:"pointer",marginBottom:10,transformOrigin:"center",boxShadow:`5px 5px 0 ${C.ink}`,fontFamily:"'Georgia',serif"},
   spinLabel:{color:C.ink,fontWeight:900,fontSize:15,textTransform:"uppercase",letterSpacing:"0.05em"},
   spinHint:{color:C.textMid,fontSize:11,marginTop:5},
   hand:{padding:"12px 12px",display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:10,alignContent:"start"},
-  actCard:{background:C.card,border:`2px solid ${C.ink}`,padding:"10px 11px",cursor:"pointer",userSelect:"none",animation:"deal 0.18s ease both",boxShadow:`3px 3px 0 ${C.ink}`},
+  actCard:{background:C.card,border:`1px solid ${C.border}`,padding:"10px 11px",cursor:"pointer",userSelect:"none",animation:"deal 0.18s ease both",boxShadow:`3px 3px 0 ${C.ink}`},
   actName:{fontWeight:900,fontSize:13,color:C.ink,lineHeight:1.2,marginBottom:3,fontFamily:"'Georgia',serif"},
   actGenre:{fontSize:10,color:C.textMid,textTransform:"uppercase",letterSpacing:"0.06em"},
   emptyState:{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:32,textAlign:"center"},
@@ -941,7 +1049,7 @@ const gm={
 
 const s={
   app:{minHeight:"100vh",background:C.bg,color:C.ink,fontFamily:"'Georgia',serif",display:"flex",flexDirection:"column"},
-  hdr:{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"0 20px",height:64,background:C.red,borderBottom:`3px solid ${C.ink}`,flexWrap:"wrap",gap:10},
+  hdr:{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"0 20px",height:64,background:C.surface,borderBottom:`2px solid ${C.orange}`,flexWrap:"wrap",gap:10},
   brandTitle:{fontWeight:900,fontSize:20,color:"#fff",letterSpacing:"-0.5px",fontFamily:"'Georgia',serif"},
   kpis:{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"},
   kdiv:{width:1,height:24,background:"rgba(255,255,255,0.3)"},
@@ -962,13 +1070,13 @@ const h={
   page:{minHeight:"100vh",background:C.bg,display:"flex",flexDirection:"column",alignItems:"center",padding:"0 16px 60px",position:"relative",overflow:"hidden"},
   heroWrap:{width:"100%",maxWidth:640,padding:"32px 0 20px",textAlign:"center",position:"relative"},
   poster:{position:"relative",userSelect:"none",lineHeight:0.85,marginBottom:8},
-  line1:{display:"block",fontSize:"clamp(56px,16vw,110px)",fontWeight:900,fontFamily:"'Georgia','Times New Roman',serif",color:C.red,letterSpacing:"-2px",textTransform:"uppercase",WebkitTextStroke:`2px ${C.ink}`},
-  line2:{display:"block",fontSize:"clamp(72px,20vw,140px)",fontWeight:900,fontFamily:"'Georgia','Times New Roman',serif",color:C.blue,letterSpacing:"-4px",textTransform:"uppercase",WebkitTextStroke:`2px ${C.ink}`,marginTop:-8},
-  tagline:{fontSize:13,color:C.textMid,letterSpacing:"0.15em",textTransform:"uppercase",marginBottom:24,marginTop:16},
-  stripe:{height:8,background:`repeating-linear-gradient(90deg,${C.red} 0,${C.red} 20px,${C.yellow} 20px,${C.yellow} 40px,${C.blue} 40px,${C.blue} 60px,${C.orange} 60px,${C.orange} 80px,${C.purple} 80px,${C.purple} 100px)`,marginBottom:20,border:`2px solid ${C.ink}`},
-  card:{background:C.surface,border:`3px solid ${C.ink}`,padding:"24px 22px",width:"100%",maxWidth:460,boxShadow:`6px 6px 0 ${C.ink}`},
+  line1:{display:"block",fontSize:"clamp(56px,16vw,110px)",fontWeight:900,fontFamily:"'Georgia','Times New Roman',serif",color:C.text,letterSpacing:"-2px",textTransform:"uppercase"},
+  line2:{display:"block",fontSize:"clamp(72px,20vw,140px)",fontWeight:900,fontFamily:"'Georgia','Times New Roman',serif",color:C.orange,letterSpacing:"-4px",textTransform:"uppercase",marginTop:-8},
+  tagline:{fontSize:13,color:C.textDim,letterSpacing:"0.15em",textTransform:"uppercase",marginBottom:24,marginTop:16},
+  stripe:{height:4,background:C.orange,marginBottom:20,opacity:0.8},
+  card:{background:C.surface,border:`1px solid ${C.border}`,padding:"24px 22px",width:"100%",maxWidth:460},
   rulesGrid:{marginBottom:20},
-  startBtn:{width:"100%",marginTop:4,background:C.blue,border:`3px solid ${C.ink}`,color:"#fff",fontWeight:900,fontSize:16,padding:"15px 0",borderRadius:0,cursor:"pointer",fontFamily:"'Georgia',serif",letterSpacing:"0.08em",textTransform:"uppercase",boxShadow:`5px 5px 0 ${C.ink}`},
+  startBtn:{width:"100%",marginTop:4,background:C.orange,border:`3px solid rgba(0,0,0,0.2)`,color:"#fff",fontWeight:900,fontSize:16,padding:"15px 0",borderRadius:0,cursor:"pointer",fontFamily:"'Georgia',serif",letterSpacing:"0.08em",textTransform:"uppercase",boxShadow:`5px 5px 0 ${C.ink}`},
   nameInput:{width:"100%",background:C.bg,border:`3px solid ${C.ink}`,padding:"13px 14px",color:C.ink,fontSize:17,outline:"none",fontFamily:"'Georgia',serif",marginBottom:6,boxSizing:"border-box",fontWeight:700},
   legalRow:{display:"flex",gap:10,justifyContent:"center",marginTop:14,alignItems:"center"},
   lBtn:{background:"none",border:"none",color:C.textDim,fontSize:11,cursor:"pointer",fontFamily:"inherit",textDecoration:"underline",padding:0},
@@ -976,32 +1084,32 @@ const h={
 
 const po={
   wrap:{margin:"14px 0"},
-  poster:{background:"#fffff8",border:`3px solid ${C.ink}`,padding:"0 0 20px",textAlign:"center",fontFamily:"'Georgia','Times New Roman',serif",boxShadow:`6px 6px 0 ${C.ink}`,overflow:"hidden"},
-  topBand:{background:`repeating-linear-gradient(90deg,${C.red} 0,${C.red} 14%,${C.yellow} 14%,${C.yellow} 28%,${C.orange} 28%,${C.orange} 42%,${C.green} 42%,${C.green} 57%,${C.blue} 57%,${C.blue} 71%,${C.purple} 71%,${C.purple} 85%,${C.red} 85%,${C.red} 100%)`,height:22,marginBottom:0},
-  hBar:{background:C.ink,padding:"6px 0",marginBottom:14},
-  hBarText:{fontSize:10,fontWeight:900,letterSpacing:"0.35em",color:"#fff",textTransform:"uppercase"},
-  festName:{fontSize:"clamp(28px,7vw,48px)",fontWeight:900,color:C.ink,letterSpacing:"0.06em",textTransform:"uppercase",lineHeight:1,marginBottom:4,padding:"0 16px",wordBreak:"break-word"},
-  festSub:{fontSize:9,color:C.textMid,letterSpacing:"0.3em",textTransform:"uppercase",marginBottom:10},
-  divider:{height:2,background:C.ink,margin:"12px 16px"},
+  poster:{background:"#1a3344",border:`3px solid ${C.orange}`,padding:"0 0 20px",textAlign:"center",fontFamily:"'Georgia','Times New Roman',serif",boxShadow:`6px 6px 0 rgba(0,0,0,0.4)`,overflow:"hidden"},
+  topBand:{background:`repeating-linear-gradient(90deg,${C.orange} 0,${C.orange} 25%,#1e3d52 25%,#1e3d52 50%,${C.blue} 50%,${C.blue} 75%,#1a3344 75%,#1a3344 100%)`,height:8,marginBottom:0},
+  hBar:{background:C.orange,padding:"6px 0",marginBottom:14},
+  hBarText:{fontSize:10,fontWeight:900,letterSpacing:"0.35em",color:"#1a3344",textTransform:"uppercase"},
+  festName:{fontSize:"clamp(28px,7vw,48px)",fontWeight:900,color:C.text,letterSpacing:"0.06em",textTransform:"uppercase",lineHeight:1,marginBottom:4,padding:"0 16px",wordBreak:"break-word"},
+  festSub:{fontSize:9,color:C.textDim,letterSpacing:"0.3em",textTransform:"uppercase",marginBottom:10},
+  divider:{height:1,background:C.orange,margin:"12px 16px",opacity:0.4},
   thinRule:{height:1,background:C.border,margin:"8px 16px"},
-  hlAct:{fontSize:"clamp(18px,4.5vw,28px)",fontWeight:900,color:C.red,letterSpacing:"0.06em",textTransform:"uppercase",lineHeight:1.25,marginBottom:4,fontFamily:"'Georgia','Times New Roman',serif"},
+  hlAct:{fontSize:"clamp(18px,4.5vw,28px)",fontWeight:900,color:C.orange,letterSpacing:"0.06em",textTransform:"uppercase",lineHeight:1.25,marginBottom:4,fontFamily:"'Georgia','Times New Roman',serif"},
   tier:{display:"flex",flexWrap:"wrap",justifyContent:"center",gap:"2px 8px",padding:"4px 16px"},
   msAct:{fontSize:14,fontWeight:700,color:C.blue,letterSpacing:"0.03em",fontFamily:"'Georgia',serif"},
-  smAct:{fontSize:9,fontWeight:500,color:C.textMid,letterSpacing:"0.01em"},
-  footer:{fontSize:12,fontWeight:900,color:C.ink,letterSpacing:"0.25em",textTransform:"uppercase",marginTop:8,padding:"0 16px"},
-  bottomBand:{background:`repeating-linear-gradient(90deg,${C.purple} 0,${C.purple} 14%,${C.blue} 14%,${C.blue} 28%,${C.green} 28%,${C.green} 42%,${C.orange} 42%,${C.orange} 57%,${C.yellow} 57%,${C.yellow} 71%,${C.red} 71%,${C.red} 85%,${C.purple} 85%,${C.purple} 100%)`,height:22,marginTop:16},
+  smAct:{fontSize:9,fontWeight:500,color:C.textDim,letterSpacing:"0.01em"},
+  footer:{fontSize:11,fontWeight:900,color:C.textMid,letterSpacing:"0.2em",textTransform:"uppercase",marginTop:8,padding:"0 16px"},
+  bottomBand:{background:`repeating-linear-gradient(90deg,#1a3344 0,#1a3344 25%,${C.blue} 25%,${C.blue} 50%,#1e3d52 50%,#1e3d52 75%,${C.orange} 75%,${C.orange} 100%)`,height:8,marginTop:16},
 };
 
 const r={
   page:{minHeight:"100vh",background:C.bg,padding:"18px 16px 40px",maxWidth:540,margin:"0 auto"},
-  verdict:{display:"flex",alignItems:"center",gap:14,marginBottom:12,padding:"14px 16px",border:`3px solid ${C.ink}`,boxShadow:`4px 4px 0 ${C.ink}`},
+  verdict:{display:"flex",alignItems:"center",gap:14,marginBottom:12,padding:"14px 16px",border:`1px solid ${C.border}`},
   figs:{display:"flex",gap:8,marginBottom:6},
   msg:{color:C.textMid,fontSize:13,lineHeight:1.6,background:C.surface,padding:"12px 14px",marginBottom:14,border:`2px solid ${C.border}`,fontStyle:"italic"},
   shareWrap:{background:C.surface,padding:"14px",marginBottom:12,border:`2px solid ${C.ink}`},
   shareLabel:{fontSize:9,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.14em",color:C.textDim,marginBottom:10,textAlign:"center"},
   shareBtns:{display:"flex",gap:8,justifyContent:"center",flexWrap:"wrap"},
   actions:{display:"flex",gap:10,marginTop:4,marginBottom:14},
-  btnPrimary:{flex:1,background:C.red,border:`2px solid ${C.ink}`,color:"#fff",fontWeight:900,fontSize:14,padding:"13px 0",cursor:"pointer",fontFamily:"inherit",boxShadow:`3px 3px 0 ${C.ink}`},
+  btnPrimary:{flex:1,background:C.orange,border:`2px solid rgba(0,0,0,0.2)`,color:C.bg,fontWeight:900,fontSize:14,padding:"13px 0",cursor:"pointer",fontFamily:"inherit",boxShadow:`3px 3px 0 ${C.ink}`},
   btnGhost:{flex:1,background:"transparent",border:`2px solid ${C.ink}`,color:C.ink,fontWeight:700,fontSize:14,padding:"13px 0",cursor:"pointer",fontFamily:"inherit"},
 };
 
