@@ -19,7 +19,7 @@ const OVERHEADS     = 2;
 const TICKET_REV    = 24;
 const TARGET_PROFIT = 4;
 const TOTAL_SLOTS   = 10;
-const MAX_SPINS     = 5;
+const MAX_SPINS     = 3;
 const HAND_SIZE     = 8;
 
 const STAGE_CAPS = {"Main Stage":3,"Second Stage":4,"Smaller Stage":3};
