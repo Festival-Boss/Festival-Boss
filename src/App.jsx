@@ -3,7 +3,7 @@ import { useState, useRef } from "react";
 // Load Inter font
 const fontLink = document.createElement("link");
 fontLink.rel = "stylesheet";
-fontLink.href = "https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap";
+fontLink.href = "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;900&display=swap";
 document.head.appendChild(fontLink);
 
 // ─── COLOURS ─────────────────────────────────────────────────
@@ -289,6 +289,7 @@ const ARTISTS = [
   {id:243,name:"Basement Jaxx",fee:1.0,draw:8.0,genre:"Electronic"},
   {id:244,name:"Orbital",fee:0.9,draw:7.9,genre:"Electronic"},
   {id:245,name:"Groove Armada",fee:0.7,draw:7.4,genre:"Electronic"},
+  {id:246,name:"Chappell Roan",fee:3.5,draw:9.3,genre:"Pop"},
 ];
 
 // ─── HELPERS ─────────────────────────────────────────────────
@@ -453,14 +454,14 @@ export default function FestivalBoss(){
   const modalS={background:BG,border:"2px solid "+BORDER_HI,padding:"24px 20px",width:"100%",maxWidth:340,borderRadius:4};
 
   return(
-    <div style={{minHeight:"100vh",background:BG,color:CREAM,fontFamily:"'Inter','Helvetica Neue',Arial,sans-serif",display:"flex",flexDirection:"column"}}>
+    <div style={{minHeight:"100vh",background:BG,color:CREAM,fontFamily:"'DM Sans','Helvetica Neue',Arial,sans-serif",display:"flex",flexDirection:"column"}}>
       <style>{`*{box-sizing:border-box}::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:${SURFACE}}::-webkit-scrollbar-thumb{background:${DIM};border-radius:2px}@keyframes spinAnim{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}@keyframes deal{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}`}</style>
 
       {/* STAGE PICKER */}
       {picking&&(
         <div style={overlayS}>
           <div style={modalS}>
-            <div style={{fontWeight:900,fontSize:20,color:CREAM,marginBottom:4,fontFamily:"'Inter','Helvetica Neue',Arial,sans-serif"}}>{picking.name}</div>
+            <div style={{fontWeight:900,fontSize:20,color:CREAM,marginBottom:4,fontFamily:"'DM Sans','Helvetica Neue',Arial,sans-serif"}}>{picking.name}</div>
             <div style={{color:MID,fontSize:13,marginBottom:4}}>Which stage?</div>
             <div style={{color:DIM,fontSize:12,marginBottom:16}}>Fee: {fmt(picking.fee)} · Draw: {picking.draw} · {picking.genre}</div>
             {STAGES.map(stage=>{
@@ -521,7 +522,7 @@ export default function FestivalBoss(){
               return(
                 <div key={a.id} style={{display:"flex",alignItems:"center",gap:8,borderLeft:"4px solid "+sc2,padding:"7px 8px 7px 10px",marginBottom:5,background:CARD,borderBottom:"1px solid "+BORDER}}>
                   <div style={{flex:1,minWidth:0}}>
-                    <div style={{fontWeight:700,fontSize:13,color:CREAM,marginBottom:2,fontFamily:"'Inter','Helvetica Neue',Arial,sans-serif"}}>{a.name}</div>
+                    <div style={{fontWeight:700,fontSize:13,color:CREAM,marginBottom:2,fontFamily:"'DM Sans','Helvetica Neue',Arial,sans-serif"}}>{a.name}</div>
                     <div style={{display:"flex",gap:5,alignItems:"center",flexWrap:"wrap"}}>
                       <span style={{fontSize:8,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.06em",padding:"2px 7px",border:"1px solid "+sc2,background:bg2,color:sc2}}>{a.assignedStage}</span>
                       <span style={{fontSize:10,color:DIM,textTransform:"uppercase",letterSpacing:"0.04em"}}>{a.genre}</span>
@@ -560,7 +561,7 @@ export default function FestivalBoss(){
         <main className="fb-main" style={{flex:1,display:"flex",flexDirection:"column",overflowY:"auto",background:BG}}>
           <div style={{textAlign:"center",padding:"20px 16px 14px",borderBottom:"1px solid "+BORDER,background:SURFACE,flexShrink:0}}>
             <button
-              style={{width:88,height:88,borderRadius:"50%",background:spinning?DIM:ORANGE,border:"none",color:BG,fontSize:16,fontWeight:900,display:"inline-flex",alignItems:"center",justifyContent:"center",cursor:(spinsLeft<=0||full)?"not-allowed":"pointer",marginBottom:10,opacity:(spinsLeft<=0||full)?0.3:1,animation:spinning?"spinAnim 0.5s linear infinite":"none",fontFamily:"'Inter','Helvetica Neue',Arial,sans-serif",letterSpacing:"0.05em"}}
+              style={{width:88,height:88,borderRadius:"50%",background:spinning?DIM:ORANGE,border:"none",color:BG,fontSize:16,fontWeight:900,display:"inline-flex",alignItems:"center",justifyContent:"center",cursor:(spinsLeft<=0||full)?"not-allowed":"pointer",marginBottom:10,opacity:(spinsLeft<=0||full)?0.3:1,animation:spinning?"spinAnim 0.5s linear infinite":"none",fontFamily:"'DM Sans','Helvetica Neue',Arial,sans-serif",letterSpacing:"0.05em"}}
               onClick={spin} disabled={spinsLeft<=0||full||spinning}>
               SPIN
             </button>
@@ -580,7 +581,7 @@ export default function FestivalBoss(){
                     style={{background:CARD,border:"1px solid "+BORDER,padding:"10px 11px",cursor:canAfford?"pointer":"not-allowed",userSelect:"none",animation:"deal 0.18s ease both",animationDelay:(i*0.04)+"s",opacity:canAfford?1:0.3,borderRadius:3}}
                     onClick={()=>canAfford&&pickAct(a)}>
                     <div style={{fontSize:10,fontWeight:800,color:drawColor,marginBottom:3}}>DRAW {a.draw}</div>
-                    <div style={{fontWeight:900,fontSize:13,color:CREAM,lineHeight:1.2,marginBottom:3,fontFamily:"'Inter','Helvetica Neue',Arial,sans-serif"}}>{a.name}</div>
+                    <div style={{fontWeight:900,fontSize:13,color:CREAM,lineHeight:1.2,marginBottom:3,fontFamily:"'DM Sans','Helvetica Neue',Arial,sans-serif"}}>{a.name}</div>
                     <div style={{fontSize:10,color:DIM,textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:6}}>{a.genre}</div>
                     <div style={{color:drawColor,fontWeight:900,fontSize:13}}>{fmt(a.fee)}</div>
                     {!canAfford&&<div style={{fontSize:9,color:RED,fontWeight:700,marginTop:4,textTransform:"uppercase"}}>Over budget</div>}
@@ -592,9 +593,9 @@ export default function FestivalBoss(){
 
           {hand.length===0&&!full&&(
             <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:32,textAlign:"center"}}>
-              <div style={{fontSize:40,marginBottom:12,opacity:0.3,fontFamily:"'Inter','Helvetica Neue',Arial,sans-serif",color:ORANGE}}>SPIN</div>
-              <div style={{color:MID,fontSize:16,fontWeight:700,fontFamily:"'Inter','Helvetica Neue',Arial,sans-serif"}}>Spin to get your acts</div>
-              <div style={{color:DIM,fontSize:12,marginTop:8}}>{MAX_SPINS} spins to fill {TOTAL_SLOTS} slots on £{BUDGET}m budget</div>
+              <div style={{fontSize:40,marginBottom:12,opacity:0.3,fontFamily:"'DM Sans','Helvetica Neue',Arial,sans-serif",color:ORANGE}}>SPIN</div>
+              <div style={{color:MID,fontSize:16,fontWeight:700,fontFamily:"'DM Sans','Helvetica Neue',Arial,sans-serif"}}>Spin to get your acts</div>
+              <div style={{color:DIM,fontSize:12,marginTop:8}}>{MAX_SPINS} skips to veto acts · {TOTAL_SLOTS} slots · £{BUDGET}m budget</div>
               <div style={{color:DIM,fontSize:11,marginTop:4}}>Break even to survive · £3.5m+ for Legendary · £4.5m+ for Sold Out</div>
               <div style={{marginTop:16,display:"flex",gap:16,flexWrap:"wrap",justifyContent:"center"}}>
                 {STAGES.map(stage=>(
@@ -613,7 +614,7 @@ export default function FestivalBoss(){
 
       {/* DRAWER BUTTON */}
       <button className="fb-drawer-btn"
-        style={{position:"fixed",bottom:0,left:0,right:0,zIndex:101,color:BG,fontWeight:900,fontSize:13,padding:"16px 20px",border:"none",cursor:"pointer",fontFamily:"'Inter','Helvetica Neue',Arial,sans-serif",letterSpacing:"0.03em",textAlign:"center",background:full?GREEN:ORANGE}}
+        style={{position:"fixed",bottom:0,left:0,right:0,zIndex:101,color:BG,fontWeight:900,fontSize:13,padding:"16px 20px",border:"none",cursor:"pointer",fontFamily:"'DM Sans','Helvetica Neue',Arial,sans-serif",letterSpacing:"0.03em",textAlign:"center",background:full?GREEN:ORANGE}}
         onClick={()=>{ if(full){setDrawerOpen(false);submit();}else setDrawerOpen(p=>!p); }}>
         {full?"NAME AND RELEASE LINEUP":"MY LINEUP ("+lineup.length+"/"+TOTAL_SLOTS+") "+(drawerOpen?"v":"^")}
       </button>
@@ -654,19 +655,19 @@ function HomeScreen({onStart,onLegal,onAbout}){
   const bestColor=best>=3.5?YELLOW:best>=2.0?GREEN:best>=0.5?TEAL:best>=-1.0?ORANGE:RED;
   return(
     <div style={{minHeight:"100vh",background:BG,display:"flex",flexDirection:"column",alignItems:"center",padding:"0 16px 60px",overflow:"hidden"}}>
-      <style>{`@keyframes deal{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}@keyframes spinAnim{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
-      <div style={{width:"100%",maxWidth:480,padding:"32px 0 20px",textAlign:"center"}}>
-        <div style={{height:4,background:ORANGE,marginBottom:28,opacity:0.8}}/>
-        <div style={{userSelect:"none",lineHeight:0.85,marginBottom:8}}>
-          <span style={{display:"block",fontSize:"clamp(56px,16vw,110px)",fontWeight:900,fontFamily:"'Inter','Helvetica Neue',Arial,sans-serif",color:CREAM,letterSpacing:"-4px",textTransform:"uppercase"}}>Festival</span>
-          <span style={{display:"block",fontSize:"clamp(72px,20vw,140px)",fontWeight:900,fontFamily:"'Inter','Helvetica Neue',Arial,sans-serif",color:ORANGE,letterSpacing:"-6px",textTransform:"uppercase",marginTop:-8}}>Boss</span>
+      <style>{`@keyframes deal{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}@keyframes spinAnim{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}`}</style>
+      <div style={{width:"100%",maxWidth:480,padding:"16px 0 12px",textAlign:"center"}}>
+        <div style={{height:3,background:ORANGE,marginBottom:16,opacity:0.8}}/>
+        <div style={{userSelect:"none",lineHeight:0.88,marginBottom:4}}>
+          <span style={{display:"block",fontSize:"clamp(44px,12vw,80px)",fontWeight:900,fontFamily:"'DM Sans','Helvetica Neue',Arial,sans-serif",color:CREAM,letterSpacing:"-3px",textTransform:"uppercase"}}>Festival</span>
+          <span style={{display:"block",fontSize:"clamp(56px,15vw,110px)",fontWeight:900,fontFamily:"'DM Sans','Helvetica Neue',Arial,sans-serif",color:ORANGE,letterSpacing:"-5px",textTransform:"uppercase",marginTop:-6}}>Boss</span>
         </div>
-        <div style={{fontSize:12,color:DIM,letterSpacing:"0.15em",textTransform:"uppercase",marginBottom:24,marginTop:16}}>Spin the acts · Book the lineup · Turn a profit</div>
+        <div style={{fontSize:11,color:DIM,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:14,marginTop:10}}>Spin the acts · Book the lineup · Turn a profit</div>
       </div>
 
-      <div style={{background:SURFACE,border:"1px solid "+BORDER,padding:"24px 22px",width:"100%",maxWidth:460,borderRadius:4}}>
-        <div style={{fontWeight:700,fontSize:13,letterSpacing:"0.08em",textTransform:"uppercase",color:MID,marginBottom:16,borderBottom:"1px solid "+BORDER,paddingBottom:10}}>How to play</div>
-        <div style={{marginBottom:20}}>
+      <div style={{background:SURFACE,border:"1px solid "+BORDER,padding:"16px 18px",width:"100%",maxWidth:460,borderRadius:4}}>
+        <div style={{fontWeight:700,fontSize:12,letterSpacing:"0.08em",textTransform:"uppercase",color:MID,marginBottom:12,borderBottom:"1px solid "+BORDER,paddingBottom:8}}>How to play</div>
+        <div style={{marginBottom:14}}>
           {[
             [MAX_SPINS+" skips",    "veto acts you don't want",   YELLOW],
             ["£"+BUDGET+"m budget", "inc. £2m overheads",         PURPLE],
@@ -675,25 +676,27 @@ function HomeScreen({onStart,onLegal,onAbout}){
             ["Smaller Stage",       "3 slots · 35% revenue",      GREEN],
             ["Make more than you spend", "sounds easy.",          RED],
           ].map(([lbl,desc,col],i)=>(
-            <div key={i} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid "+BORDER}}>
-              <span style={{color:col,fontWeight:700,fontSize:14}}>{lbl}</span>
-              <span style={{color:DIM,fontSize:12,textAlign:"right"}}>{desc}</span>
+            <div key={i} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"6px 0",borderBottom:"1px solid "+BORDER}}>
+              <span style={{color:col,fontWeight:700,fontSize:13}}>{lbl}</span>
+              <span style={{color:DIM,fontSize:11,textAlign:"right"}}>{desc}</span>
             </div>
           ))}
-          <div style={{padding:"10px 0",fontSize:12,color:MID,fontStyle:"italic",textAlign:"center"}}>
+          <div style={{padding:"8px 0",fontSize:11,color:MID,fontStyle:"italic",textAlign:"center"}}>
             Your biggest names belong on the biggest stages.
           </div>
         </div>
 
-        <div style={{background:BG,border:"1px solid "+BORDER,padding:"12px 14px",marginBottom:16,textAlign:"center",borderRadius:3}}>
-          <div style={{fontSize:13,color:MID,lineHeight:1.7}}>
+        <div style={{background:BG,border:"1px solid "+BORDER,padding:"10px 12px",marginBottom:14,textAlign:"center",borderRadius:3}}>
+          <div style={{fontSize:12,color:MID,lineHeight:1.6}}>
             The record profit is <span style={{color:YELLOW,fontWeight:700}}>£4.5m</span>. Only 1 in 500 reach Sold Out.
           </div>
         </div>
 
-        <button style={{width:"100%",marginTop:4,background:ORANGE,border:"none",color:BG,fontWeight:900,fontSize:16,padding:"15px 0",borderRadius:3,cursor:"pointer",fontFamily:"'Inter','Helvetica Neue',Arial,sans-serif",letterSpacing:"0.08em",textTransform:"uppercase"}} onClick={onStart}>
+        <button style={{width:"100%",background:ORANGE,border:"none",color:BG,fontWeight:900,fontSize:16,padding:"15px 0",borderRadius:3,cursor:"pointer",fontFamily:"'DM Sans','Helvetica Neue',Arial,sans-serif",letterSpacing:"0.08em",textTransform:"uppercase"}} onClick={onStart}>
           Build Your Festival
         </button>
+
+        <div style={{textAlign:"center",marginTop:10,fontSize:11,color:FAINT,animation:"bounce 2s ease-in-out infinite"}}>↓ scroll for your best score</div>
 
         {hasBest&&(
           <div style={{marginTop:12,padding:"8px 12px",background:BG,border:"1px solid "+bestColor,textAlign:"center",borderRadius:3}}>
@@ -726,17 +729,17 @@ function NameScreen({name,setName,lineup,onConfirm,onBack}){
         <div style={{background:BG,padding:"12px 14px",marginBottom:20,textAlign:"center",borderRadius:3}}>
           <div style={{fontSize:9,letterSpacing:"0.3em",color:DIM,textTransform:"uppercase",marginBottom:6}}>Your Main Stage</div>
           {main.length>0
-            ? main.map(a=><div key={a.id} style={{fontWeight:900,fontSize:15,color:ORANGE,letterSpacing:"0.06em",textTransform:"uppercase",fontFamily:"'Inter','Helvetica Neue',Arial,sans-serif",lineHeight:1.3}}>{a.name}</div>)
+            ? main.map(a=><div key={a.id} style={{fontWeight:900,fontSize:15,color:ORANGE,letterSpacing:"0.06em",textTransform:"uppercase",fontFamily:"'DM Sans','Helvetica Neue',Arial,sans-serif",lineHeight:1.3}}>{a.name}</div>)
             : <div style={{color:RED,fontSize:13}}>No Main Stage acts booked</div>
           }
         </div>
         <div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.14em",color:MID,marginBottom:10}}>Name your festival</div>
         <input
-          style={{width:"100%",background:BG,border:"2px solid "+BORDER_HI,padding:"13px 14px",color:CREAM,fontSize:17,outline:"none",fontFamily:"'Inter','Helvetica Neue',Arial,sans-serif",marginBottom:6,boxSizing:"border-box",fontWeight:700,borderRadius:3}}
+          style={{width:"100%",background:BG,border:"2px solid "+BORDER_HI,padding:"13px 14px",color:CREAM,fontSize:17,outline:"none",fontFamily:"'DM Sans','Helvetica Neue',Arial,sans-serif",marginBottom:6,boxSizing:"border-box",fontWeight:700,borderRadius:3}}
           placeholder="e.g. Dave's Fantastic Fest" value={name} maxLength={32} onChange={e=>setName(e.target.value)} autoFocus/>
         <div style={{fontSize:11,color:DIM,marginBottom:16}}>{name.length}/32</div>
         <button
-          style={{width:"100%",background:ok?GREEN:DIM,border:"none",color:BG,fontWeight:900,fontSize:16,padding:"15px 0",borderRadius:3,cursor:ok?"pointer":"not-allowed",fontFamily:"'Inter','Helvetica Neue',Arial,sans-serif",letterSpacing:"0.08em",textTransform:"uppercase",opacity:ok?1:0.5}}
+          style={{width:"100%",background:ok?GREEN:DIM,border:"none",color:BG,fontWeight:900,fontSize:16,padding:"15px 0",borderRadius:3,cursor:ok?"pointer":"not-allowed",fontFamily:"'DM Sans','Helvetica Neue',Arial,sans-serif",letterSpacing:"0.08em",textTransform:"uppercase",opacity:ok?1:0.5}}
           onClick={()=>ok&&onConfirm()}>
           Release Lineup
         </button>
@@ -795,7 +798,7 @@ function Result({result,lineup,name,onReset,onHome,copied,onCopy,onTweet,onFb,on
       <div style={{display:"flex",gap:8,marginBottom:6}}>
         {[[fmt(revenue),"Revenue",GREEN],["-"+fmt(cost),"All Costs",RED],[fmtS(profit),profit>=0?"Profit":"Loss",profit>=0?GREEN:RED,true]].map(([v,l,c,big])=>(
           <div key={l} style={{flex:1,textAlign:"center",background:SURFACE,padding:"10px 6px",border:"1px solid "+BORDER,borderRadius:3}}>
-            <div style={{color:c,fontWeight:900,fontSize:big?22:17,fontFamily:"'Inter','Helvetica Neue',Arial,sans-serif"}}>{v}</div>
+            <div style={{color:c,fontWeight:900,fontSize:big?22:17,fontFamily:"'DM Sans','Helvetica Neue',Arial,sans-serif"}}>{v}</div>
             <div style={{color:DIM,fontSize:10,marginTop:3}}>{l}</div>
           </div>
         ))}
@@ -850,7 +853,7 @@ function Result({result,lineup,name,onReset,onHome,copied,onCopy,onTweet,onFb,on
 
       {/* POSTER */}
       <div style={{margin:"14px 0"}}>
-        <div ref={posterRef} style={{background:BG,border:"2px solid "+ORANGE,padding:"0 0 20px",textAlign:"center",fontFamily:"'Inter','Helvetica Neue',Arial,sans-serif",overflow:"hidden",borderRadius:4}}>
+        <div ref={posterRef} style={{background:BG,border:"2px solid "+ORANGE,padding:"0 0 20px",textAlign:"center",fontFamily:"'DM Sans','Helvetica Neue',Arial,sans-serif",overflow:"hidden",borderRadius:4}}>
           <div style={{background:ORANGE,padding:"6px 0",marginBottom:14}}>
             <span style={{fontSize:10,fontWeight:900,letterSpacing:"0.35em",color:BG,textTransform:"uppercase"}}>Festival Boss Presents</span>
           </div>
@@ -858,9 +861,9 @@ function Result({result,lineup,name,onReset,onHome,copied,onCopy,onTweet,onFb,on
           <div style={{fontSize:9,color:DIM,letterSpacing:"0.3em",textTransform:"uppercase",marginBottom:10}}>ONE WEEKEND · ONE CHANCE</div>
           <div style={{height:1,background:ORANGE,margin:"12px 16px",opacity:0.4}}/>
           {main.length>0
-            ? main.map(a=><div key={a.id} style={{fontSize:"clamp(18px,4.5vw,28px)",fontWeight:900,color:ORANGE,letterSpacing:"0.06em",textTransform:"uppercase",lineHeight:1.25,marginBottom:4,fontFamily:"'Inter','Helvetica Neue',Arial,sans-serif"}}>{a.name.toUpperCase()}</div>)
+            ? main.map(a=><div key={a.id} style={{fontSize:"clamp(18px,4.5vw,28px)",fontWeight:900,color:ORANGE,letterSpacing:"0.06em",textTransform:"uppercase",lineHeight:1.25,marginBottom:4,fontFamily:"'DM Sans','Helvetica Neue',Arial,sans-serif"}}>{a.name.toUpperCase()}</div>)
             : <div style={{opacity:0.2,fontSize:16,color:ORANGE}}>NO MAIN STAGE BOOKED</div>}
-          {second.length>0&&<><div style={{height:1,background:ORANGE,margin:"12px 16px",opacity:0.4}}/><div style={{display:"flex",flexWrap:"wrap",justifyContent:"center",gap:"2px 8px",padding:"4px 16px"}}>{second.map((a,i)=><span key={a.id} style={{fontSize:14,fontWeight:700,color:TEAL,letterSpacing:"0.03em",fontFamily:"'Inter','Helvetica Neue',Arial,sans-serif"}}>{a.name}{i<second.length-1?" · ":""}</span>)}</div></>}
+          {second.length>0&&<><div style={{height:1,background:ORANGE,margin:"12px 16px",opacity:0.4}}/><div style={{display:"flex",flexWrap:"wrap",justifyContent:"center",gap:"2px 8px",padding:"4px 16px"}}>{second.map((a,i)=><span key={a.id} style={{fontSize:14,fontWeight:700,color:TEAL,letterSpacing:"0.03em",fontFamily:"'DM Sans','Helvetica Neue',Arial,sans-serif"}}>{a.name}{i<second.length-1?" · ":""}</span>)}</div></>}
           {smaller.length>0&&<><div style={{height:1,background:BORDER,margin:"8px 16px"}}/><div style={{display:"flex",flexWrap:"wrap",justifyContent:"center",gap:"2px 8px",padding:"4px 16px"}}>{smaller.map((a,i)=><span key={a.id} style={{fontSize:9,fontWeight:500,color:DIM,letterSpacing:"0.01em"}}>{a.name}{i<smaller.length-1?"  ":""}</span>)}</div></>}
           <div style={{height:1,background:ORANGE,margin:"12px 16px",opacity:0.4}}/>
           <div style={{fontSize:11,fontWeight:900,color:MID,letterSpacing:"0.2em",textTransform:"uppercase",marginTop:8,padding:"0 16px"}}>{tier.poster}</div>
@@ -905,7 +908,7 @@ function Legal({type,onBack}){
     <div style={{minHeight:"100vh",background:BG,display:"flex",justifyContent:"center",padding:"32px 16px 60px"}}>
       <div style={{background:SURFACE,border:"1px solid "+BORDER,padding:"28px 24px",width:"100%",maxWidth:560,borderRadius:4}}>
         <button style={{background:"none",border:"none",color:MID,cursor:"pointer",fontSize:13,padding:0,fontFamily:"inherit",marginBottom:18,display:"block"}} onClick={onBack}>Back</button>
-        <h2 style={{fontSize:22,fontWeight:900,color:CREAM,marginBottom:4,fontFamily:"'Inter','Helvetica Neue',Arial,sans-serif"}}>{isT?"Terms and Conditions":"Privacy Policy"}</h2>
+        <h2 style={{fontSize:22,fontWeight:900,color:CREAM,marginBottom:4,fontFamily:"'DM Sans','Helvetica Neue',Arial,sans-serif"}}>{isT?"Terms and Conditions":"Privacy Policy"}</h2>
         <p style={{color:DIM,fontSize:12,marginBottom:22}}>Last updated: June 2026 · festivalbossgame.com</p>
         {isT?<>
           {cl("1. Nature of the game","Festival Boss is a free browser-based entertainment game. Fiction for amusement only. No real festival is organised.")}
@@ -936,7 +939,7 @@ function About({onBack,onLegal}){
     <div style={{minHeight:"100vh",background:BG,display:"flex",flexDirection:"column",alignItems:"center",padding:"32px 16px 0"}}>
       <div style={{background:SURFACE,border:"1px solid "+BORDER,borderRadius:4,padding:"28px 24px",width:"100%",maxWidth:560,marginBottom:0}}>
         <button style={{background:"none",border:"none",color:MID,cursor:"pointer",fontSize:13,padding:0,fontFamily:"inherit",marginBottom:18,display:"block"}} onClick={onBack}>Back to game</button>
-        <h1 style={{fontSize:26,fontWeight:900,color:CREAM,margin:0,fontFamily:"'Inter','Helvetica Neue',Arial,sans-serif"}}>Festival Boss</h1>
+        <h1 style={{fontSize:26,fontWeight:900,color:CREAM,margin:0,fontFamily:"'DM Sans','Helvetica Neue',Arial,sans-serif"}}>Festival Boss</h1>
         <p style={{color:MID,fontSize:13,margin:"4px 0 20px"}}>The festival booking game</p>
         {[
           ["What is it?","A free browser game where you take on the role of festival promoter. Book acts across three stages and try to turn a profit. Most players don't on their first attempt."],
