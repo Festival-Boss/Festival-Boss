@@ -345,7 +345,7 @@ function shareText(n,res,lu){
   if(s===4) return "ON THE MAP on Festival Boss! "+n+" turned "+fmtS(res.profit)+" profit with "+main+" on Main Stage. Can you beat it? festivalbossgame.com";
   if(s===3) return "Established promoter on Festival Boss! "+n+" — "+fmtS(res.profit)+" in the black. Think you can get On the Map? festivalbossgame.com";
   if(s===2) return "In the Black on Festival Boss! "+n+" turned "+fmtS(res.profit)+" profit. Can you do better? festivalbossgame.com";
-  if(s===1) return "Bad year but we go again. "+n+" on Festival Boss — "+fmtS(res.profit)+". Can you survive? festivalbossgame.com";
+  if(s===1) return "Bad year but we go again. "+n+" on Festival Boss — "+fmtS(res.profit)+". festivalbossgame.com";
   return "I just cancelled my own festival on Festival Boss. "+n+" lost "+fmtS(res.profit)+". The crowd never came. The mud did. festivalbossgame.com";
 }
 async function doCopy(t){ try{ await navigator.clipboard.writeText(t); return true; }catch{ return false; } }
@@ -814,7 +814,7 @@ function Result({result,lineup,name,onReset,onHome,copied,onCopy,onTweet,onFb,on
   }
 
   const tierBg=tier.color+"22";
-  const nextMsg=stars===0?"Can you survive? Break even for Bad Year":stars===1?"Need £0.5m+ profit for In the Black":stars===2?"Need £2m+ for Established":stars===3?"Need £3.5m+ for On the Map — and £4.0m+ for the holy grail: Sold Out":"";
+  const nextMsg=stars===1?"Need £0.5m+ profit for In the Black":stars===2?"Need £2m+ for Established":stars===3?"Need £3.5m+ for On the Map — and £4.0m+ for the holy grail: Sold Out":"";
 
   return(
     <div style={{minHeight:"100vh",background:BG,padding:"18px 16px 40px",maxWidth:540,margin:"0 auto"}}>
@@ -846,6 +846,12 @@ function Result({result,lineup,name,onReset,onHome,copied,onCopy,onTweet,onFb,on
       </div>
       <div style={{color:DIM,fontSize:11,textAlign:"center",marginBottom:12}}>
         Incl. £{OVERHEADS}m overheads · Artist fees: {fmt(artistCost||cost-OVERHEADS)}
+      </div>
+
+      {/* TRY AGAIN — right up top for retention */}
+      <div style={{display:"flex",gap:10,marginBottom:14}}>
+        <button style={{flex:2,background:ORANGE,border:"none",color:BG,fontWeight:900,fontSize:15,padding:"14px 0",cursor:"pointer",fontFamily:"inherit",borderRadius:3}} onClick={onReset}>Try Again</button>
+        <button style={{flex:1,background:"transparent",border:"1px solid "+BORDER_HI,color:CREAM,fontWeight:700,fontSize:14,padding:"14px 0",cursor:"pointer",fontFamily:"inherit",borderRadius:3}} onClick={onHome}>Home</button>
       </div>
 
       {/* TIER TEASER */}
@@ -982,11 +988,6 @@ function Result({result,lineup,name,onReset,onHome,copied,onCopy,onTweet,onFb,on
 
       {/* AD SLOT — activate when AdSense approved */}
       {false&&<div id="adsense-results" style={{width:"100%",marginBottom:14}}/>}
-
-      <div style={{display:"flex",gap:10,marginTop:4,marginBottom:14}}>
-        <button style={{flex:1,background:ORANGE,border:"none",color:BG,fontWeight:900,fontSize:14,padding:"13px 0",cursor:"pointer",fontFamily:"inherit",borderRadius:3}} onClick={onReset}>Try Again</button>
-        <button style={{flex:1,background:"transparent",border:"1px solid "+BORDER_HI,color:CREAM,fontWeight:700,fontSize:14,padding:"13px 0",cursor:"pointer",fontFamily:"inherit",borderRadius:3}} onClick={onHome}>Home</button>
-      </div>
 
       <Footer onLegal={onLegal} onAbout={onAbout}/>
     </div>
