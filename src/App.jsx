@@ -341,12 +341,12 @@ function saveBest(p){ try{ const b=getBest(); if(p>b) localStorage.setItem("fb_b
 function shareText(n,res,lu){
   const main=lu.filter(a=>a.assignedStage==="Main Stage").map(a=>a.name).join(", ")||"nobody";
   const s=res.tier.stars;
-  if(res.profit>=SOLD_OUT_MARK) return "SOLD OUT on Festival Boss! "+n+" turned "+fmtS(res.profit)+" profit. The holy grail. festivalbossgame.com";
-  if(s===4) return "ON THE MAP on Festival Boss! "+n+" turned "+fmtS(res.profit)+" profit with "+main+" on Main Stage. Can you beat it? festivalbossgame.com";
-  if(s===3) return "Established promoter on Festival Boss! "+n+" — "+fmtS(res.profit)+" in the black. Think you can get On the Map? festivalbossgame.com";
-  if(s===2) return "In the Black on Festival Boss! "+n+" turned "+fmtS(res.profit)+" profit. Can you do better? festivalbossgame.com";
-  if(s===1) return "Bad year but we go again. "+n+" on Festival Boss — "+fmtS(res.profit)+". festivalbossgame.com";
-  return "I just cancelled my own festival on Festival Boss. "+n+" lost "+fmtS(res.profit)+". The crowd never came. The mud did. festivalbossgame.com";
+  if(res.profit>=SOLD_OUT_MARK) return "SOLD OUT on Festival Boss! "+n+" turned "+fmtS(res.profit)+" profit. The holy grail. https://festivalbossgame.com";
+  if(s===4) return "ON THE MAP on Festival Boss! "+n+" turned "+fmtS(res.profit)+" profit with "+main+" on Main Stage. Can you beat it? https://festivalbossgame.com";
+  if(s===3) return "Established promoter on Festival Boss! "+n+" — "+fmtS(res.profit)+" in the black. Think you can get On the Map? https://festivalbossgame.com";
+  if(s===2) return "In the Black on Festival Boss! "+n+" turned "+fmtS(res.profit)+" profit. Can you do better? https://festivalbossgame.com";
+  if(s===1) return "Bad year but we go again. "+n+" on Festival Boss — "+fmtS(res.profit)+". https://festivalbossgame.com";
+  return "I just cancelled my own festival on Festival Boss. "+n+" lost "+fmtS(res.profit)+". The crowd never came. The mud did. https://festivalbossgame.com";
 }
 async function doCopy(t){ try{ await navigator.clipboard.writeText(t); return true; }catch{ return false; } }
 function doTweet(t){ window.open("https://twitter.com/intent/tweet?text="+encodeURIComponent(t),"_blank"); }
