@@ -32,11 +32,11 @@ const BORDER_HI= "rgba(245,240,232,0.25)";
 // ─── GAME CONFIG ─────────────────────────────────────────────
 const BUDGET         = 14;
 const OVERHEADS      = 2;
-const TICKET_REV     = 34;
+const TICKET_REV     = 31;
 const TOTAL_SLOTS    = 10;
 const MAX_SPINS      = 3;
 const HAND_SIZE      = 8;
-const SOLD_OUT_MARK  = 4.5;
+const SOLD_OUT_MARK  = 4.0;
 
 const STAGE_CAPS = {"Main Stage":3,"Second Stage":4,"Smaller Stage":3};
 const STAGE_MULS = {"Main Stage":1.0,"Second Stage":0.65,"Smaller Stage":0.35};
@@ -44,7 +44,7 @@ const STAGES     = ["Main Stage","Second Stage","Smaller Stage"];
 
 // ─── TIERS ───────────────────────────────────────────────────
 const TIERS = [
-  {min:3.5, stars:4, label:"Legendary",   sub:"This is the stuff of festival history.",           color:YELLOW,  poster:"LEGENDARY"},
+  {min:3.5, stars:4, label:"On the Map",    sub:"Your festival is a name people know. You made it.",  color:CREAM,  poster:"ON THE MAP"},
   {min:2.0, stars:3, label:"Established", sub:"People are talking. You're a name in the game.",  color:GREEN,   poster:"ESTABLISHED"},
   {min:0.5, stars:2, label:"In the Black",sub:"You turned a profit. Real promoters dream of this.",color:TEAL,  poster:"IN THE BLACK"},
   {min:-1.0,stars:1, label:"Bad Year",    sub:"We lost money but we'll be back next summer.",     color:ORANGE,  poster:"BAD YEAR"},
@@ -64,42 +64,42 @@ function getReview(stars){ const r=REVIEWS[stars]||REVIEWS[0]; return r[Math.flo
 
 // ─── ARTISTS ─────────────────────────────────────────────────
 const ARTISTS = [
-  {id:1,name:"Radiohead",fee:3.0,draw:9.8,genre:"Alt Rock"},
-  {id:2,name:"Beyonce",fee:6.0,draw:10.0,genre:"Pop / R&B"},
-  {id:3,name:"The Rolling Stones",fee:6.5,draw:9.5,genre:"Rock"},
-  {id:4,name:"Coldplay",fee:5.0,draw:9.7,genre:"Pop Rock"},
-  {id:5,name:"Adele",fee:5.2,draw:9.9,genre:"Pop"},
-  {id:6,name:"Taylor Swift",fee:6.5,draw:10.0,genre:"Pop"},
-  {id:7,name:"Foo Fighters",fee:3.8,draw:9.3,genre:"Rock"},
-  {id:8,name:"Arctic Monkeys",fee:3.6,draw:9.4,genre:"Indie Rock"},
-  {id:9,name:"Jay-Z",fee:4.0,draw:9.1,genre:"Hip-Hop"},
-  {id:10,name:"Kendrick Lamar",fee:4.2,draw:9.6,genre:"Hip-Hop"},
-  {id:11,name:"Blur",fee:3.2,draw:9.0,genre:"Britpop"},
-  {id:12,name:"Muse",fee:3.2,draw:9.2,genre:"Alt Rock"},
-  {id:13,name:"David Bowie",fee:4.0,draw:9.9,genre:"Rock"},
-  {id:14,name:"Eminem",fee:4.5,draw:9.5,genre:"Hip-Hop"},
-  {id:15,name:"Bruce Springsteen",fee:4.0,draw:9.3,genre:"Rock"},
-  {id:16,name:"The Who",fee:3.6,draw:9.0,genre:"Rock"},
-  {id:17,name:"Paul McCartney",fee:5.0,draw:9.8,genre:"Rock"},
-  {id:18,name:"Elton John",fee:5.0,draw:9.7,genre:"Pop / Rock"},
-  {id:19,name:"Guns N Roses",fee:4.2,draw:9.2,genre:"Rock"},
-  {id:20,name:"The Prodigy",fee:1.8,draw:8.8,genre:"Electronic"},
+  {id:1,name:"Radiohead",fee:2.2,draw:9.8,genre:"Alt Rock"},
+  {id:2,name:"Beyonce",fee:4.5,draw:10.0,genre:"Pop / R&B"},
+  {id:3,name:"The Rolling Stones",fee:5.5,draw:9.5,genre:"Rock"},
+  {id:4,name:"Coldplay",fee:3.5,draw:9.7,genre:"Pop Rock"},
+  {id:5,name:"Adele",fee:4.0,draw:9.9,genre:"Pop"},
+  {id:6,name:"Taylor Swift",fee:5.0,draw:10.0,genre:"Pop"},
+  {id:7,name:"Foo Fighters",fee:3.5,draw:9.3,genre:"Rock"},
+  {id:8,name:"Arctic Monkeys",fee:3.2,draw:9.4,genre:"Indie Rock"},
+  {id:9,name:"Jay-Z",fee:3.2,draw:9.1,genre:"Hip-Hop"},
+  {id:10,name:"Kendrick Lamar",fee:3.8,draw:9.6,genre:"Hip-Hop"},
+  {id:11,name:"Blur",fee:3.0,draw:9.0,genre:"Britpop"},
+  {id:12,name:"Muse",fee:3.0,draw:9.2,genre:"Alt Rock"},
+  {id:13,name:"David Bowie",fee:3.0,draw:9.9,genre:"Rock"},
+  {id:14,name:"Eminem",fee:3.6,draw:9.5,genre:"Hip-Hop"},
+  {id:15,name:"Bruce Springsteen",fee:3.2,draw:9.3,genre:"Rock"},
+  {id:16,name:"The Who",fee:2.8,draw:9.0,genre:"Rock"},
+  {id:17,name:"Paul McCartney",fee:3.5,draw:9.8,genre:"Rock"},
+  {id:18,name:"Elton John",fee:3.8,draw:9.7,genre:"Pop / Rock"},
+  {id:19,name:"Guns N Roses",fee:3.4,draw:9.2,genre:"Rock"},
+  {id:20,name:"The Prodigy",fee:2.2,draw:8.8,genre:"Electronic"},
   {id:21,name:"Chemical Brothers",fee:1.6,draw:8.5,genre:"Electronic"},
-  {id:22,name:"Dua Lipa",fee:3.8,draw:9.4,genre:"Pop"},
-  {id:23,name:"Ed Sheeran",fee:5.5,draw:9.8,genre:"Pop"},
+  {id:22,name:"Dua Lipa",fee:3.0,draw:9.4,genre:"Pop"},
+  {id:23,name:"Ed Sheeran",fee:4.2,draw:9.8,genre:"Pop"},
   {id:24,name:"Gorillaz",fee:2.8,draw:9.0,genre:"Alternative"},
   {id:25,name:"Stormzy",fee:2.5,draw:8.9,genre:"Grime"},
-  {id:26,name:"Oasis",fee:4.5,draw:9.9,genre:"Britpop"},
+  {id:26,name:"Oasis",fee:3.8,draw:9.9,genre:"Britpop"},
   {id:27,name:"Pulp",fee:2.2,draw:8.7,genre:"Britpop"},
   {id:28,name:"Neil Young",fee:2.5,draw:8.8,genre:"Rock"},
   {id:29,name:"Arcade Fire",fee:1.8,draw:8.6,genre:"Indie"},
-  {id:30,name:"Fleetwood Mac",fee:4.0,draw:9.2,genre:"Rock"},
+  {id:30,name:"Fleetwood Mac",fee:3.0,draw:9.2,genre:"Rock"},
   {id:176,name:"Green Day",fee:3.0,draw:9.0,genre:"Punk Rock"},
   {id:31,name:"Florence and the Machine",fee:1.4,draw:8.3,genre:"Indie"},
   {id:32,name:"Jack White",fee:1.2,draw:8.0,genre:"Rock"},
   {id:33,name:"The National",fee:0.9,draw:7.8,genre:"Indie Rock"},
   {id:34,name:"Haim",fee:0.8,draw:7.5,genre:"Pop Rock"},
-  {id:35,name:"Billie Eilish",fee:3.0,draw:9.2,genre:"Pop"},
+  {id:35,name:"Billie Eilish",fee:2.4,draw:9.2,genre:"Pop"},
   {id:36,name:"Lizzo",fee:1.4,draw:8.4,genre:"Pop / R&B"},
   {id:37,name:"Hozier",fee:1.0,draw:8.1,genre:"Folk Rock"},
   {id:38,name:"Alt-J",fee:0.9,draw:7.9,genre:"Indie"},
@@ -110,35 +110,35 @@ const ARTISTS = [
   {id:43,name:"Massive Attack",fee:1.1,draw:8.2,genre:"Trip-Hop"},
   {id:44,name:"Portishead",fee:1.0,draw:8.0,genre:"Trip-Hop"},
   {id:45,name:"The Killers",fee:2.5,draw:8.9,genre:"Indie Rock"},
-  {id:46,name:"Queens of the Stone Age",fee:2.0,draw:8.5,genre:"Rock"},
-  {id:47,name:"Pearl Jam",fee:3.0,draw:9.0,genre:"Grunge"},
+  {id:46,name:"Queens of the Stone Age",fee:1.5,draw:8.5,genre:"Rock"},
+  {id:47,name:"Pearl Jam",fee:2.4,draw:9.0,genre:"Grunge"},
   {id:48,name:"Nine Inch Nails",fee:1.8,draw:8.6,genre:"Industrial"},
   {id:49,name:"Frank Ocean",fee:2.8,draw:9.0,genre:"R&B"},
   {id:50,name:"SZA",fee:1.6,draw:8.7,genre:"R&B"},
   {id:52,name:"System of a Down",fee:2.0,draw:8.8,genre:"Metal"},
-  {id:53,name:"Metallica",fee:3.8,draw:9.3,genre:"Metal"},
+  {id:53,name:"Metallica",fee:3.0,draw:9.3,genre:"Metal"},
   {id:54,name:"Slipknot",fee:1.6,draw:8.4,genre:"Metal"},
   {id:55,name:"Dizzee Rascal",fee:0.7,draw:7.5,genre:"Grime"},
   {id:56,name:"Skepta",fee:0.8,draw:7.7,genre:"Grime"},
   {id:57,name:"Dave",fee:0.9,draw:7.9,genre:"Hip-Hop"},
   {id:58,name:"Little Simz",fee:0.7,draw:7.6,genre:"Hip-Hop"},
   {id:59,name:"Rosalia",fee:1.2,draw:8.1,genre:"Latin / Alt"},
-  {id:60,name:"Lana Del Rey",fee:2.4,draw:8.7,genre:"Indie Pop"},
-  {id:61,name:"Calvin Harris",fee:2.4,draw:8.8,genre:"EDM"},
+  {id:60,name:"Lana Del Rey",fee:1.8,draw:8.7,genre:"Indie Pop"},
+  {id:61,name:"Calvin Harris",fee:1.8,draw:8.8,genre:"EDM"},
   {id:62,name:"Aphex Twin",fee:1.2,draw:8.2,genre:"Electronic"},
-  {id:63,name:"Daft Punk",fee:4.5,draw:9.5,genre:"Electronic"},
+  {id:63,name:"Daft Punk",fee:3.5,draw:9.5,genre:"Electronic"},
   {id:64,name:"Underworld",fee:0.9,draw:7.9,genre:"Electronic"},
   {id:65,name:"The Cure",fee:2.0,draw:8.5,genre:"Post-Punk"},
-  {id:66,name:"Depeche Mode",fee:2.6,draw:8.8,genre:"Synth-Pop"},
-  {id:67,name:"New Order",fee:1.4,draw:8.3,genre:"Post-Punk"},
+  {id:66,name:"Depeche Mode",fee:2.4,draw:8.8,genre:"Synth-Pop"},
+  {id:67,name:"New Order",fee:1.8,draw:8.3,genre:"Post-Punk"},
   {id:68,name:"Pet Shop Boys",fee:1.2,draw:8.1,genre:"Synth-Pop"},
   {id:69,name:"Suede",fee:0.8,draw:7.7,genre:"Britpop"},
-  {id:70,name:"Primal Scream",fee:0.9,draw:7.8,genre:"Rock"},
+  {id:70,name:"Primal Scream",fee:1.2,draw:7.8,genre:"Rock"},
   {id:71,name:"The Libertines",fee:1.0,draw:7.9,genre:"Indie Rock"},
   {id:72,name:"Amy Winehouse",fee:1.4,draw:8.5,genre:"Soul"},
-  {id:73,name:"Noel Gallagher HFB",fee:1.8,draw:8.5,genre:"Rock"},
-  {id:74,name:"Liam Gallagher",fee:2.2,draw:8.7,genre:"Rock"},
-  {id:75,name:"Sam Fender",fee:1.2,draw:8.0,genre:"Indie Rock"},
+  {id:73,name:"Noel Gallagher HFB",fee:1.4,draw:8.5,genre:"Rock"},
+  {id:74,name:"Liam Gallagher",fee:2.0,draw:8.7,genre:"Rock"},
+  {id:75,name:"Sam Fender",fee:0.9,draw:8.0,genre:"Indie Rock"},
   {id:76,name:"Wet Leg",fee:0.6,draw:7.5,genre:"Indie Rock"},
   {id:77,name:"Fontaines DC",fee:0.7,draw:7.7,genre:"Post-Punk"},
   {id:78,name:"Jungle",fee:0.7,draw:7.6,genre:"Funk / Soul"},
@@ -148,27 +148,27 @@ const ARTISTS = [
   {id:83,name:"Four Tet",fee:0.7,draw:7.5,genre:"Electronic"},
   {id:84,name:"Jamie xx",fee:0.7,draw:7.4,genre:"Electronic"},
   {id:85,name:"Robyn",fee:1.0,draw:8.0,genre:"Pop / Electronic"},
-  {id:86,name:"Kylie Minogue",fee:2.0,draw:8.6,genre:"Pop"},
+  {id:86,name:"Kylie Minogue",fee:1.6,draw:8.6,genre:"Pop"},
   {id:87,name:"Sam Smith",fee:1.2,draw:8.2,genre:"Pop / Soul"},
   {id:88,name:"Years and Years",fee:0.7,draw:7.4,genre:"Pop / Electronic"},
   {id:89,name:"Elbow",fee:1.0,draw:7.9,genre:"Indie Rock"},
   {id:90,name:"James",fee:0.7,draw:7.3,genre:"Indie Rock"},
-  {id:177,name:"Blink-182",fee:2.4,draw:8.7,genre:"Pop Punk"},
-  {id:178,name:"My Chemical Romance",fee:2.6,draw:8.9,genre:"Emo Rock"},
+  {id:177,name:"Blink-182",fee:2.2,draw:8.7,genre:"Pop Punk"},
+  {id:178,name:"My Chemical Romance",fee:2.5,draw:8.9,genre:"Emo Rock"},
   {id:179,name:"Fall Out Boy",fee:1.2,draw:8.2,genre:"Pop Punk"},
   {id:180,name:"Panic At the Disco",fee:1.4,draw:8.4,genre:"Pop Rock"},
-  {id:181,name:"twenty one pilots",fee:2.4,draw:8.7,genre:"Indie Pop"},
+  {id:181,name:"twenty one pilots",fee:1.8,draw:8.7,genre:"Indie Pop"},
   {id:182,name:"Paramore",fee:2.0,draw:8.6,genre:"Pop Punk"},
-  {id:183,name:"Halsey",fee:1.3,draw:8.0,genre:"Alt Pop"},
-  {id:184,name:"Lorde",fee:1.8,draw:8.4,genre:"Pop"},
-  {id:185,name:"Charli XCX",fee:1.8,draw:8.5,genre:"Pop"},
-  {id:186,name:"Olivia Rodrigo",fee:2.8,draw:9.1,genre:"Pop"},
+  {id:183,name:"Halsey",fee:1.0,draw:8.0,genre:"Alt Pop"},
+  {id:184,name:"Lorde",fee:1.4,draw:8.4,genre:"Pop"},
+  {id:185,name:"Charli XCX",fee:1.4,draw:8.5,genre:"Pop"},
+  {id:186,name:"Olivia Rodrigo",fee:2.2,draw:9.1,genre:"Pop"},
   {id:195,name:"The Streets",fee:0.8,draw:7.8,genre:"Garage / Rap"},
-  {id:197,name:"Kasabian",fee:1.5,draw:8.2,genre:"Indie Rock"},
+  {id:197,name:"Kasabian",fee:1.2,draw:8.2,genre:"Indie Rock"},
   {id:198,name:"Kaiser Chiefs",fee:0.9,draw:7.9,genre:"Indie Rock"},
   {id:200,name:"Bloc Party",fee:0.8,draw:7.7,genre:"Indie Rock"},
   {id:203,name:"Biffy Clyro",fee:0.9,draw:7.9,genre:"Alt Rock"},
-  {id:205,name:"Mumford and Sons",fee:1.8,draw:8.4,genre:"Folk Rock"},
+  {id:205,name:"Mumford and Sons",fee:1.4,draw:8.4,genre:"Folk Rock"},
   {id:215,name:"Grace Jones",fee:0.8,draw:7.7,genre:"Funk / Electronic"},
   {id:216,name:"Kraftwerk",fee:1.2,draw:8.1,genre:"Electronic"},
   {id:91,name:"The xx",fee:0.9,draw:7.8,genre:"Indie"},
@@ -210,7 +210,7 @@ const ARTISTS = [
   {id:129,name:"YUNGBLUD",fee:0.5,draw:7.2,genre:"Punk Pop"},
   {id:131,name:"Frank Turner",fee:0.5,draw:7.3,genre:"Folk Punk"},
   {id:132,name:"Enter Shikari",fee:0.45,draw:7.1,genre:"Post-Hardcore"},
-  {id:134,name:"Bring Me the Horizon",fee:1.4,draw:8.1,genre:"Metal / Pop"},
+  {id:134,name:"Bring Me the Horizon",fee:1.1,draw:8.1,genre:"Metal / Pop"},
   {id:135,name:"Architects",fee:0.55,draw:7.3,genre:"Metalcore"},
   {id:136,name:"Amyl and the Sniffers",fee:0.3,draw:6.8,genre:"Punk"},
   {id:137,name:"Bob Vylan",fee:0.25,draw:6.6,genre:"Punk / Grime"},
@@ -328,7 +328,7 @@ function calcFeedback(lu,profit){
   const es=sm.filter(a=>a.fee>1.0);
   if(es.length>0) tips.push(es[0].name+" wasted on Smaller Stage — high-fee acts need big stages.");
   if(tips.length===0&&profit<3.5){
-    if(profit>=2.0) tips.push("Great run! To hit Legendary you need perfect Main Stage acts AND tight budget management.");
+    if(profit>=2.0) tips.push("Great run! To hit On the Map you need perfect Main Stage acts AND tight budget management.");
     else if(profit>=0) tips.push("Try stronger acts on Main Stage — that's where the revenue multiplier really kicks in.");
     else tips.push("Try premium acts on Main Stage and cheap acts on Smaller Stage — and mix your genres.");
   }
@@ -342,8 +342,8 @@ function shareText(n,res,lu){
   const main=lu.filter(a=>a.assignedStage==="Main Stage").map(a=>a.name).join(", ")||"nobody";
   const s=res.tier.stars;
   if(res.profit>=SOLD_OUT_MARK) return "SOLD OUT on Festival Boss! "+n+" turned "+fmtS(res.profit)+" profit. The holy grail. festivalbossgame.com";
-  if(s===4) return "LEGENDARY on Festival Boss! "+n+" turned "+fmtS(res.profit)+" profit with "+main+" on Main Stage. Can you beat it? festivalbossgame.com";
-  if(s===3) return "Established promoter on Festival Boss! "+n+" — "+fmtS(res.profit)+" in the black. Think you can go Legendary? festivalbossgame.com";
+  if(s===4) return "ON THE MAP on Festival Boss! "+n+" turned "+fmtS(res.profit)+" profit with "+main+" on Main Stage. Can you beat it? festivalbossgame.com";
+  if(s===3) return "Established promoter on Festival Boss! "+n+" — "+fmtS(res.profit)+" in the black. Think you can get On the Map? festivalbossgame.com";
   if(s===2) return "In the Black on Festival Boss! "+n+" turned "+fmtS(res.profit)+" profit. Can you do better? festivalbossgame.com";
   if(s===1) return "Bad year but we go again. "+n+" on Festival Boss — "+fmtS(res.profit)+". Can you survive? festivalbossgame.com";
   return "I just cancelled my own festival on Festival Boss. "+n+" lost "+fmtS(res.profit)+". The crowd never came. The mud did. festivalbossgame.com";
@@ -358,10 +358,44 @@ function dealHand(usedIds){
   const avail=ARTISTS.filter(a=>!usedIds.includes(a.id));
   const shuffle=arr=>[...arr].sort(()=>Math.random()-0.5);
   if(avail.length<=HAND_SIZE) return shuffle(avail);
+
   const premium=shuffle(avail.filter(a=>a.draw>=9.0));
   const mid=shuffle(avail.filter(a=>a.draw>=8.0&&a.draw<9.0));
   const small=shuffle(avail.filter(a=>a.draw<8.0));
-  const hand=[...premium.slice(0,2),...mid.slice(0,3),...small.slice(0,3)];
+  const expensive=shuffle(avail.filter(a=>a.fee>=3.5));
+  const cheap=shuffle(avail.filter(a=>a.fee<1.0));
+
+  // Hand types with weights: balanced=40%, budget trap=15%, genre trap=15%, stage trap=15%, bargain=15%
+  const rand=Math.random();
+  let hand=[];
+
+  if(rand<0.40){
+    // BALANCED — fair hand, mix of all tiers
+    hand=[...premium.slice(0,2),...mid.slice(0,3),...small.slice(0,3)];
+
+  } else if(rand<0.55){
+    // BUDGET TRAP — lots of expensive premium acts, tempts overspend
+    hand=[...expensive.slice(0,5),...small.slice(0,3)];
+
+  } else if(rand<0.70){
+    // GENRE TRAP — 4-5 acts from same genre, looks appealing
+    const genreCounts={};
+    avail.forEach(a=>{genreCounts[a.genre]=(genreCounts[a.genre]||0)+1;});
+    const bigGenre=Object.entries(genreCounts).sort((a,b)=>b[1]-a[1])[0][0];
+    const sameGenre=shuffle(avail.filter(a=>a.genre===bigGenre));
+    const other=shuffle(avail.filter(a=>a.genre!==bigGenre));
+    hand=[...sameGenre.slice(0,4),...other.slice(0,4)];
+
+  } else if(rand<0.85){
+    // STAGE TRAP — all high draw acts, nothing cheap for smaller stage
+    hand=[...premium.slice(0,4),...mid.slice(0,4)];
+
+  } else {
+    // BARGAIN HAND — cheap lower draw acts, tests value building
+    hand=[...cheap.slice(0,5),...mid.slice(0,3)];
+  }
+
+  // Top up to HAND_SIZE if needed
   const ids=new Set(hand.map(a=>a.id));
   const rest=shuffle(avail.filter(a=>!ids.has(a.id)));
   while(rest.length>0&&hand.length<HAND_SIZE) hand.push(rest.pop());
@@ -596,7 +630,7 @@ export default function FestivalBoss(){
               <div style={{fontSize:40,marginBottom:12,opacity:0.3,fontFamily:"'DM Sans','Helvetica Neue',Arial,sans-serif",color:ORANGE}}>SPIN</div>
               <div style={{color:MID,fontSize:16,fontWeight:700,fontFamily:"'DM Sans','Helvetica Neue',Arial,sans-serif"}}>Spin to get your acts</div>
               <div style={{color:DIM,fontSize:12,marginTop:8}}>{MAX_SPINS} skips to veto acts · {TOTAL_SLOTS} slots · £{BUDGET}m budget</div>
-              <div style={{color:DIM,fontSize:11,marginTop:4}}>Break even to survive · £3.5m+ for Legendary · £4.5m+ for Sold Out</div>
+              <div style={{color:DIM,fontSize:11,marginTop:4}}>Break even to survive · £3.5m+ for On the Map · £4.0m+ for Sold Out</div>
               <div style={{marginTop:16,display:"flex",gap:16,flexWrap:"wrap",justifyContent:"center"}}>
                 {STAGES.map(stage=>(
                   <div key={stage} style={{fontSize:11,color:stageColor(stage),fontWeight:700,textAlign:"center"}}>
@@ -651,7 +685,7 @@ function SBtn({onClick,hi,children}){
 function HomeScreen({onStart,onLegal,onAbout}){
   const best=getBest();
   const hasBest=best>-50;
-  const bestStars=best>=3.5?"LEGENDARY":best>=2.0?"Established":best>=0.5?"In the Black":best>=0?"Bad Year (survived!)":"Cancelled";
+  const bestStars=best>=3.5?"ON THE MAP":best>=2.0?"Established":best>=0.5?"In the Black":best>=0?"Bad Year (survived!)":"Cancelled";
   const bestColor=best>=3.5?YELLOW:best>=2.0?GREEN:best>=0.5?TEAL:best>=-1.0?ORANGE:RED;
   return(
     <div style={{minHeight:"100vh",background:BG,display:"flex",flexDirection:"column",alignItems:"center",padding:"0 16px 60px",overflow:"hidden"}}>
@@ -662,8 +696,15 @@ function HomeScreen({onStart,onLegal,onAbout}){
           <span style={{display:"block",fontSize:"clamp(44px,12vw,80px)",fontWeight:900,fontFamily:"'DM Sans','Helvetica Neue',Arial,sans-serif",color:CREAM,letterSpacing:"-3px",textTransform:"uppercase"}}>Festival</span>
           <span style={{display:"block",fontSize:"clamp(56px,15vw,110px)",fontWeight:900,fontFamily:"'DM Sans','Helvetica Neue',Arial,sans-serif",color:ORANGE,letterSpacing:"-5px",textTransform:"uppercase",marginTop:-6}}>Boss</span>
         </div>
-        <div style={{fontSize:11,color:DIM,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:14,marginTop:10}}>Spin the acts · Book the lineup · Turn a profit</div>
+        <div style={{fontSize:11,color:DIM,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:8,marginTop:10}}>Spin the acts · Book the lineup · Turn a profit</div>
+        <div style={{fontSize:12,color:MID,lineHeight:1.6,marginBottom:14,textAlign:"center"}}>
+          Don't get Cancelled. Get In the Black. Get Established.<br/>
+          Put it <span style={{color:CREAM,fontWeight:700}}>On the Map</span>. The holy grail? <span style={{color:ORANGE,fontWeight:700}}>Sold Out.</span>
+        </div>
       </div>
+
+      {/* AD SLOT — activate when AdSense approved */}
+      {false&&<div id="adsense-home" style={{width:"100%",maxWidth:460,marginBottom:12}}/>}
 
       <div style={{background:SURFACE,border:"1px solid "+BORDER,padding:"16px 18px",width:"100%",maxWidth:460,borderRadius:4}}>
         <div style={{fontWeight:700,fontSize:12,letterSpacing:"0.08em",textTransform:"uppercase",color:MID,marginBottom:12,borderBottom:"1px solid "+BORDER,paddingBottom:8}}>How to play</div>
@@ -688,7 +729,7 @@ function HomeScreen({onStart,onLegal,onAbout}){
 
         <div style={{background:BG,border:"1px solid "+BORDER,padding:"10px 12px",marginBottom:14,textAlign:"center",borderRadius:3}}>
           <div style={{fontSize:12,color:MID,lineHeight:1.6}}>
-            The record profit is <span style={{color:YELLOW,fontWeight:700}}>£4.5m</span>. Only 1 in 500 reach Sold Out.
+            The record profit is <span style={{color:YELLOW,fontWeight:700}}>£4.0m</span>. Only 1 in 500 reach Sold Out.
           </div>
         </div>
 
@@ -773,7 +814,7 @@ function Result({result,lineup,name,onReset,onHome,copied,onCopy,onTweet,onFb,on
   }
 
   const tierBg=tier.color+"22";
-  const nextMsg=stars===0?"Can you survive? Break even for Bad Year":stars===1?"Need £0.5m+ profit for In the Black":stars===2?"Need £2m+ for Established":stars===3?"Need £3.5m+ for Legendary — and £4.5m+ for the holy grail: Sold Out":"";
+  const nextMsg=stars===0?"Can you survive? Break even for Bad Year":stars===1?"Need £0.5m+ profit for In the Black":stars===2?"Need £2m+ for Established":stars===3?"Need £3.5m+ for On the Map — and £4.0m+ for the holy grail: Sold Out":"";
 
   return(
     <div style={{minHeight:"100vh",background:BG,padding:"18px 16px 40px",maxWidth:540,margin:"0 auto"}}>
@@ -809,17 +850,17 @@ function Result({result,lineup,name,onReset,onHome,copied,onCopy,onTweet,onFb,on
 
       {/* TIER TEASER */}
       {isSoldOut?(
-        <div style={{background:YELLOW_D,border:"1px solid "+YELLOW,padding:"10px 14px",marginBottom:12,textAlign:"center",borderRadius:3}}>
-          <div style={{fontSize:13,fontWeight:900,color:YELLOW}}>SOLD OUT — You've done the impossible. Share this immediately.</div>
+        <div style={{background:ORANGE_D,border:"1px solid "+ORANGE,padding:"10px 14px",marginBottom:12,textAlign:"center",borderRadius:3}}>
+          <div style={{fontSize:13,fontWeight:900,color:ORANGE}}>SOLD OUT — You've done the impossible. Share this immediately.</div>
         </div>
       ):stars<4?(
         <div style={{background:"rgba(245,240,232,0.04)",border:"1px solid "+BORDER,padding:"10px 14px",marginBottom:12,textAlign:"center",borderRadius:3}}>
           <div style={{fontSize:11,color:DIM,marginBottom:3}}>{nextMsg}</div>
-          <div style={{fontSize:10,color:FAINT}}>The Sold Out record is £4.5m+. Almost nobody gets there.</div>
+          <div style={{fontSize:10,color:FAINT}}>The Sold Out record is £4.0m+. Almost nobody gets there.</div>
         </div>
       ):(
         <div style={{background:YELLOW_D,border:"1px solid "+YELLOW,padding:"10px 14px",marginBottom:12,textAlign:"center",borderRadius:3}}>
-          <div style={{fontSize:12,fontWeight:900,color:YELLOW}}>Legendary. Can you go one further and hit Sold Out at £4.5m+?</div>
+          <div style={{fontSize:12,fontWeight:900,color:CREAM}}>On the Map! Can you go one further and hit Sold Out at £4.0m+?</div>
         </div>
       )}
 
@@ -840,7 +881,7 @@ function Result({result,lineup,name,onReset,onHome,copied,onCopy,onTweet,onFb,on
           :profit>=3.5
             ?name+" turned "+fmt(profit)+" profit. "+(main[0]?.name||"Your headliner")+" packed the Main Stage. Even the portaloos turned a profit."
             :profit>=0
-              ?name+" made "+fmt(profit)+" profit. Not bad — but Legendary is still out there."
+              ?name+" made "+fmt(profit)+" profit. Still a way to go until you're On the Map."
               :name+" lost "+fmt(Math.abs(profit))+". The crowd never came. The mud did."
         }
       </p>
@@ -853,20 +894,74 @@ function Result({result,lineup,name,onReset,onHome,copied,onCopy,onTweet,onFb,on
 
       {/* POSTER */}
       <div style={{margin:"14px 0"}}>
-        <div ref={posterRef} style={{background:BG,border:"2px solid "+ORANGE,padding:"0 0 20px",textAlign:"center",fontFamily:"'DM Sans','Helvetica Neue',Arial,sans-serif",overflow:"hidden",borderRadius:4}}>
-          <div style={{background:ORANGE,padding:"6px 0",marginBottom:14}}>
-            <span style={{fontSize:10,fontWeight:900,letterSpacing:"0.35em",color:BG,textTransform:"uppercase"}}>Festival Boss Presents</span>
+        <div ref={posterRef} style={{background:BG,border:"3px solid "+ORANGE,textAlign:"center",fontFamily:"'DM Sans','Helvetica Neue',Arial,sans-serif",overflow:"hidden",borderRadius:4}}>
+
+          {/* Top stripe */}
+          <div style={{height:8,background:ORANGE}}/>
+
+          {/* Header */}
+          <div style={{background:ORANGE,padding:"10px 16px 8px"}}>
+            <div style={{fontSize:9,fontWeight:900,letterSpacing:"0.5em",color:BG,textTransform:"uppercase",marginBottom:2}}>Festival Boss Presents</div>
+            <div style={{fontSize:"clamp(32px,8vw,56px)",fontWeight:900,color:BG,letterSpacing:"-2px",textTransform:"uppercase",lineHeight:0.9}}>{name.toUpperCase()}</div>
           </div>
-          <div style={{fontSize:"clamp(28px,7vw,48px)",fontWeight:900,color:CREAM,letterSpacing:"0.06em",textTransform:"uppercase",lineHeight:1,marginBottom:4,padding:"0 16px",wordBreak:"break-word"}}>{name.toUpperCase()}</div>
-          <div style={{fontSize:9,color:DIM,letterSpacing:"0.3em",textTransform:"uppercase",marginBottom:10}}>ONE WEEKEND · ONE CHANCE</div>
-          <div style={{height:1,background:ORANGE,margin:"12px 16px",opacity:0.4}}/>
-          {main.length>0
-            ? main.map(a=><div key={a.id} style={{fontSize:"clamp(18px,4.5vw,28px)",fontWeight:900,color:ORANGE,letterSpacing:"0.06em",textTransform:"uppercase",lineHeight:1.25,marginBottom:4,fontFamily:"'DM Sans','Helvetica Neue',Arial,sans-serif"}}>{a.name.toUpperCase()}</div>)
-            : <div style={{opacity:0.2,fontSize:16,color:ORANGE}}>NO MAIN STAGE BOOKED</div>}
-          {second.length>0&&<><div style={{height:1,background:ORANGE,margin:"12px 16px",opacity:0.4}}/><div style={{display:"flex",flexWrap:"wrap",justifyContent:"center",gap:"2px 8px",padding:"4px 16px"}}>{second.map((a,i)=><span key={a.id} style={{fontSize:14,fontWeight:700,color:TEAL,letterSpacing:"0.03em",fontFamily:"'DM Sans','Helvetica Neue',Arial,sans-serif"}}>{a.name}{i<second.length-1?" · ":""}</span>)}</div></>}
-          {smaller.length>0&&<><div style={{height:1,background:BORDER,margin:"8px 16px"}}/><div style={{display:"flex",flexWrap:"wrap",justifyContent:"center",gap:"2px 8px",padding:"4px 16px"}}>{smaller.map((a,i)=><span key={a.id} style={{fontSize:9,fontWeight:500,color:DIM,letterSpacing:"0.01em"}}>{a.name}{i<smaller.length-1?"  ":""}</span>)}</div></>}
-          <div style={{height:1,background:ORANGE,margin:"12px 16px",opacity:0.4}}/>
-          <div style={{fontSize:11,fontWeight:900,color:MID,letterSpacing:"0.2em",textTransform:"uppercase",marginTop:8,padding:"0 16px"}}>{tier.poster}</div>
+
+          {/* Tagline */}
+          <div style={{padding:"10px 16px 0",fontSize:8,color:DIM,letterSpacing:"0.4em",textTransform:"uppercase"}}>ONE WEEKEND · ONE CHANCE · ONE LINEUP</div>
+
+          {/* Main stage acts — big */}
+          <div style={{padding:"14px 16px 4px"}}>
+            {main.length>0
+              ? main.map((a,i)=>(
+                <div key={a.id} style={{
+                  fontSize:i===0?"clamp(24px,6vw,40px)":"clamp(18px,4.5vw,28px)",
+                  fontWeight:900,
+                  color:i===0?ORANGE:CREAM,
+                  letterSpacing:i===0?"-1px":"0px",
+                  textTransform:"uppercase",
+                  lineHeight:1.1,
+                  marginBottom:i===0?4:2,
+                }}>{a.name.toUpperCase()}</div>
+              ))
+              : <div style={{opacity:0.2,fontSize:16,color:ORANGE}}>NO MAIN STAGE BOOKED</div>}
+          </div>
+
+          {/* Divider */}
+          <div style={{height:1,background:ORANGE,margin:"10px 20px",opacity:0.5}}/>
+
+          {/* Second stage */}
+          {second.length>0&&(
+            <div style={{display:"flex",flexWrap:"wrap",justifyContent:"center",gap:"2px 10px",padding:"4px 16px"}}>
+              {second.map((a,i)=>(
+                <span key={a.id} style={{fontSize:13,fontWeight:700,color:TEAL,letterSpacing:"0.02em",textTransform:"uppercase"}}>
+                  {a.name}{i<second.length-1?" ·":""}&nbsp;
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Thin rule */}
+          <div style={{height:1,background:"rgba(245,240,232,0.1)",margin:"8px 20px"}}/>
+
+          {/* Smaller stage */}
+          {smaller.length>0&&(
+            <div style={{display:"flex",flexWrap:"wrap",justifyContent:"center",gap:"1px 8px",padding:"2px 16px 4px"}}>
+              {smaller.map((a,i)=>(
+                <span key={a.id} style={{fontSize:10,fontWeight:600,color:DIM,letterSpacing:"0.05em",textTransform:"uppercase"}}>
+                  {a.name}{i<smaller.length-1?" ·":""}&nbsp;
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Footer */}
+          <div style={{height:1,background:ORANGE,margin:"10px 20px 0",opacity:0.5}}/>
+          <div style={{padding:"8px 16px 10px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <div style={{fontSize:8,fontWeight:900,letterSpacing:"0.3em",color:DIM,textTransform:"uppercase"}}>festivalbossgame.com</div>
+            <div style={{fontSize:9,fontWeight:900,color:tier.color,letterSpacing:"0.15em",textTransform:"uppercase"}}>{tier.poster}</div>
+          </div>
+
+          {/* Bottom stripe */}
+          <div style={{height:8,background:ORANGE}}/>
         </div>
       </div>
 
@@ -880,10 +975,13 @@ function Result({result,lineup,name,onReset,onHome,copied,onCopy,onTweet,onFb,on
           <SBtn onClick={onShare}>Share</SBtn>
           <SBtn onClick={onCopy} hi={copied}>{copied?"Copied!":"Copy"}</SBtn>
         </div>
-        <button onClick={downloadPoster} style={{marginTop:10,width:"100%",background:"transparent",border:"1px solid "+BORDER_HI,color:MID,fontWeight:700,fontSize:12,padding:"9px 0",cursor:"pointer",fontFamily:"inherit",letterSpacing:"0.05em",borderRadius:3}}>
-          Download Poster
+        <button onClick={downloadPoster} style={{marginTop:10,width:"100%",background:ORANGE,border:"none",color:BG,fontWeight:900,fontSize:13,padding:"11px 0",cursor:"pointer",fontFamily:"inherit",letterSpacing:"0.08em",textTransform:"uppercase",borderRadius:3}}>
+          Download Poster Image
         </button>
       </div>
+
+      {/* AD SLOT — activate when AdSense approved */}
+      {false&&<div id="adsense-results" style={{width:"100%",marginBottom:14}}/>}
 
       <div style={{display:"flex",gap:10,marginTop:4,marginBottom:14}}>
         <button style={{flex:1,background:ORANGE,border:"none",color:BG,fontWeight:900,fontSize:14,padding:"13px 0",cursor:"pointer",fontFamily:"inherit",borderRadius:3}} onClick={onReset}>Try Again</button>
@@ -943,7 +1041,7 @@ function About({onBack,onLegal}){
         <p style={{color:MID,fontSize:13,margin:"4px 0 20px"}}>The festival booking game</p>
         {[
           ["What is it?","A free browser game where you take on the role of festival promoter. Book acts across three stages and try to turn a profit. Most players don't on their first attempt."],
-          ["How to play","You have "+MAX_SPINS+" spins to fill "+TOTAL_SLOTS+" slots. Main Stage (3 slots, 100% revenue), Second Stage (4 slots, 65%), Smaller Stage (3 slots, 35%). Budget is £"+BUDGET+"m. Break even to survive — £4.5m+ for the holy grail: Sold Out."],
+          ["How to play","You have "+MAX_SPINS+" spins to fill "+TOTAL_SLOTS+" slots. Main Stage (3 slots, 100% revenue), Second Stage (4 slots, 65%), Smaller Stage (3 slots, 35%). Budget is £"+BUDGET+"m. Break even to survive — £4.0m+ for the holy grail: Sold Out."],
           ["The artists","Over 200 real musicians from UK festival history. All fees and draw ratings are fictional, invented for game balance only."],
           ["Contact","festivalboss.game@mail.com"],
         ].map(([t,c])=>(
