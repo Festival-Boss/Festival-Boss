@@ -24,6 +24,8 @@ const RED      = "#e8191f";
 const RED_D    = "rgba(232,25,31,0.15)";
 const YELLOW   = "#ffd400";
 const YELLOW_D = "rgba(255,212,0,0.15)";
+const PURPLE   = "#b07fd4";
+const PURPLE_D = "rgba(176,127,212,0.15)";
 const BORDER   = "rgba(245,240,232,0.12)";
 const BORDER_HI= "rgba(245,240,232,0.25)";
 
@@ -55,7 +57,7 @@ const REVIEWS = {
   4:["Best festival ever. I can't even find my knickers.","I lost my shoes and found my soulmate.","I'm never going home. Someone bring my post here.","I cried. My mate cried. The security guard cried."],
   3:["Already bought tickets for next year before I left the site.","My mate cried during the headline set. In a good way.","Best weekend of the year. And my wedding was this year.","I don't know what happened but I need to do it again."],
   2:["Decent. Not life-changing, but decent.","The halloumi wrap queue was only 45 minutes. Respect.","I lost my phone but found it again. Net neutral.","Better than Reading 2011. And that's saying something."],
-  1:["It rained. Then it rained some more. Then it rained again.","The sound cut out twice during the headline set.","Queue for the bar was longer than the set.","My tent flooded on night one. Slept in the car."],
+  1:["It rained. Then it rained some more. Then it rained again.","The sound cut out twice during the headline set.","Queue for the bar was longer than one of the headline sets.","My tent flooded on night one. Slept in the car."],
   0:["I got locked in a portaloo for 6 hours.","Me and my mate were the only ones there. We left at 3pm.","The catering gave everyone food poisoning. Everyone.","I drove 4 hours for this. 4 hours."],
 };
 function getReview(stars){ const r=REVIEWS[stars]||REVIEWS[0]; return r[Math.floor(Math.random()*r.length)]; }
@@ -141,7 +143,6 @@ const ARTISTS = [
   {id:77,name:"Fontaines DC",fee:0.7,draw:7.7,genre:"Post-Punk"},
   {id:78,name:"Jungle",fee:0.7,draw:7.6,genre:"Funk / Soul"},
   {id:79,name:"Glass Animals",fee:0.8,draw:7.8,genre:"Indie"},
-  {id:80,name:"Roisin Murphy",fee:0.7,draw:7.5,genre:"Electronic"},
   {id:81,name:"Justice",fee:0.9,draw:7.9,genre:"Electronic"},
   {id:82,name:"Bonobo",fee:0.6,draw:7.3,genre:"Electronic"},
   {id:83,name:"Four Tet",fee:0.7,draw:7.5,genre:"Electronic"},
@@ -259,11 +260,40 @@ const ARTISTS = [
   {id:217,name:"Metronomy",fee:0.45,draw:7.0,genre:"Indie / Electronic"},
   {id:218,name:"Wild Beasts",fee:0.3,draw:6.7,genre:"Indie Rock"},
   {id:220,name:"Honeyblood",fee:0.15,draw:6.0,genre:"Indie Rock"},
+  // R&B / Soul
+  {id:221,name:"Alicia Keys",fee:3.8,draw:9.2,genre:"R&B / Soul"},
+  {id:222,name:"Mary J Blige",fee:2.8,draw:8.8,genre:"R&B / Soul"},
+  {id:223,name:"Lauryn Hill",fee:2.5,draw:8.7,genre:"R&B / Soul"},
+  {id:224,name:"D'Angelo",fee:1.8,draw:8.2,genre:"R&B / Soul"},
+  {id:225,name:"Lianne La Havas",fee:0.7,draw:7.4,genre:"R&B / Soul"},
+  {id:226,name:"Corinne Bailey Rae",fee:0.6,draw:7.2,genre:"Soul / Pop"},
+  {id:227,name:"Leon Bridges",fee:0.8,draw:7.5,genre:"Soul"},
+  // Hip-Hop
+  {id:228,name:"Drake",fee:5.0,draw:9.8,genre:"Hip-Hop"},
+  {id:229,name:"J Cole",fee:3.2,draw:9.0,genre:"Hip-Hop"},
+  {id:230,name:"Tyler the Creator",fee:2.8,draw:9.0,genre:"Hip-Hop"},
+  {id:231,name:"Nas",fee:1.8,draw:8.4,genre:"Hip-Hop"},
+  {id:232,name:"Missy Elliott",fee:2.2,draw:8.6,genre:"Hip-Hop"},
+  {id:233,name:"Run DMC",fee:1.5,draw:8.0,genre:"Hip-Hop"},
+  {id:234,name:"Public Enemy",fee:1.2,draw:7.8,genre:"Hip-Hop"},
+  {id:235,name:"Doja Cat",fee:3.0,draw:9.1,genre:"Pop / Hip-Hop"},
+  // Pop
+  {id:236,name:"Rihanna",fee:5.5,draw:9.8,genre:"Pop / R&B"},
+  {id:237,name:"Lady Gaga",fee:5.0,draw:9.7,genre:"Pop"},
+  {id:238,name:"Katy Perry",fee:3.5,draw:9.0,genre:"Pop"},
+  {id:239,name:"Madonna",fee:4.5,draw:9.2,genre:"Pop"},
+  {id:240,name:"Shakira",fee:3.2,draw:9.0,genre:"Pop"},
+  {id:241,name:"Harry Styles",fee:4.2,draw:9.5,genre:"Pop / Rock"},
+  // Electronic / Dance
+  {id:242,name:"Fatboy Slim",fee:1.2,draw:8.3,genre:"Electronic"},
+  {id:243,name:"Basement Jaxx",fee:1.0,draw:8.0,genre:"Electronic"},
+  {id:244,name:"Orbital",fee:0.9,draw:7.9,genre:"Electronic"},
+  {id:245,name:"Groove Armada",fee:0.7,draw:7.4,genre:"Electronic"},
 ];
 
 // ─── HELPERS ─────────────────────────────────────────────────
-function stageColor(s){ return s==="Main Stage"?TEAL:s==="Second Stage"?"#c084d4":ORANGE; }
-function stageBg(s){ return s==="Main Stage"?TEAL_D:s==="Second Stage"?"rgba(192,132,212,0.15)":ORANGE_D; }
+function stageColor(s){ return s==="Main Stage"?ORANGE:s==="Second Stage"?TEAL:GREEN; }
+function stageBg(s){ return s==="Main Stage"?ORANGE_D:s==="Second Stage"?TEAL_D:GREEN_D; }
 function fmt(v){ const a=Math.abs(v); if(a===0) return "£0m"; return "£"+(a>=1?a.toFixed(1):a.toFixed(2).replace(/\.?0+$/,""))+"m"; }
 function fmtS(v){ return (v>=0?"+":"-")+fmt(Math.abs(v)); }
 
@@ -315,7 +345,7 @@ function shareText(n,res,lu){
   if(s===3) return "Established promoter on Festival Boss! "+n+" — "+fmtS(res.profit)+" in the black. Think you can go Legendary? festivalbossgame.com";
   if(s===2) return "In the Black on Festival Boss! "+n+" turned "+fmtS(res.profit)+" profit. Can you do better? festivalbossgame.com";
   if(s===1) return "Bad year but we go again. "+n+" on Festival Boss — "+fmtS(res.profit)+". Can you survive? festivalbossgame.com";
-  return "I just cancelled my own festival on Festival Boss. "+n+" lost "+fmtS(res.profit)+". Even the portaloos turned a profit. festivalbossgame.com";
+  return "I just cancelled my own festival on Festival Boss. "+n+" lost "+fmtS(res.profit)+". The crowd never came. The mud did. festivalbossgame.com";
 }
 async function doCopy(t){ try{ await navigator.clipboard.writeText(t); return true; }catch{ return false; } }
 function doTweet(t){ window.open("https://twitter.com/intent/tweet?text="+encodeURIComponent(t),"_blank"); }
@@ -456,11 +486,11 @@ export default function FestivalBoss(){
       <header style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 12px",minHeight:52,background:SURFACE,borderBottom:"2px solid "+ORANGE,flexShrink:0,flexWrap:"wrap",gap:6}}>
         <span style={{fontWeight:900,fontSize:15,color:CREAM,letterSpacing:"-0.3px",whiteSpace:"nowrap"}}>Festival Boss</span>
         <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"nowrap"}}>
-          <Kpi l="Budget" v={fmt(rem)}                          c={rem<2?YELLOW:CREAM}/>
+          <Kpi l="Budget" v={fmt(rem)}                          c={rem<2?RED:PURPLE}/>
           <div style={{width:1,height:16,background:"rgba(245,240,232,0.2)"}}/>
           <Kpi l="Acts"   v={lineup.length+"/"+TOTAL_SLOTS}     c={full?YELLOW:CREAM}/>
           <div style={{width:1,height:16,background:"rgba(245,240,232,0.2)"}}/>
-          <Kpi l="Spins"  v={spinsLeft}                         c={spinsLeft<=1?YELLOW:CREAM}/>
+          <Kpi l="Spins"  v={spinsLeft}                         c={spinsLeft<=1?RED:YELLOW}/>
           <div style={{width:1,height:16,background:"rgba(245,240,232,0.2)"}}/>
           <Kpi l="P&L"    v={fmtS(profit)}                      c={profit>=0?GREEN:RED}/>
         </div>
@@ -524,7 +554,6 @@ export default function FestivalBoss(){
             <div style={{fontSize:10,color:DIM,marginTop:2}}>Incl. £{OVERHEADS}m overheads</div>
           </div>
           {full&&<button style={{margin:"10px 12px",flexShrink:0,background:ORANGE,border:"none",color:BG,fontWeight:900,fontSize:14,padding:"13px 0",cursor:"pointer",fontFamily:"inherit",letterSpacing:"0.05em",textTransform:"uppercase",borderRadius:3}} onClick={()=>{setDrawerOpen(false);submit();}}>Name and Release Lineup</button>}
-          <Ad text="Ticketmaster - sell out in seconds"/>
         </aside>
 
         {/* MAIN AREA */}
@@ -636,28 +665,29 @@ function HomeScreen({onStart,onLegal,onAbout}){
       </div>
 
       <div style={{background:SURFACE,border:"1px solid "+BORDER,padding:"24px 22px",width:"100%",maxWidth:460,borderRadius:4}}>
-        <div style={{fontWeight:900,fontSize:11,letterSpacing:"0.2em",textTransform:"uppercase",color:DIM,marginBottom:14,borderBottom:"1px solid "+BORDER,paddingBottom:8}}>How to play</div>
+        <div style={{fontWeight:700,fontSize:13,letterSpacing:"0.08em",textTransform:"uppercase",color:MID,marginBottom:16,borderBottom:"1px solid "+BORDER,paddingBottom:10}}>How to play</div>
         <div style={{marginBottom:20}}>
           {[
-            [MAX_SPINS+" spins","to fill your lineup",ORANGE],
-            ["£"+BUDGET+"m budget","inc. £2m overheads",TEAL],
-            ["Main Stage: 3 slots","100% revenue — pick wisely",TEAL],
-            ["Second Stage: 4 slots","65% revenue","#c084d4"],
-            ["Smaller Stage: 3 slots","35% revenue",ORANGE],
-            ["Break even to survive","£3.5m+ Legendary · £4.5m+ Sold Out",RED],
+            [MAX_SPINS+" skips",    "veto acts you don't want",   YELLOW],
+            ["£"+BUDGET+"m budget", "inc. £2m overheads",         PURPLE],
+            ["Main Stage",          "3 slots · 100% revenue",     ORANGE],
+            ["Second Stage",        "4 slots · 65% revenue",      TEAL],
+            ["Smaller Stage",       "3 slots · 35% revenue",      GREEN],
+            ["Make more than you spend", "sounds easy.",          RED],
           ].map(([lbl,desc,col],i)=>(
-            <div key={i} style={{display:"flex",alignItems:"flex-start",gap:10,padding:"6px 0",borderBottom:"1px solid "+BORDER}}>
-              <div>
-                <span style={{color:col,fontWeight:900,fontSize:13,fontFamily:"'Inter','Helvetica Neue',Arial,sans-serif"}}>{lbl}</span>
-                <span style={{color:MID,fontSize:13}}> — {desc}</span>
-              </div>
+            <div key={i} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid "+BORDER}}>
+              <span style={{color:col,fontWeight:700,fontSize:14}}>{lbl}</span>
+              <span style={{color:DIM,fontSize:12,textAlign:"right"}}>{desc}</span>
             </div>
           ))}
+          <div style={{padding:"10px 0",fontSize:12,color:MID,fontStyle:"italic",textAlign:"center"}}>
+            Your biggest names belong on the biggest stages.
+          </div>
         </div>
 
-        <div style={{background:BG,border:"1px solid "+BORDER,padding:"10px 12px",marginBottom:14,textAlign:"center",borderRadius:3}}>
-          <div style={{fontSize:11,color:DIM,lineHeight:1.6}}>
-            The record profit is <strong style={{color:CREAM}}>£4.5m</strong>. Only 1 in 500 reach Sold Out status.
+        <div style={{background:BG,border:"1px solid "+BORDER,padding:"12px 14px",marginBottom:16,textAlign:"center",borderRadius:3}}>
+          <div style={{fontSize:13,color:MID,lineHeight:1.7}}>
+            The record profit is <span style={{color:YELLOW,fontWeight:700}}>£4.5m</span>. Only 1 in 500 reach Sold Out.
           </div>
         </div>
 
@@ -671,7 +701,6 @@ function HomeScreen({onStart,onLegal,onAbout}){
           </div>
         )}
 
-        <CarbonAd/>
 
         <div style={{display:"flex",gap:10,justifyContent:"center",marginTop:14,alignItems:"center"}}>
           <button style={{background:"none",border:"none",color:DIM,fontSize:11,cursor:"pointer",fontFamily:"inherit",textDecoration:"underline",padding:0}} onClick={onAbout}>About</button>
@@ -745,7 +774,6 @@ function Result({result,lineup,name,onReset,onHome,copied,onCopy,onTweet,onFb,on
 
   return(
     <div style={{minHeight:"100vh",background:BG,padding:"18px 16px 40px",maxWidth:540,margin:"0 auto"}}>
-      <Ad text="Eventbrite - sell your tickets in minutes"/>
 
       {isNewBest&&(
         <div style={{background:TEAL_D,border:"1px solid "+TEAL,padding:"8px 14px",marginBottom:10,textAlign:"center",borderRadius:3}}>
@@ -794,30 +822,30 @@ function Result({result,lineup,name,onReset,onHome,copied,onCopy,onTweet,onFb,on
 
       {/* FEEDBACK */}
       {stars!==0&&feedback&&feedback.length>0&&(
-        <div style={{background:ORANGE_D,border:"1px solid "+ORANGE,padding:"12px 14px",marginBottom:14,borderRadius:3}}>
-          <div style={{fontWeight:900,fontSize:11,textTransform:"uppercase",letterSpacing:"0.1em",color:ORANGE,marginBottom:8}}>{stars>=3?"What worked":"What went wrong"}</div>
+        <div style={{background:ORANGE_D,border:"1px solid "+ORANGE,padding:"14px 16px",marginBottom:14,borderRadius:3}}>
+          <div style={{fontWeight:700,fontSize:11,textTransform:"uppercase",letterSpacing:"0.1em",color:ORANGE,marginBottom:10}}>{stars>=3?"What worked":"What went wrong"}</div>
           {feedback.map((tip,i)=>(
-            <div key={i} style={{fontSize:12,color:MID,lineHeight:1.5,marginBottom:i<feedback.length-1?6:0}}>• {tip}</div>
+            <div key={i} style={{fontSize:13,color:MID,lineHeight:1.6,marginBottom:i<feedback.length-1?8:0}}>— {tip}</div>
           ))}
         </div>
       )}
 
       {/* SUMMARY */}
-      <p style={{color:MID,fontSize:13,lineHeight:1.6,background:SURFACE,padding:"12px 14px",marginBottom:14,border:"1px solid "+BORDER,fontStyle:"italic",borderRadius:3}}>
+      <p style={{color:MID,fontSize:14,lineHeight:1.7,background:SURFACE,padding:"14px 16px",marginBottom:14,border:"1px solid "+BORDER,borderRadius:3}}>
         {stars===0
-          ?name+" never opened its gates. "+( main[0]?.name||"Nobody")+" played to an empty field."
+          ?name+" never opened its gates. "+(main[0]?.name||"Nobody")+" played to an empty field. The site's empty. Creditors are circling."
           :profit>=3.5
-            ?name+" turned "+fmt(profit)+" profit. "+( main[0]?.name||"Your headliner")+" packed the Main Stage. The crowd won't forget it."
+            ?name+" turned "+fmt(profit)+" profit. "+(main[0]?.name||"Your headliner")+" packed the Main Stage. Even the portaloos turned a profit."
             :profit>=0
               ?name+" made "+fmt(profit)+" profit. Not bad — but Legendary is still out there."
-              :name+" lost "+fmt(Math.abs(profit))+". Even the portaloos turned a profit."
+              :name+" lost "+fmt(Math.abs(profit))+". The crowd never came. The mud did."
         }
       </p>
 
       {/* CROWD REVIEW */}
-      <div style={{background:"rgba(245,240,232,0.04)",border:"1px solid "+BORDER,padding:"12px 14px",marginBottom:16,borderRadius:3}}>
-        <div style={{fontWeight:900,fontSize:10,textTransform:"uppercase",letterSpacing:"0.12em",color:DIM,marginBottom:6}}>One festival-goer said</div>
-        <div style={{fontSize:14,color:MID,fontStyle:"italic",lineHeight:1.5}}>"{crowdReview}"</div>
+      <div style={{background:"rgba(245,240,232,0.04)",border:"1px solid "+BORDER,padding:"14px 16px",marginBottom:16,borderRadius:3}}>
+        <div style={{fontWeight:700,fontSize:11,textTransform:"uppercase",letterSpacing:"0.1em",color:DIM,marginBottom:8}}>One festival-goer said</div>
+        <div style={{fontSize:15,color:CREAM,lineHeight:1.6}}>"{crowdReview}"</div>
       </div>
 
       {/* POSTER */}
@@ -859,7 +887,6 @@ function Result({result,lineup,name,onReset,onHome,copied,onCopy,onTweet,onFb,on
         <button style={{flex:1,background:"transparent",border:"1px solid "+BORDER_HI,color:CREAM,fontWeight:700,fontSize:14,padding:"13px 0",cursor:"pointer",fontFamily:"inherit",borderRadius:3}} onClick={onHome}>Home</button>
       </div>
 
-      <CarbonAd/>
       <Footer onLegal={onLegal} onAbout={onAbout}/>
     </div>
   );
