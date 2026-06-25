@@ -758,6 +758,10 @@ function HomeScreen({onStart,onLegal,onAbout}){
       <div style={{textAlign:"center",padding:"0 0 24px"}}>
         <a href="https://ko-fi.com/festivalboss" target="_blank" rel="noopener noreferrer" style={{color:DIM,fontSize:11,textDecoration:"none"}}>☕ enjoyed it? buy me a coffee</a>
       </div>
+    </div>
+  );
+}
+
 // ─── NAME SCREEN ─────────────────────────────────────────────
 function NameScreen({name,setName,lineup,onConfirm,onBack}){
   const ok=name.trim().length>=2;
