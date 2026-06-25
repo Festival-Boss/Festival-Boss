@@ -685,8 +685,8 @@ function SBtn({onClick,hi,children}){
 function HomeScreen({onStart,onLegal,onAbout}){
   const best=getBest();
   const hasBest=best>-50;
-  const bestStars=best>=3.5?"ON THE MAP":best>=2.0?"Established":best>=0.5?"In the Black":best>=0?"Bad Year (survived!)":"Cancelled";
-  const bestColor=best>=3.5?YELLOW:best>=2.0?GREEN:best>=0.5?TEAL:best>=-1.0?ORANGE:RED;
+  const bestStars=best>=SOLD_OUT_MARK?"🏆 SOLD OUT":best>=3.5?"On the Map":best>=2.0?"Established":best>=0.5?"In the Black":best>=0?"Bad Year (survived!)":"Cancelled";
+  const bestColor=best>=SOLD_OUT_MARK?ORANGE:best>=3.5?CREAM:best>=2.0?GREEN:best>=0.5?TEAL:best>=-1.0?ORANGE:RED;
   return(
     <div style={{minHeight:"100vh",background:BG,display:"flex",flexDirection:"column",alignItems:"center",padding:"0 16px 60px",overflow:"hidden"}}>
       <style>{`@keyframes deal{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}@keyframes spinAnim{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}`}</style>
@@ -740,7 +740,8 @@ function HomeScreen({onStart,onLegal,onAbout}){
         <div style={{textAlign:"center",marginTop:10,fontSize:11,color:FAINT,animation:"bounce 2s ease-in-out infinite"}}>↓ scroll for your best score</div>
 
         {hasBest&&(
-          <div style={{marginTop:12,padding:"8px 12px",background:BG,border:"1px solid "+bestColor,textAlign:"center",borderRadius:3}}>
+          <div style={{marginTop:12,padding:"10px 12px",background:best>=SOLD_OUT_MARK?ORANGE_D:BG,border:"2px solid "+bestColor,textAlign:"center",borderRadius:3}}>
+            {best>=SOLD_OUT_MARK&&<div style={{fontSize:10,fontWeight:900,letterSpacing:"0.15em",color:ORANGE,textTransform:"uppercase",marginBottom:4}}>You've done the impossible</div>}
             <span style={{fontSize:12,fontWeight:700,color:bestColor}}>Your best: {fmtS(best)} — {bestStars}</span>
           </div>
         )}
