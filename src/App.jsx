@@ -408,6 +408,7 @@ export default function FestivalBoss(){
   const [name,      setName]      = useState("");
   const [lineup,    setLineup]    = useState([]);
   const [hand,      setHand]      = useState([]);
+  const [seenIds,   setSeenIds]   = useState([]);
   const [spinsLeft, setSpinsLeft] = useState(MAX_SPINS);
   const [spinning,  setSpinning]  = useState(false);
   const [result,    setResult]    = useState(null);
@@ -429,7 +430,9 @@ export default function FestivalBoss(){
     if(spinsLeft<=0||full||spinning) return;
     setSpinning(true);
     setTimeout(()=>{
-      setHand(dealHand(lineup.map(a=>a.id)));
+      const newHand=dealHand([...seenIds,...lineup.map(a=>a.id)]);
+      setSeenIds(p=>[...p,...newHand.map(a=>a.id)]);
+      setHand(newHand);
       if(hand.length>0) setSpinsLeft(p=>p-1);
       setSpinning(false);
     },500);
@@ -442,8 +445,11 @@ export default function FestivalBoss(){
     const nl=[...lineup,{...picking,assignedStage:stage}];
     setLineup(nl);
     setPicking(null);
-    if(nl.length<TOTAL_SLOTS) setHand(dealHand(nl.map(a=>a.id)));
-    else setHand([]);
+    if(nl.length<TOTAL_SLOTS){
+      const newHand=dealHand([...seenIds,...nl.map(a=>a.id)]);
+      setSeenIds(p=>[...p,...newHand.map(a=>a.id)]);
+      setHand(newHand);
+    } else setHand([]);
   }
 
   function removeAct(id){ setLineup(p=>p.filter(a=>a.id!==id)); }
@@ -460,7 +466,7 @@ export default function FestivalBoss(){
   }
 
   function reset(){
-    setLineup([]);setHand([]);setSpinsLeft(MAX_SPINS);
+    setLineup([]);setHand([]);setSpinsLeft(MAX_SPINS);setSeenIds([]);
     setResult(null);setCopied(false);setPicking(null);setName("");setScreen("game");
   }
 
@@ -729,7 +735,7 @@ function HomeScreen({onStart,onLegal,onAbout}){
 
         <div style={{background:BG,border:"1px solid "+BORDER,padding:"10px 12px",marginBottom:14,textAlign:"center",borderRadius:3}}>
           <div style={{fontSize:12,color:MID,lineHeight:1.6}}>
-            The record profit is <span style={{color:YELLOW,fontWeight:700}}>£4.0m</span>. Only 1 in 500 reach Sold Out.
+            Can you get your festival Sold Out? You'll need £4m+ profit. Almost nobody does.
           </div>
         </div>
 
