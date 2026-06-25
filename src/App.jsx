@@ -755,10 +755,9 @@ function HomeScreen({onStart,onLegal,onAbout}){
         </div>
       </div>
       <Footer onLegal={onLegal} onAbout={onAbout}/>
-    </div>
-  );
-}
-
+      <div style={{textAlign:"center",padding:"0 0 24px"}}>
+        <a href="https://ko-fi.com/festivalboss" target="_blank" rel="noopener noreferrer" style={{color:DIM,fontSize:11,textDecoration:"none"}}>☕ enjoyed it? buy me a coffee</a>
+      </div>
 // ─── NAME SCREEN ─────────────────────────────────────────────
 function NameScreen({name,setName,lineup,onConfirm,onBack}){
   const ok=name.trim().length>=2;
@@ -990,6 +989,9 @@ function Result({result,lineup,name,onReset,onHome,copied,onCopy,onTweet,onFb,on
       {false&&<div id="adsense-results" style={{width:"100%",marginBottom:14}}/>}
 
       <Footer onLegal={onLegal} onAbout={onAbout}/>
+      <div style={{textAlign:"center",padding:"0 0 24px"}}>
+        <a href="https://ko-fi.com/festivalboss" target="_blank" rel="noopener noreferrer" style={{color:DIM,fontSize:11,textDecoration:"none"}}>☕ enjoyed it? buy me a coffee</a>
+      </div>
     </div>
   );
 }
