@@ -993,6 +993,9 @@ function Result({result,lineup,name,onReset,onHome,copied,onCopy,onTweet,onFb,on
       {false&&<div id="adsense-results" style={{width:"100%",marginBottom:14}}/>}
 
       <Footer onLegal={onLegal} onAbout={onAbout}/>
+      <div style={{textAlign:"center",padding:"0 0 8px"}}>
+        <a href="https://www.skiddle.com/festivals/?sktag=15726" target="_blank" rel="noopener noreferrer" style={{color:DIM,fontSize:11,textDecoration:"none"}}>🎪 buy real festival tickets</a>
+      </div>
       <div style={{textAlign:"center",padding:"0 0 24px"}}>
         <a href="https://ko-fi.com/festivalboss" target="_blank" rel="noopener noreferrer" style={{color:DIM,fontSize:11,textDecoration:"none"}}>☕ enjoyed it? buy me a coffee</a>
       </div>
