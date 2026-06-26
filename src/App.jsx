@@ -549,11 +549,14 @@ export default function FestivalBoss(){
 
       <div className="fb-body" style={{display:"flex",flexDirection:"column",flex:1,overflow:"hidden",position:"relative"}}>
 
+        {/* DRAWER OVERLAY */}
+        {drawerOpen&&<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:99}} onClick={()=>setDrawerOpen(false)}/>}
+
         {/* SIDEBAR */}
-        <aside className="fb-sidebar" style={{position:"fixed",bottom:0,left:0,right:0,zIndex:100,background:SURFACE,borderTop:"2px solid "+BORDER,maxHeight:"75vh",display:drawerOpen?"flex":"none",flexDirection:"column",overflow:"hidden",boxShadow:"0 -4px 24px rgba(0,0,0,0.3)"}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"0 14px 10px",borderBottom:"1px solid "+BORDER,marginBottom:8}}>
-            <div style={{fontSize:11,fontWeight:900,textTransform:"uppercase",letterSpacing:"0.12em",color:CREAM}}>My Lineup</div>
-            <button style={{background:"none",border:"none",color:MID,cursor:"pointer",fontFamily:"inherit",fontSize:12,fontWeight:600,padding:0}} onClick={()=>setDrawerOpen(false)}>Close</button>
+        <aside className="fb-sidebar" style={{position:"fixed",bottom:0,left:0,right:0,zIndex:100,background:SURFACE,borderTop:"3px solid "+ORANGE,maxHeight:"70vh",display:drawerOpen?"flex":"none",flexDirection:"column",overflow:"hidden",boxShadow:"0 -8px 32px rgba(0,0,0,0.6)"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 16px",borderBottom:"2px solid "+BORDER,background:BG,flexShrink:0}}>
+            <div style={{fontSize:13,fontWeight:900,textTransform:"uppercase",letterSpacing:"0.15em",color:ORANGE}}>My Lineup</div>
+            <button style={{background:"none",border:"1px solid "+BORDER_HI,color:CREAM,cursor:"pointer",fontFamily:"inherit",fontSize:12,fontWeight:700,padding:"4px 12px",borderRadius:3}} onClick={()=>setDrawerOpen(false)}>Close ✕</button>
           </div>
           <div style={{flex:1,overflowY:"auto",padding:"0 10px"}}>
             {lineup.length===0&&<p style={{color:DIM,fontSize:13,padding:"28px 0",textAlign:"center",margin:0}}>Spin to get your first acts</p>}
@@ -576,7 +579,7 @@ export default function FestivalBoss(){
               );
             })}
           </div>
-          <div style={{margin:"8px 12px",padding:"11px 12px",background:CARD,border:"1px solid "+BORDER,flexShrink:0}}>
+          <div style={{margin:"8px 12px 70px",padding:"11px 12px",background:CARD,border:"1px solid "+BORDER,flexShrink:0}}>
             {STAGES.map(stage=>(
               <div key={stage} style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
                 <span style={{fontSize:11,color:stageColor(stage),fontWeight:700}}>{stage}</span>
@@ -589,6 +592,10 @@ export default function FestivalBoss(){
               {varietyGood?"Good genre mix":"Too many same genre"}
             </div>
             <div style={{marginTop:8,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <span style={{color:MID,fontSize:12}}>Budget left</span>
+              <span style={{color:rem<2?RED:PURPLE,fontWeight:900,fontSize:16}}>{fmt(rem)}</span>
+            </div>
+            <div style={{marginTop:4,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
               <span style={{color:MID,fontSize:12}}>Projected P&L</span>
               <span style={{color:profit>=0?GREEN:RED,fontWeight:900,fontSize:18}}>{fmtS(profit)}</span>
             </div>
@@ -612,19 +619,19 @@ export default function FestivalBoss(){
           </div>
 
           {hand.length>0&&!full&&(
-            <div style={{padding:"12px",display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:10,alignContent:"start"}}>
+            <div style={{padding:"8px 8px 80px 8px",display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:6,alignContent:"start"}}>
               {hand.map((a,i)=>{
                 const canAfford=rem>=a.fee-0.001;
                 const drawColor=a.draw>=9?ORANGE:a.draw>=8?TEAL:DIM;
                 return(
                   <div key={a.id}
-                    style={{background:CARD,border:"1px solid "+BORDER,padding:"10px 11px",cursor:canAfford?"pointer":"not-allowed",userSelect:"none",animation:"deal 0.18s ease both",animationDelay:(i*0.04)+"s",opacity:canAfford?1:0.3,borderRadius:3}}
+                    style={{background:CARD,border:"1px solid "+BORDER,padding:"7px 9px",cursor:canAfford?"pointer":"not-allowed",userSelect:"none",animation:"deal 0.18s ease both",animationDelay:(i*0.04)+"s",opacity:canAfford?1:0.3,borderRadius:3}}
                     onClick={()=>canAfford&&pickAct(a)}>
-                    <div style={{fontSize:10,fontWeight:800,color:drawColor,marginBottom:3}}>DRAW {a.draw}</div>
-                    <div style={{fontWeight:900,fontSize:13,color:CREAM,lineHeight:1.2,marginBottom:3,fontFamily:"'DM Sans','Helvetica Neue',Arial,sans-serif"}}>{a.name}</div>
-                    <div style={{fontSize:10,color:DIM,textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:6}}>{a.genre}</div>
-                    <div style={{color:drawColor,fontWeight:900,fontSize:13}}>{fmt(a.fee)}</div>
-                    {!canAfford&&<div style={{fontSize:9,color:RED,fontWeight:700,marginTop:4,textTransform:"uppercase"}}>Over budget</div>}
+                    <div style={{fontSize:9,fontWeight:800,color:drawColor,marginBottom:2}}>DRAW {a.draw}</div>
+                    <div style={{fontWeight:900,fontSize:12,color:CREAM,lineHeight:1.2,marginBottom:2,fontFamily:"'DM Sans','Helvetica Neue',Arial,sans-serif"}}>{a.name}</div>
+                    <div style={{fontSize:9,color:DIM,textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:4}}>{a.genre}</div>
+                    <div style={{color:drawColor,fontWeight:900,fontSize:12}}>{fmt(a.fee)}</div>
+                    {!canAfford&&<div style={{fontSize:8,color:RED,fontWeight:700,marginTop:3,textTransform:"uppercase"}}>Over budget</div>}
                   </div>
                 );
               })}
