@@ -761,6 +761,11 @@ function HomeScreen({onStart,onLegal,onAbout}){
           <button style={{background:"none",border:"none",color:DIM,fontSize:11,cursor:"pointer",fontFamily:"inherit",textDecoration:"underline",padding:0}} onClick={()=>onLegal("privacy")}>Privacy</button>
         </div>
       </div>
+      <div style={{padding:"16px 16px 4px",maxWidth:460,margin:"0 auto"}}>
+        <p style={{fontSize:11,color:FAINT,lineHeight:1.7,textAlign:"center",margin:0}}>
+          Festival Boss is a free browser game about the music festival industry. Book real artists, fill three stages and try not to go bankrupt. With 222 acts spanning rock, pop, hip-hop, electronic and more, every game is different. Can you build a lineup good enough to get Sold Out?
+        </p>
+      </div>
       <Footer onLegal={onLegal} onAbout={onAbout}/>
       <div style={{textAlign:"center",padding:"0 0 24px"}}>
         <a href="https://ko-fi.com/festivalboss" target="_blank" rel="noopener noreferrer" style={{color:DIM,fontSize:11,textDecoration:"none"}}>☕ enjoyed it? buy me a coffee</a>
